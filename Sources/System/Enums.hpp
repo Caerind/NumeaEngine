@@ -1,7 +1,7 @@
 #ifndef NU_ENUMS_HPP
 #define NU_ENUMS_HPP
 
-#include "Platform.hpp"
+#include "Macros.hpp"
 
 namespace nu
 {
