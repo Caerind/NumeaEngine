@@ -482,23 +482,23 @@ inline Vector2<T> Vector2<T>::normalized(T* oldLength) const
 template<typename T>
 inline T Vector2<T>::getPolarAngle() const
 {
-	return oe::atan2(y, x);
+	return nu::atan2(y, x);
 }
 
 template<typename T>
 inline Vector2<T>& Vector2<T>::setPolarAngle(T angle)
 {
 	const T length = getLength();
-	x = oe::cos(angle) * length;
-	y = oe::sin(angle) * length;
+	x = nu::cos(angle) * length;
+	y = nu::sin(angle) * length;
 	return *this;
 }
 
 template<typename T>
 inline Vector2<T>& Vector2<T>::rotate(T angle)
 {
-	const T c = oe::cos(angle);
-	const T s = oe::sin(angle);
+	const T c = nu::cos(angle);
+	const T s = nu::sin(angle);
 	const T tx = c * x - s * y;
 	y = s * x + c * y;
 	x = tx;
@@ -508,8 +508,8 @@ inline Vector2<T>& Vector2<T>::rotate(T angle)
 template<typename T>
 inline Vector2<T> Vector2<T>::rotated(T angle) const
 {
-	const T c = oe::cos(angle);
-	const T s = oe::sin(angle);
+	const T c = nu::cos(angle);
+	const T s = nu::sin(angle);
 	return Vector2<T>(c * x - s * y, s * x + c * y);
 }
 
@@ -575,7 +575,7 @@ inline Vector2<T>& Vector2<T>::makeZero()
 template<typename T>
 inline Vector2<T>& Vector2<T>::makePolar(T angle, T length)
 {
-	return set(oe::cos(angle) * length, oe::sin(angle) * length);
+	return set(nu::cos(angle) * length, nu::sin(angle) * length);
 }
 
 template<typename T>
@@ -605,7 +605,7 @@ inline Vector2<T> Vector2<T>::zero()
 template<typename T>
 inline Vector2<T> Vector2<T>::polar(T angle, T length)
 {
-	return Vector2<T>(oe::cos(angle) * length, oe::sin(angle) * length);
+	return Vector2<T>(nu::cos(angle) * length, nu::sin(angle) * length);
 }
 
 template<typename T>

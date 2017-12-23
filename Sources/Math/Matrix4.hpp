@@ -1,10 +1,13 @@
 #ifndef NU_MATRIX4_HPP
 #define NU_MATRIX4_HPP
 
-#include "Quaternion.hpp"
-
 namespace nu
 {
+
+template <typename T> class Matrix3;
+template <typename T> class Quaternion;
+template <typename T> class Vector3;
+template <typename T> class Vector4;
 
 template <typename T>
 class Matrix4
@@ -20,7 +23,8 @@ class Matrix4
 		explicit inline Matrix4(const Matrix4<U>& m);
 		explicit inline Matrix4(const T& s);
 		explicit inline Matrix4(const T* a);
-		inline Matrix4(const T& a11, const T& a12, const T& a13, const T& a14, const T& a21, const T& a22, const T& a23, const T& a24, const T& a31, const T& a32, const T& a33, const T& a34, const T& a41, const T& a42, const T& a43, const T& a44);
+		inline Matrix4(const Matrix3<T>& m);
+		inline Matrix4(const T& a11, const T& a21, const T& a31, const T& a41, const T& a12, const T& a22, const T& a32, const T& a42, const T& a13, const T& a23, const T& a33, const T& a43, const T& a14, const T& a24, const T& a34, const T& a44);
 		~Matrix4() = default;
 
 		inline Matrix4<T>& set(const Matrix4<T>& m);
@@ -28,7 +32,8 @@ class Matrix4
 		inline Matrix4<T>& set(const Matrix4<U>& m);
 		inline Matrix4<T>& set(const T& s);
 		inline Matrix4<T>& set(const T* a);
-		inline Matrix4<T>& set(const T& a11, const T& a12, const T& a13, const T& a14, const T& a21, const T& a22, const T& a23, const T& a24, const T& a31, const T& a32, const T& a33, const T& a34, const T& a41, const T& a42, const T& a43, const T& a44);
+		inline Matrix4<T>& set(const Matrix3<T>& m);
+		inline Matrix4<T>& set(const T& a11, const T& a21, const T& a31, const T& a41, const T& a12, const T& a22, const T& a32, const T& a42, const T& a13, const T& a23, const T& a33, const T& a43, const T& a14, const T& a24, const T& a34, const T& a44);
 		
 		inline T& operator[](U32 i);
 		inline const T& operator[](U32 i) const;
@@ -45,9 +50,13 @@ class Matrix4
 		inline Matrix4<T> operator+(const Matrix4<T>& m) const;
 		inline Matrix4<T> operator-(const Matrix4<T>& m) const;
 		inline Matrix4<T> operator*(const Matrix4<T>& m) const;
+		inline Matrix4<T> operator*(const Quaternion<T>& q) const;
+		inline Matrix4<T> operator*(const Matrix3<T>& m) const;
 		inline Matrix4<T>& operator+=(const Matrix4<T>& m);
 		inline Matrix4<T>& operator-=(const Matrix4<T>& m);
 		inline Matrix4<T>& operator*=(const Matrix4<T>& m);
+		inline Matrix4<T>& operator*=(const Quaternion<T>& q);
+		inline Matrix4<T>& operator*=(const Matrix3<T>& m);
 
 		inline Matrix4<T> operator+(const T& s) const;
 		inline Matrix4<T> operator-(const T& s) const;
@@ -58,21 +67,23 @@ class Matrix4
 		inline Matrix4<T>& operator*=(const T& s);
 		inline Matrix4<T>& operator/=(const T& s);
 
-		// Operators* with Vector are defined below, outside the class
-		// As we use row-major Matrix, we use the form : vector * matrix
-		// I don't want to use the matrix * vector form to avoid errors maybe I'll review this later if needed
-		// But I'll provide the "trasnformVector" function below to help users but that way they'll know what they're doing 
-
-		inline Vector3<T> transformVector(const Vector3<T>& v1) const;
+		inline Vector3<T> operator*(const Vector3<T>& vector) const; // Representing a point, not a direction (w = 1)
+		inline Vector4<T> operator*(const Vector4<T>& vector) const;
+		
+		inline Vector3<T> transformPosition(const Vector3<T>& position) const; // w = 1
+		inline Vector3<T> transformDirection(const Vector3<T>& direction) const; // w = 0
 
 		inline bool operator==(const Matrix4<T>& m) const;
 		inline bool operator!=(const Matrix4<T>& m) const;
+
+		inline Matrix4<T>& fromMatrix3(const Matrix3<T>& matrix);
+		inline void toMatrix3(Matrix3<T>& matrix) const;
+		inline Matrix3<T> toMatrix3() const;
 
 		inline Quaternion<T> getRotation() const;
 		inline Vector3<T> getScale() const;
 		inline Vector3<T> getTranslation() const;
 
-		inline bool hasNegativeScale() const;
 		inline bool hasScale() const;
 		inline bool isAffine() const;
 		inline bool isIdentity() const;
@@ -87,66 +98,82 @@ class Matrix4
 		inline Matrix4<T> transposed() const;
 
 		inline Matrix4<T>& setRotation(const Quaternion<T>& rotation);
+		inline Matrix4<T>& setRotation(const Matrix3<T>& rotation);
 		inline Matrix4<T>& setScale(const Vector3<T>& scale);
 		inline Matrix4<T>& setTranslation(const Vector3<T>& translation);
 
 		inline Matrix4<T>& applyRotation(const Quaternion<T>& rotation);
+		inline Matrix4<T>& applyRotation(const Matrix3<T>& rotation);
 		inline Matrix4<T>& applyScale(const Vector3<T>& scale);
 		inline Matrix4<T>& applyTranslation(const Vector3<T>& translation);
 
 		inline Matrix4<T> rotated(const Quaternion<T>& rotation);
+		inline Matrix4<T> rotated(const Matrix3<T>& rotation);
 		inline Matrix4<T> scaled(const Vector3<T>& scale);
 		inline Matrix4<T> translated(const Vector3<T>& translation);
 		inline Matrix4<T> transformed(const Vector3<T>& translation, const Quaternion<T>& rotation);
 		inline Matrix4<T> transformed(const Vector3<T>& translation, const Quaternion<T>& rotation, const Vector3<T>& scale);
 
 		inline Matrix4<T>& makeRotation(const Quaternion<T>& rotation);
+		inline Matrix4<T>& makeRotation(const Matrix3<T>& rotation);
 		inline Matrix4<T>& makeScale(const Vector3<T>& scale);
 		inline Matrix4<T>& makeTranslation(const Vector3<T>& translation);
 		inline Matrix4<T>& makeTransform(const Vector3<T>& translation, const Quaternion<T>& rotation);
 		inline Matrix4<T>& makeTransform(const Vector3<T>& translation, const Quaternion<T>& rotation, const Vector3<T>& scale);
 
 		inline Matrix4<T>& makeViewMatrix(const Vector3<T>& translation, const Quaternion<T>& rotation);
-		inline Matrix4<T>& makeLookAt(const Vector3<T>& eye, const Vector3<T>& target, const Vector3<T>& up = Vector3<T>::up());
+		inline Matrix4<T>& makeLookAt(const Vector3<T>& eye, const Vector3<T>& target, const Vector3<T>& up, const T handedness = -1);
 		inline Matrix4<T>& makeOrtho(const T& left, const T& right, const T& top, const T& bottom, const T& zNear, const T& zFar);
-		inline Matrix4<T>& makeOrtho(const T& width, const T& height, const T& zNear, const T& zFar);
-		inline Matrix4<T>& makePerspective(const T& angle, const T& ratio, const T& zNear, const T& zFar);
+		inline Matrix4<T>& makePerspective(const T& fov, const T& ratio, const T& zNear, const T& zFar);
 
 		inline Matrix4<T>& makeZero();
 		inline Matrix4<T>& makeIdentity();
 
 		static inline Matrix4<T> rotation(const Quaternion<T>& rotation);
+		static inline Matrix4<T> rotation(const Matrix3<T>& rotation);
 		static inline Matrix4<T> scale(const Vector3<T>& scale);
 		static inline Matrix4<T> translation(const Vector3<T>& translation);
 		static inline Matrix4<T> transform(const Vector3<T>& translation, const Quaternion<T>& rotation);
 		static inline Matrix4<T> transform(const Vector3<T>& translation, const Quaternion<T>& rotation, const Vector3<T>& scale);
 
 		static inline Matrix4<T> viewMatrix(const Vector3<T>& translation, const Quaternion<T>& rotation);
-		static inline Matrix4<T> lookAt(const Vector3<T>& eye, const Vector3<T>& target, const Vector3<T>& up = Vector3<T>::up());
+		static inline Matrix4<T> lookAt(const Vector3<T>& eye, const Vector3<T>& target, const Vector3<T>& up, const T handedness = -1);
 		static inline Matrix4<T> ortho(const T& left, const T& right, const T& top, const T& bottom, const T& zNear, const T& zFar);
-		static inline Matrix4<T> ortho(const T& width, const T& height, const T& zNear, const T& zFar);
-		static inline Matrix4<T> perspective(const T& angle, const T& ratio, const T& zNear, const T& zFar);
+		static inline Matrix4<T> perspective(const T& fov, const T& ratio, const T& zNear, const T& zFar);
 
 		static inline Matrix4<T> zero();
 		static inline Matrix4<T> identity();
 
+		#include "DisableAnonymousStructBegin.hpp"
 		union
 		{
 			T data[16];
 			T m[4][4];
 		};
+		#include "DisableAnonymousStructEnd.hpp"
 };
 
-template <typename T>
-Vector3<T> operator*(const Vector3<T>& vector, const Matrix4<T>& matrix);
+typedef Matrix4<F32> Matrix4f;
 
-template <typename T>
-Vector3<T>& operator*=(Vector3<T>& vector, const Matrix4<T>& matrix);
+typedef Matrix4f mat4; // GLSL-like
+
+} // namespace nu
+
+/////////////////////////////////
+// Implementation              //
+/////////////////////////////////
+
+#include "Matrix3.hpp"
+#include "Vector4.hpp"
+#include "Quaternion.hpp"
+
+namespace nu
+{
 
 template<typename T>
 inline Matrix4<T>::Matrix4()
 {
-	set(zero());
+	set(identity());
 }
 
 template<typename T>
@@ -205,23 +232,44 @@ inline Matrix4<T>::Matrix4(const T* a)
 }
 
 template<typename T>
-inline Matrix4<T>::Matrix4(const T& a11, const T& a12, const T& a13, const T& a14, const T& a21, const T& a22, const T& a23, const T& a24, const T& a31, const T& a32, const T& a33, const T& a34, const T& a41, const T& a42, const T& a43, const T& a44)
+inline Matrix4<T>::Matrix4(const Matrix3<T>& m)
+{
+	data[0] = m[0];
+	data[1] = m[1];
+	data[2] = m[2];
+	data[3] = 0;
+	data[4] = m[3];
+	data[5] = m[4];
+	data[6] = m[5];
+	data[7] = 0;
+	data[8] = m[6];
+	data[9] = m[7];
+	data[10] = m[8];
+	data[11] = 0;
+	data[12] = 0;
+	data[13] = 0;
+	data[14] = 0;
+	data[15] = 1;
+}
+
+template<typename T>
+inline Matrix4<T>::Matrix4(const T& a11, const T& a21, const T& a31, const T& a41, const T& a12, const T& a22, const T& a32, const T& a42, const T& a13, const T& a23, const T& a33, const T& a43, const T& a14, const T& a24, const T& a34, const T& a44)
 {
 	data[0] = a11;
-	data[1] = a12;
-	data[2] = a13;
-	data[3] = a14;
-	data[4] = a21;
+	data[1] = a21;
+	data[2] = a21;
+	data[3] = a41;
+	data[4] = a12;
 	data[5] = a22;
-	data[6] = a23;
-	data[7] = a24;
-	data[8] = a31;
-	data[9] = a32;
+	data[6] = a32;
+	data[7] = a42;
+	data[8] = a13;
+	data[9] = a23;
 	data[10] = a33;
-	data[11] = a34;
-	data[12] = a41;
-	data[13] = a42;
-	data[14] = a43;
+	data[11] = a43;
+	data[12] = a14;
+	data[13] = a24;
+	data[14] = a34;
 	data[15] = a44;
 }
 
@@ -285,23 +333,45 @@ inline Matrix4<T>& Matrix4<T>::set(const T* a)
 }
 
 template<typename T>
-inline Matrix4<T>& Matrix4<T>::set(const T& a11, const T& a12, const T& a13, const T& a14, const T& a21, const T& a22, const T& a23, const T& a24, const T& a31, const T& a32, const T& a33, const T& a34, const T& a41, const T& a42, const T& a43, const T& a44)
+inline Matrix4<T>& Matrix4<T>::set(const Matrix3<T>& m)
+{
+	data[0] = m[0];
+	data[1] = m[1];
+	data[2] = m[2];
+	data[3] = 0;
+	data[4] = m[3];
+	data[5] = m[4];
+	data[6] = m[5];
+	data[7] = 0;
+	data[8] = m[6];
+	data[9] = m[7];
+	data[10] = m[8];
+	data[11] = 0;
+	data[12] = 0;
+	data[13] = 0;
+	data[14] = 0;
+	data[15] = 1;
+	return *this;
+}
+
+template<typename T>
+inline Matrix4<T>& Matrix4<T>::set(const T& a11, const T& a21, const T& a31, const T& a41, const T& a12, const T& a22, const T& a32, const T& a42, const T& a13, const T& a23, const T& a33, const T& a43, const T& a14, const T& a24, const T& a34, const T& a44)
 {
 	data[0] = a11;
-	data[1] = a12;
-	data[2] = a13;
-	data[3] = a14;
-	data[4] = a21;
+	data[1] = a21;
+	data[2] = a21;
+	data[3] = a41;
+	data[4] = a12;
 	data[5] = a22;
-	data[6] = a23;
-	data[7] = a24;
-	data[8] = a31;
-	data[9] = a32;
+	data[6] = a32;
+	data[7] = a42;
+	data[8] = a13;
+	data[9] = a23;
 	data[10] = a33;
-	data[11] = a34;
-	data[12] = a41;
-	data[13] = a42;
-	data[14] = a43;
+	data[11] = a43;
+	data[12] = a14;
+	data[13] = a24;
+	data[14] = a34;
 	data[15] = a44;
 	return *this;
 }
@@ -321,25 +391,25 @@ inline const T& Matrix4<T>::operator[](U32 i) const
 template<typename T>
 inline T& Matrix4<T>::operator()(U32 row, U32 column)
 {
-	return data[column + rows * row];
+	return data[row + rows * column];
 }
 
 template<typename T>
 inline const T& Matrix4<T>::operator()(U32 row, U32 column) const
 {
-	return data[column + rows * row];
+	return data[row + rows * column];
 }
 
 template<typename T>
 inline Vector4<T> Matrix4<T>::getColumn(U32 i) const
 {
-	return Vector4<T>(data[i + rows * 0], data[i + rows * 1], data[i + rows * 2], data[i + rows * 3]);
+	return Vector4<T>(data[0 + rows * i], data[1 + rows * i], data[2 + rows * i], data[3 + rows * i]);
 }
 
 template<typename T>
 inline Vector4<T> Matrix4<T>::getRow(U32 j) const
 {
-	return Vector4<T>(data[0 + rows * i], data[1 + rows * i], data[2 + rows * i], data[3 + rows * i]);
+	return Vector4<T>(data[j + rows * 0], data[j + rows * 1], data[j + rows * 2], data[j + rows * 3]);
 }
 
 template<typename T>
@@ -383,35 +453,53 @@ template<typename T>
 inline Matrix4<T> Matrix4<T>::operator*(const Matrix4<T>& m) const
 {
 	Matrix4<T> out;
+	Vector4<T> c0(m.getColumn(0));
+	Vector4<T> c1(m.getColumn(1));
+	Vector4<T> c2(m.getColumn(2));
+	Vector4<T> c3(m.getColumn(3));
 	{
 		Vector4<T> row(getRow(0));
-		out.data[0] = row.dotProduct(m.getColumn(0));
-		out.data[4] = row.dotProduct(m.getColumn(1));
-		out.data[8] = row.dotProduct(m.getColumn(2));
-		out.data[12] = row.dotProduct(m.getColumn(3));
+		out.data[0] = c0.dotProduct(row);
+		out.data[4] = c1.dotProduct(row);
+		out.data[8] = c2.dotProduct(row);
+		out.data[12] = c3.dotProduct(row);
 	}
 	{
 		Vector4<T> row(getRow(1));
-		out.data[1] = row.dotProduct(m.getColumn(0));
-		out.data[5] = row.dotProduct(m.getColumn(1));
-		out.data[9] = row.dotProduct(m.getColumn(2));
-		out.data[13] = row.dotProduct(m.getColumn(3));
+		out.data[1] = c0.dotProduct(row);
+		out.data[5] = c1.dotProduct(row);
+		out.data[9] = c2.dotProduct(row);
+		out.data[13] = c3.dotProduct(row);
 	}
 	{
 		Vector4<T> row(getRow(2));
-		out.data[2] = row.dotProduct(m.getColumn(0));
-		out.data[6] = row.dotProduct(m.getColumn(1));
-		out.data[10] = row.dotProduct(m.getColumn(2));
-		out.data[14] = row.dotProduct(m.getColumn(3));
+		out.data[2] = c0.dotProduct(row);
+		out.data[6] = c1.dotProduct(row);
+		out.data[10] = c2.dotProduct(row);
+		out.data[14] = c3.dotProduct(row);
 	}
 	{
 		Vector4<T> row(getRow(3));
-		out.data[3] = row.dotProduct(m.getColumn(0));
-		out.data[7] = row.dotProduct(m.getColumn(1));
-		out.data[11] = row.dotProduct(m.getColumn(2));
-		out.data[15] = row.dotProduct(m.getColumn(3));
+		out.data[3] = c0.dotProduct(row);
+		out.data[5] = c1.dotProduct(row);
+		out.data[11] = c2.dotProduct(row);
+		out.data[15] = c3.dotProduct(row);
 	}
 	return out;
+}
+
+template<typename T>
+inline Matrix4<T> Matrix4<T>::operator*(const Quaternion<T>& q) const
+{
+	// TODO : Improve ?
+	return operator*(q.toMatrix4());
+}
+
+template<typename T>
+inline Matrix4<T> Matrix4<T>::operator*(const Matrix3<T>& m) const
+{
+	// TODO : Improve ?
+	return operator*(Matrix4<T>::rotation(m));
 }
 
 template<typename T>
@@ -461,36 +549,45 @@ inline Matrix4<T>& Matrix4<T>::operator-=(const Matrix4<T>& m)
 template<typename T>
 inline Matrix4<T>& Matrix4<T>::operator*=(const Matrix4<T>& m)
 {
-	Matrix4<T> copy(*this);
-	{
-		Vector4<T> row(copy.getRow(0));
-		data[0] = row.dotProduct(m.getColumn(0));
-		data[4] = row.dotProduct(m.getColumn(1));
-		data[8] = row.dotProduct(m.getColumn(2));
-		data[12] = row.dotProduct(m.getColumn(3));
-	}
-	{
-		Vector4<T> row(copy.getRow(1));
-		data[1] = row.dotProduct(m.getColumn(0));
-		data[5] = row.dotProduct(m.getColumn(1));
-		data[9] = row.dotProduct(m.getColumn(2));
-		data[13] = row.dotProduct(m.getColumn(3));
-	}
-	{
-		Vector4<T> row(copy.getRow(2));
-		data[2] = row.dotProduct(m.getColumn(0));
-		data[6] = row.dotProduct(m.getColumn(1));
-		data[10] = row.dotProduct(m.getColumn(2));
-		data[14] = row.dotProduct(m.getColumn(3));
-	}
-	{
-		Vector4<T> row(copy.getRow(3));
-		data[3] = row.dotProduct(m.getColumn(0));
-		data[7] = row.dotProduct(m.getColumn(1));
-		data[11] = row.dotProduct(m.getColumn(2));
-		data[15] = row.dotProduct(m.getColumn(3));
-	}
+	Vector3<T> r0(getRow(0));
+	Vector3<T> r1(getRow(1));
+	Vector3<T> r2(getRow(2));
+	Vector3<T> r3(getRow(3));
+	Vector3<T> c0(m.getColumn(0));
+	Vector3<T> c1(m.getColumn(1));
+	Vector3<T> c2(m.getColumn(2));
+	Vector3<T> c3(m.getColumn(3));
+	data[0] = c0.dotProduct(r0);
+	data[4] = c1.dotProduct(r0);
+	data[8] = c2.dotProduct(r0);
+	data[12] = c3.dotProduct(r0);
+	data[1] = c0.dotProduct(r1);
+	data[5] = c1.dotProduct(r1);
+	data[9] = c2.dotProduct(r1);
+	data[13] = c3.dotProduct(r1);
+	data[2] = c0.dotProduct(r2);
+	data[6] = c1.dotProduct(r2);
+	data[10] = c2.dotProduct(r2);
+	data[14] = c3.dotProduct(r2);
+	data[3] = c0.dotProduct(r3);
+	data[5] = c1.dotProduct(r3);
+	data[11] = c2.dotProduct(r3);
+	data[15] = c3.dotProduct(r3);
 	return *this;
+}
+
+template<typename T>
+inline Matrix4<T>& Matrix4<T>::operator*=(const Quaternion<T>& q)
+{
+	// TODO : Improve ?
+	return operator*=(q.toMatrix4());
+}
+
+template<typename T>
+inline Matrix4<T>& Matrix4<T>::operator*=(const Matrix3<T>& m)
+{
+	// TODO : Improve ?
+	return operator*=(Matrix4<T>::rotation(m));
 }
 
 template<typename T>
@@ -620,9 +717,36 @@ inline Matrix4<T>& Matrix4<T>::operator/=(const T& s)
 }
 
 template<typename T>
-inline Vector3<T> Matrix4<T>::transformVector(const Vector3<T>& v) const
+inline Vector3<T> Matrix4<T>::operator*(const Vector3<T>& vector) const
 {
-	return Vector3<T>(v.x * data[0] + v.y * data[4] + v.z * data[8], v.x * data[1] + v.y * data[5] + v.z * data[9], v.x * data[2] + v.y * data[6] + v.z * data[10]);
+	return Vector3<T>(v.x * data[0] + v.y * data[4] + v.z * data[8] + data[12],
+		v.x * data[1] + v.y * data[5] + v.z * data[9] + data[13],
+		v.x * data[2] + v.y * data[6] + v.z * data[10] + data[14]);
+}
+
+template<typename T>
+inline Vector4<T> Matrix4<T>::operator*(const Vector4<T>& vector) const
+{
+	return Vector4<T>(v.x * data[0] + v.y * data[4] + v.z * data[8] + v.w * data[12],
+		v.x * data[1] + v.y * data[5] + v.z * data[9] + v.w * data[13],
+		v.x * data[2] + v.y * data[6] + v.z * data[10] + v.w * data[14],
+		v.x * data[3] + v.y * data[7] + v.z * data[11] + v.w * data[15]);
+}
+
+template<typename T>
+inline Vector3<T> Matrix4<T>::transformPosition(const Vector3<T>& position) const
+{
+	return Vector3<T>(v.x * data[0] + v.y * data[4] + v.z * data[8] + data[12],
+		v.x * data[1] + v.y * data[5] + v.z * data[9] + data[13],
+		v.x * data[2] + v.y * data[6] + v.z * data[10] + data[14]);
+}
+
+template<typename T>
+inline Vector3<T> Matrix4<T>::transformDirection(const Vector3<T>& direction) const
+{
+	return Vector3<T>(v.x * data[0] + v.y * data[4] + v.z * data[8],
+		v.x * data[1] + v.y * data[5] + v.z * data[9],
+		v.x * data[2] + v.y * data[6] + v.z * data[10]);
 }
 
 template<typename T>
@@ -653,69 +777,70 @@ inline bool Matrix4<T>::operator!=(const Matrix4<T>& m) const
 }
 
 template<typename T>
+inline Matrix4<T>& Matrix4<T>::fromMatrix3(const Matrix3<T>& matrix)
+{
+	data[0] = matrix[0];
+	data[1] = matrix[1];
+	data[2] = matrix[2];
+	data[3] = 0;
+	data[4] = matrix[3];
+	data[5] = matrix[4];
+	data[6] = matrix[5];
+	data[7] = 0;
+	data[8] = matrix[6];
+	data[9] = matrix[7];
+	data[10] = matrix[8];
+	data[11] = 0;
+	data[12] = 0;
+	data[13] = 0;
+	data[14] = 0;
+	data[15] = 1;
+	return *this;
+}
+
+template<typename T>
+inline void Matrix4<T>::toMatrix3(Matrix3<T>& matrix) const
+{
+	matrix[0] = data[0];
+	matrix[1] = data[1];
+	matrix[2] = data[2];
+	matrix[3] = data[4];
+	matrix[4] = data[5];
+	matrix[5] = data[6];
+	matrix[6] = data[8];
+	matrix[7] = data[9];
+	matrix[8] = data[10];
+}
+
+template<typename T>
+inline Matrix3<T> Matrix4<T>::toMatrix3() const
+{
+	return Matrix3<T>(data[0], data[1], data[2], data[4], data[5], data[6], data[8], data[9], data[10]);
+}
+
+template<typename T>
 inline Quaternion<T> Matrix4<T>::getRotation() const
 {
-	// TODO : Do this algorithm take care of the scale ?
-
-	const T trace = data[0] + data[5] + data[10];
-	Quaternion<T> q;
-
-	// Check the diagonal
-	if (trace > 0)
-	{
-		const T s = std::sqrt(trace + T(1));
-		q.w = s * T(0.5);
-
-		const T t = T(0.5) / s;
-		q.x = (data[9] - data[6]) * t;
-		q.y = (data[2] - data[8]) * t;
-		q.z = (data[4] - data[1]) * t;
-
-		return q;
-	}
-	else
-	{
-		// Diagonal is negative
-		int i = 0;
-		if (data[5] > data[0]) i = 1;
-		if (data[10] > m[i][i]) i = 2;
-
-		static const int next[3] = { 1, 2, 0 };
-		int j = next[i];
-		int k = next[j];
-
-		const T s = std::sqrt((m[i][j] - (m[j][j] + m[k][k])) + 1);
-
-		q[i] = s * T(0.5);
-
-		const T t = (!equals(s, T(0))) ? T(0.5) / s : s;
-
-		q[3] = (m[k][j] - m[j][k]) * t;
-		q[j] = (m[j][i] + m[i][j]) * t;
-		q[k] = (m[k][i] + m[i][k]) * t;
-
-		return q;
-	}
+	Matrix3<T> rot;
+	Vector3<T> scale = getScale();
+	rot[0] = data[0] / scale.x;
+	rot[1] = data[1] / scale.x;
+	rot[2] = data[2] / scale.x;
+	rot[3] = data[4] / scale.y;
+	rot[4] = data[5] / scale.y;
+	rot[5] = data[6] / scale.y;
+	rot[6] = data[8] / scale.z;
+	rot[7] = data[9] / scale.z;
+	rot[8] = data[10] / scale.z;
+	return Quaternion<T>(rot);
 }
 
 template<typename T>
 inline Vector3<T> Matrix4<T>::getScale() const
 {
-	const T unit = T(1);
-	const Vector3<T> scale(data[0] * data[0] + data[1] * data[1] + data[2] * data[2], data[4] * data[4] + data[5] * data[5] + data[6] * data[6], data[8] * data[8] + data[9] * data[9] + data[10] * data[10]);
-	if (!equals(unit, scale.x))
-	{
-		scale.x = std::sqrt(scale.x);
-	}
-	if (!equals(unit, scale.y))
-	{
-		scale.y = std::sqrt(scale.y);
-	}
-	if (!equals(unit, scale.z))
-	{
-		scale.z = std::sqrt(scale.z);
-	}
-	return scale;
+	return Vector3<T>(nu::sqrt(data[0] * data[0] + data[1] * data[1] + data[2] * data[2]),
+		nu::sqrt(data[4] * data[4] + data[5] * data[5] + data[6] * data[6]),
+		nu::sqrt(data[8] * data[8] + data[9] * data[9] + data[10] * data[10]));
 }
 
 template<typename T>
@@ -725,63 +850,42 @@ inline Vector3<T> Matrix4<T>::getTranslation() const
 }
 
 template<typename T>
-inline bool Matrix4<T>::hasNegativeScale() const
-{
-	return getDeterminant() < F(0);
-}
-
-template<typename T>
 inline bool Matrix4<T>::hasScale() const
 {
-	const T unit = T(1);
-
-	T t = data[0] * data[0] + data[1] * data[1] + data[2] * data[2];
-	if (!equals(t, unit))
-		return true;
-
-	t = data[4] * data[4] + data[5] * data[5] + data[6] * data[6];
-	if (!equals(t, unit))
-		return true;
-
-	t = data[8] * data[8] + data[9] * data[9] + data[10] * data[10];
-	if (!equals(t, unit))
-		return true;
-
+	if (!equals(data[0] * data[0] + data[1] * data[1] + data[2] * data[2], T(1))) return true;
+	if (!equals(data[4] * data[4] + data[5] * data[5] + data[6] * data[6], T(1))) return true;
+	if (!equals(data[8] * data[8] + data[9] * data[9] + data[10] * data[10], T(1))) return true;
 	return false;
 }
 
 template<typename T>
 inline bool Matrix4<T>::isAffine() const
 {
-	const T zero = T(0);
-	if (!equals(data[3], zero)) return false;
-	if (!equals(data[7], zero)) return false;
-	if (!equals(data[11], zero)) return false;
+	if (!equals(data[3], T(0))) return false;
+	if (!equals(data[7], T(0))) return false;
+	if (!equals(data[11], T(0))) return false;
 	return equals(data[15], T(1));
 }
 
 template<typename T>
 inline bool Matrix4<T>::isIdentity() const
 {
-	const T unit = T(1);
-	const T zero = T(0);
+	if (!equals(data[0], T(1))) return false;
+	if (!equals(data[5], T(1))) return false;
+	if (!equals(data[10], T(1))) return false;
+	if (!equals(data[15], T(1))) return false;
 
-	if (!equals(data[0], unit)) return false;
-	if (!equals(data[5], unit)) return false;
-	if (!equals(data[10], unit)) return false;
-	if (!equals(data[15], unit)) return false;
-
-	if (!equals(data[2], zero)) return false;
-	if (!equals(data[3], zero)) return false;
-	if (!equals(data[4], zero)) return false;
-	if (!equals(data[6], zero)) return false;
-	if (!equals(data[7], zero)) return false;
-	if (!equals(data[8], zero)) return false;
-	if (!equals(data[9], zero)) return false;
-	if (!equals(data[11], zero)) return false;
-	if (!equals(data[11], zero)) return false;
-	if (!equals(data[11], zero)) return false;
-	return equals(data[14], zero);
+	if (!equals(data[2], T(0))) return false;
+	if (!equals(data[3], T(0))) return false;
+	if (!equals(data[4], T(0))) return false;
+	if (!equals(data[6], T(0))) return false;
+	if (!equals(data[7], T(0))) return false;
+	if (!equals(data[8], T(0))) return false;
+	if (!equals(data[9], T(0))) return false;
+	if (!equals(data[11], T(0))) return false;
+	if (!equals(data[12], T(0))) return false;
+	if (!equals(data[13], T(0))) return false;
+	return equals(data[14], T(0));
 }
 
 template<typename T>
@@ -798,38 +902,137 @@ inline T Matrix4<T>::getDeterminant() const
 
 	// Compute det2x2
 	const T m22m33 = data[5] * data[10] - data[6] * data[9];
-	const T m21m33 = data[4] * data[10] - data[8] * data[6];
-	const T m21m32 = data[4] * data[9] - data[8] * data[5];
+	const T m21m33 = data[1] * data[10] - data[2] * data[6];
+	const T m21m32 = data[1] * data[9] - data[2] * data[5];
 
+	// Compute det3x3
+	const T m11m33 = data[0] * m22m33 - data[4] * m21m33 + data[8] * m21m32;
 	if (isAffine())
 	{
 		// If affine, the last row is full of zero except the last one
 		// Return the det of the 3x3
-		return data[0] * m22m33 - data[1] * m21m33 + data[2] * m21m32; // 9 mul, 5 add
+		return m11m33; // 9 mul, 5 add
 	}
 	else
 	{
 		// Compute det2x2, each det2x2 is used 2 times for the det3
-		const T m21m34 = data[4] * data[11] - data[8] * data[7];
-		const T m22m34 = data[5] * data[11] - data[9] * data[7];
-		const T m23m34 = data[6] * data[11] - data[10] * data[7];
+		const T m21m34 = data[1] * data[14] - data[2] * data[9];
+		const T m22m34 = data[5] * data[14] - data[6] * data[13];
+		const T m23m34 = data[9] * data[14] - data[10] * data[13];
 
 		// Compute det3x3
-		const T a = data[1] * m23m34 - data[2] * m22m34 + data[3] * m22m33;
-		const T b = data[0] * m23m34 - data[2] * m21m34 + data[3] * m21m33;
-		const T c = data[0] * m22m34 - data[1] * m21m34 + data[3] * m21m32;
-		const T d = data[0] * m22m33 - data[1] * m21m33 + data[2] * m21m32;
+		const T m12m34 = data[4] * m23m34 - data[8] * m22m34 + data[12] * m22m33;
+		const T m11m34 = data[0] * m23m34 - data[8] * m21m34 + data[12] * m21m33;
+		const T m11m34b = data[0] * m22m34 - data[4] * m21m34 + data[12] * m21m32;
 
 		// Return the det of the 4x4
-		return a - b + c - d; // 24 mul, 17 add
+		return data[3] * m12m34 - data[7] * m11m34 + data[11] * m11m34 - data[15] * m11m33; // 25 mul, 14 add
 	}
 }
 
 template<typename T>
 inline Matrix4<T>& Matrix4<T>::inverse(bool* succeeded)
 {
-	const T det = getDeterminant();
-	if (equals(det, T(0))
+	T inv[9];
+	inv[0] = m[5] * m[10] * m[15] -
+		m[5] * m[11] * m[14] -
+		m[9] * m[6] * m[15] +
+		m[9] * m[7] * m[14] +
+		m[13] * m[6] * m[11] -
+		m[13] * m[7] * m[10];
+	inv[4] = -m[4] * m[10] * m[15] +
+		m[4] * m[11] * m[14] +
+		m[8] * m[6] * m[15] -
+		m[8] * m[7] * m[14] -
+		m[12] * m[6] * m[11] +
+		m[12] * m[7] * m[10];
+	inv[8] = m[4] * m[9] * m[15] -
+		m[4] * m[11] * m[13] -
+		m[8] * m[5] * m[15] +
+		m[8] * m[7] * m[13] +
+		m[12] * m[5] * m[11] -
+		m[12] * m[7] * m[9];
+	inv[12] = -m[4] * m[9] * m[14] +
+		m[4] * m[10] * m[13] +
+		m[8] * m[5] * m[14] -
+		m[8] * m[6] * m[13] -
+		m[12] * m[5] * m[10] +
+		m[12] * m[6] * m[9];
+	inv[1] = -m[1] * m[10] * m[15] +
+		m[1] * m[11] * m[14] +
+		m[9] * m[2] * m[15] -
+		m[9] * m[3] * m[14] -
+		m[13] * m[2] * m[11] +
+		m[13] * m[3] * m[10];
+	inv[5] = m[0] * m[10] * m[15] -
+		m[0] * m[11] * m[14] -
+		m[8] * m[2] * m[15] +
+		m[8] * m[3] * m[14] +
+		m[12] * m[2] * m[11] -
+		m[12] * m[3] * m[10];
+	inv[9] = -m[0] * m[9] * m[15] +
+		m[0] * m[11] * m[13] +
+		m[8] * m[1] * m[15] -
+		m[8] * m[3] * m[13] -
+		m[12] * m[1] * m[11] +
+		m[12] * m[3] * m[9];
+	inv[13] = m[0] * m[9] * m[14] -
+		m[0] * m[10] * m[13] -
+		m[8] * m[1] * m[14] +
+		m[8] * m[2] * m[13] +
+		m[12] * m[1] * m[10] -
+		m[12] * m[2] * m[9];
+	inv[2] = m[1] * m[6] * m[15] -
+		m[1] * m[7] * m[14] -
+		m[5] * m[2] * m[15] +
+		m[5] * m[3] * m[14] +
+		m[13] * m[2] * m[7] -
+		m[13] * m[3] * m[6];
+	inv[6] = -m[0] * m[6] * m[15] +
+		m[0] * m[7] * m[14] +
+		m[4] * m[2] * m[15] -
+		m[4] * m[3] * m[14] -
+		m[12] * m[2] * m[7] +
+		m[12] * m[3] * m[6];
+	inv[10] = m[0] * m[5] * m[15] -
+		m[0] * m[7] * m[13] -
+		m[4] * m[1] * m[15] +
+		m[4] * m[3] * m[13] +
+		m[12] * m[1] * m[7] -
+		m[12] * m[3] * m[5];
+	inv[14] = -m[0] * m[5] * m[14] +
+		m[0] * m[6] * m[13] +
+		m[4] * m[1] * m[14] -
+		m[4] * m[2] * m[13] -
+		m[12] * m[1] * m[6] +
+		m[12] * m[2] * m[5];
+	inv[3] = -m[1] * m[6] * m[11] +
+		m[1] * m[7] * m[10] +
+		m[5] * m[2] * m[11] -
+		m[5] * m[3] * m[10] -
+		m[9] * m[2] * m[7] +
+		m[9] * m[3] * m[6];
+	inv[7] = m[0] * m[6] * m[11] -
+		m[0] * m[7] * m[10] -
+		m[4] * m[2] * m[11] +
+		m[4] * m[3] * m[10] +
+		m[8] * m[2] * m[7] -
+		m[8] * m[3] * m[6];
+	inv[11] = -m[0] * m[5] * m[11] +
+		m[0] * m[7] * m[9] +
+		m[4] * m[1] * m[11] -
+		m[4] * m[3] * m[9] -
+		m[8] * m[1] * m[7] +
+		m[8] * m[3] * m[5];
+	inv[15] = m[0] * m[5] * m[10] -
+		m[0] * m[6] * m[9] -
+		m[4] * m[1] * m[10] +
+		m[4] * m[2] * m[9] +
+		m[8] * m[1] * m[6] -
+		m[8] * m[2] * m[5];
+
+	const T det = m[0] * inv[0] + m[1] * inv[4] + m[2] * inv[8] + m[3] * inv[12];
+	if (equals(det, T(0)))
 	{
 		if (succeeded != nullptr)
 		{
@@ -837,120 +1040,6 @@ inline Matrix4<T>& Matrix4<T>::inverse(bool* succeeded)
 		}
 		return *this;
 	}
-
-	const T inv[16];
-
-	inv[0] = data[5] * data[10] * data[15] -
-		data[5] * data[11] * data[14] -
-		data[9] * data[6] * data[15] +
-		data[9] * data[7] * data[14] +
-		data[13] * data[6] * data[11] -
-		data[13] * data[7] * data[10];
-
-	inv[4] = -data[4] * data[10] * data[15] +
-		data[4] * data[11] * data[14] +
-		data[8] * data[6] * data[15] -
-		data[8] * data[7] * data[14] -
-		data[12] * data[6] * data[11] +
-		data[12] * data[7] * data[10];
-
-	inv[8] = data[4] * data[9] * data[15] -
-		data[4] * data[11] * data[13] -
-		data[8] * data[5] * data[15] +
-		data[8] * data[7] * data[13] +
-		data[12] * data[5] * data[11] -
-		data[12] * data[7] * data[9];
-
-	inv[12] = -data[4] * data[9] * data[14] +
-		data[4] * data[10] * data[13] +
-		data[8] * data[5] * data[14] -
-		data[8] * data[6] * data[13] -
-		data[12] * data[5] * data[10] +
-		data[12] * data[6] * data[9];
-
-	inv[1] = -data[1] * data[10] * data[15] +
-		data[1] * data[11] * data[14] +
-		data[9] * data[2] * data[15] -
-		data[9] * data[3] * data[14] -
-		data[13] * data[2] * data[11] +
-		data[13] * data[3] * data[10];
-
-	inv[5] = data[0] * data[10] * data[15] -
-		data[0] * data[11] * data[14] -
-		data[8] * data[2] * data[15] +
-		data[8] * data[3] * data[14] +
-		data[12] * data[2] * data[11] -
-		data[12] * data[3] * data[10];
-
-	inv[9] = -data[0] * data[9] * data[15] +
-		data[0] * data[11] * data[13] +
-		data[8] * data[1] * data[15] -
-		data[8] * data[3] * data[13] -
-		data[12] * data[1] * data[11] +
-		data[12] * data[3] * data[9];
-
-	inv[13] = data[0] * data[9] * data[14] -
-		data[0] * data[10] * data[13] -
-		data[8] * data[1] * data[14] +
-		data[8] * data[2] * data[13] +
-		data[12] * data[1] * data[10] -
-		data[12] * data[2] * data[9];
-
-	inv[2] = data[1] * data[6] * data[15] -
-		data[1] * data[7] * data[14] -
-		data[5] * data[2] * data[15] +
-		data[5] * data[3] * data[14] +
-		data[13] * data[2] * data[7] -
-		data[13] * data[3] * data[6];
-
-	inv[6] = -data[0] * data[6] * data[15] +
-		data[0] * data[7] * data[14] +
-		data[4] * data[2] * data[15] -
-		data[4] * data[3] * data[14] -
-		data[12] * data[2] * data[7] +
-		data[12] * data[3] * data[6];
-
-	inv[10] = data[0] * data[5] * data[15] -
-		data[0] * data[7] * data[13] -
-		data[4] * data[1] * data[15] +
-		data[4] * data[3] * data[13] +
-		data[12] * data[1] * data[7] -
-		data[12] * data[3] * data[5];
-
-	inv[14] = -data[0] * data[5] * data[14] +
-		data[0] * data[6] * data[13] +
-		data[4] * data[1] * data[14] -
-		data[4] * data[2] * data[13] -
-		data[12] * data[1] * data[6] +
-		data[12] * data[2] * data[5];
-
-	inv[3] = -data[1] * data[6] * data[11] +
-		data[1] * data[7] * data[10] +
-		data[5] * data[2] * data[11] -
-		data[5] * data[3] * data[10] -
-		data[9] * data[2] * data[7] +
-		data[9] * data[3] * data[6];
-
-	inv[7] = data[0] * data[6] * data[11] -
-		data[0] * data[7] * data[10] -
-		data[4] * data[2] * data[11] +
-		data[4] * data[3] * data[10] +
-		data[8] * data[2] * data[7] -
-		data[8] * data[3] * data[6];
-
-	inv[11] = -data[0] * data[5] * data[11] +
-		data[0] * data[7] * data[9] +
-		data[4] * data[1] * data[11] -
-		data[4] * data[3] * data[9] -
-		data[8] * data[1] * data[7] +
-		data[8] * data[3] * data[5];
-
-	inv[15] = data[0] * data[5] * data[10] -
-		data[0] * data[6] * data[9] -
-		data[4] * data[1] * data[10] +
-		data[4] * data[2] * data[9] +
-		data[8] * data[1] * data[6] -
-		data[8] * data[2] * data[5];
 
 	const T invDet = 1 / det;
 	for (int i = 0; i < 16; i++)
@@ -962,13 +1051,131 @@ inline Matrix4<T>& Matrix4<T>::inverse(bool* succeeded)
 	{
 		*succeeded = true;
 	}
-	set(inv);
+	return set(inv);
 }
 
 template<typename T>
 inline Matrix4<T> Matrix4<T>::inversed(bool* succeeded) const
 {
-	return Matrix4<T>(*this).inverse();
+	T inv[9];
+	inv[0] = m[5] * m[10] * m[15] -
+		m[5] * m[11] * m[14] -
+		m[9] * m[6] * m[15] +
+		m[9] * m[7] * m[14] +
+		m[13] * m[6] * m[11] -
+		m[13] * m[7] * m[10];
+	inv[4] = -m[4] * m[10] * m[15] +
+		m[4] * m[11] * m[14] +
+		m[8] * m[6] * m[15] -
+		m[8] * m[7] * m[14] -
+		m[12] * m[6] * m[11] +
+		m[12] * m[7] * m[10];
+	inv[8] = m[4] * m[9] * m[15] -
+		m[4] * m[11] * m[13] -
+		m[8] * m[5] * m[15] +
+		m[8] * m[7] * m[13] +
+		m[12] * m[5] * m[11] -
+		m[12] * m[7] * m[9];
+	inv[12] = -m[4] * m[9] * m[14] +
+		m[4] * m[10] * m[13] +
+		m[8] * m[5] * m[14] -
+		m[8] * m[6] * m[13] -
+		m[12] * m[5] * m[10] +
+		m[12] * m[6] * m[9];
+	inv[1] = -m[1] * m[10] * m[15] +
+		m[1] * m[11] * m[14] +
+		m[9] * m[2] * m[15] -
+		m[9] * m[3] * m[14] -
+		m[13] * m[2] * m[11] +
+		m[13] * m[3] * m[10];
+	inv[5] = m[0] * m[10] * m[15] -
+		m[0] * m[11] * m[14] -
+		m[8] * m[2] * m[15] +
+		m[8] * m[3] * m[14] +
+		m[12] * m[2] * m[11] -
+		m[12] * m[3] * m[10];
+	inv[9] = -m[0] * m[9] * m[15] +
+		m[0] * m[11] * m[13] +
+		m[8] * m[1] * m[15] -
+		m[8] * m[3] * m[13] -
+		m[12] * m[1] * m[11] +
+		m[12] * m[3] * m[9];
+	inv[13] = m[0] * m[9] * m[14] -
+		m[0] * m[10] * m[13] -
+		m[8] * m[1] * m[14] +
+		m[8] * m[2] * m[13] +
+		m[12] * m[1] * m[10] -
+		m[12] * m[2] * m[9];
+	inv[2] = m[1] * m[6] * m[15] -
+		m[1] * m[7] * m[14] -
+		m[5] * m[2] * m[15] +
+		m[5] * m[3] * m[14] +
+		m[13] * m[2] * m[7] -
+		m[13] * m[3] * m[6];
+	inv[6] = -m[0] * m[6] * m[15] +
+		m[0] * m[7] * m[14] +
+		m[4] * m[2] * m[15] -
+		m[4] * m[3] * m[14] -
+		m[12] * m[2] * m[7] +
+		m[12] * m[3] * m[6];
+	inv[10] = m[0] * m[5] * m[15] -
+		m[0] * m[7] * m[13] -
+		m[4] * m[1] * m[15] +
+		m[4] * m[3] * m[13] +
+		m[12] * m[1] * m[7] -
+		m[12] * m[3] * m[5];
+	inv[14] = -m[0] * m[5] * m[14] +
+		m[0] * m[6] * m[13] +
+		m[4] * m[1] * m[14] -
+		m[4] * m[2] * m[13] -
+		m[12] * m[1] * m[6] +
+		m[12] * m[2] * m[5];
+	inv[3] = -m[1] * m[6] * m[11] +
+		m[1] * m[7] * m[10] +
+		m[5] * m[2] * m[11] -
+		m[5] * m[3] * m[10] -
+		m[9] * m[2] * m[7] +
+		m[9] * m[3] * m[6];
+	inv[7] = m[0] * m[6] * m[11] -
+		m[0] * m[7] * m[10] -
+		m[4] * m[2] * m[11] +
+		m[4] * m[3] * m[10] +
+		m[8] * m[2] * m[7] -
+		m[8] * m[3] * m[6];
+	inv[11] = -m[0] * m[5] * m[11] +
+		m[0] * m[7] * m[9] +
+		m[4] * m[1] * m[11] -
+		m[4] * m[3] * m[9] -
+		m[8] * m[1] * m[7] +
+		m[8] * m[3] * m[5];
+	inv[15] = m[0] * m[5] * m[10] -
+		m[0] * m[6] * m[9] -
+		m[4] * m[1] * m[10] +
+		m[4] * m[2] * m[9] +
+		m[8] * m[1] * m[6] -
+		m[8] * m[2] * m[5];
+
+	const T det = m[0] * inv[0] + m[1] * inv[4] + m[2] * inv[8] + m[3] * inv[12];
+	if (equals(det, T(0)))
+	{
+		if (succeeded != nullptr)
+		{
+			*succeeded = false;
+		}
+		return identity();
+	}
+
+	const T invDet = 1 / det;
+	for (int i = 0; i < 16; i++)
+	{
+		inv[i] *= invDet;
+	}
+
+	if (succeeded != nullptr)
+	{
+		*succeeded = true;
+	}
+	return Matrix4<T>(inv);
 }
 
 template<typename T>
@@ -986,25 +1193,33 @@ inline Matrix4<T>& Matrix4<T>::transpose()
 template<typename T>
 inline Matrix4<T> Matrix4<T>::transposed() const
 {
-	return Matrix4<T>(*this).transpose();
+	return Matrix4<T>(data[0], data[4], data[8], data[12], data[1], data[5], data[9], data[13], data[2], data[6], data[10], data[14], data[3], data[7], data[11], data[15]);
 }
 
 template<typename T>
 inline Matrix4<T>& Matrix4<T>::setRotation(const Quaternion<T>& rotation)
 {
-	Vector3<T> currentScale = getScale();
-	Quaternion<T> currentRotation = getRotation();
+	return fromMatrix3(rotation.toMatrix3());
+}
 
-	// TODO : 
+template<typename T>
+inline Matrix4<T>& nu::Matrix4<T>::setRotation(const Matrix3<T>& rotation)
+{
+	return fromMatrix3(rotation);
 }
 
 template<typename T>
 inline Matrix4<T>& Matrix4<T>::setScale(const Vector3<T>& scale)
 {
-	Vector3<T> currentScale = getScale();
-	Quaternion<T> currentRotation = getRotation();
-
-	// TODO : 
+	data[0] = scale.x;
+	data[1] = 0;
+	data[2] = 0;
+	data[4] = 0;
+	data[5] = scale.y;
+	data[6] = 0;
+	data[8] = 0;
+	data[9] = 0;
+	data[10] = scale.z;
 }
 
 template<typename T>
@@ -1019,21 +1234,24 @@ inline Matrix4<T>& Matrix4<T>::setTranslation(const Vector3<T>& translation)
 template<typename T>
 inline Matrix4<T>& Matrix4<T>::applyRotation(const Quaternion<T>& rotation)
 {
-	// TODO:
+	// TODO : Improve ?
+	operator*=(Matrix4<T>::rotation(rotation));
+	return *this;
+}
+
+template<typename T>
+inline Matrix4<T>& nu::Matrix4<T>::applyRotation(const Matrix3<T>& rotation)
+{
+	// TODO : Improve ?
+	operator*=(Matrix4<T>::rotation(rotation));
+	return *this;
 }
 
 template<typename T>
 inline Matrix4<T>& Matrix4<T>::applyScale(const Vector3<T>& scale)
 {
-	data[0] *= scale.x;
-	data[1] *= scale.x;
-	data[2] *= scale.x;
-	data[4] *= scale.y;
-	data[5] *= scale.y;
-	data[6] *= scale.y;
-	data[8] *= scale.z;
-	data[9] *= scale.z;
-	data[10] *= scale.z;
+	// TODO : Improve ? 
+	operator*=(Matrix4<T>::scale(scale));
 	return *this;
 }
 
@@ -1047,227 +1265,238 @@ inline Matrix4<T>& Matrix4<T>::applyTranslation(const Vector3<T>& translation)
 }
 
 template<typename T>
-inline Matrix4<T> oe::Matrix4<T>::rotated(const Quaternion<T>& rotation)
+inline Matrix4<T> Matrix4<T>::rotated(const Quaternion<T>& rotation)
 {
+	// TODO : Improve ? 
 	return Matrix4<T>(*this).applyRotation(rotation);
 }
 
 template<typename T>
-inline Matrix4<T> oe::Matrix4<T>::scaled(const Vector3<T>& scale)
+inline Matrix4<T> nu::Matrix4<T>::rotated(const Matrix3<T>& rotation)
 {
+	// TODO : Improve ? 
+	return Matrix4<T>(*this).applyRotation(rotation);
+}
+
+template<typename T>
+inline Matrix4<T> Matrix4<T>::scaled(const Vector3<T>& scale)
+{
+	// TODO : Improve ? 
 	return Matrix4<T>(*this).applyScale(scale);
 }
 
 template<typename T>
-inline Matrix4<T> oe::Matrix4<T>::translated(const Vector3<T>& translation)
+inline Matrix4<T> Matrix4<T>::translated(const Vector3<T>& translation)
 {
+	// TODO : Improve ? 
 	return Matrix4<T>(*this).applyTranslation(translation);
 }
 
 template<typename T>
-inline Matrix4<T> oe::Matrix4<T>::transformed(const Vector3<T>& translation, const Quaternion<T>& rotation)
+inline Matrix4<T> Matrix4<T>::transformed(const Vector3<T>& translation, const Quaternion<T>& rotation)
 {
+	// TODO : Improve ? 
 	return Matrix4<T>(*this).applyTransform(translation, rotation);
 }
 
 template<typename T>
-inline Matrix4<T> oe::Matrix4<T>::transformed(const Vector3<T>& translation, const Quaternion<T>& rotation, const Vector3<T>& scale)
+inline Matrix4<T> Matrix4<T>::transformed(const Vector3<T>& translation, const Quaternion<T>& rotation, const Vector3<T>& scale)
 {
+	// TODO : Improve ? 
 	return Matrix4<T>(*this).applyTransform(translation, rotation, scale);
 }
 
 template<typename T>
 inline Matrix4<T>& Matrix4<T>::makeRotation(const Quaternion<T>& rotation)
 {
-	// TODO:
-	return set(T(1));
+	// TODO : Improve ? 
+	return set(Matrix4<T>::rotation(rotation));
+}
+
+template<typename T>
+inline Matrix4<T>& nu::Matrix4<T>::makeRotation(const Matrix3<T>& rotation)
+{
+	// TODO : Improve ? 
+	return set(Matrix4<T>::rotation(rotation));
 }
 
 template<typename T>
 inline Matrix4<T>& Matrix4<T>::makeScale(const Vector3<T>& scale)
 {
-	return set(scale.x, T(0), T(0), T(0),
-		T(0), scale.y, T(0), T(0),
-		T(0), T(0), scale.z, T(0),
-		T(0), T(0), T(0), T(1));
+	// TODO : Improve ? 
+	return set(Matrix4<T>::scale(scale));
 }
 
 template<typename T>
 inline Matrix4<T>& Matrix4<T>::makeTranslation(const Vector3<T>& translation)
 {
-	return set(T(1), T(0), T(0), T(0),
-		T(0), T(1), T(0), T(0),
-		T(0), T(0), T(1), T(0),
-		translation.x, translation.y, translation.z, T(1));
+	// TODO : Improve ? 
+	return set(Matrix4<T>::translation(translation));
 }
 
 template<typename T>
 inline Matrix4<T>& Matrix4<T>::makeTransform(const Vector3<T>& translation, const Quaternion<T>& rotation)
 {
-	// TODO:
-	return set(T(1));
+	// TODO : Improve ? 
+	return set(Matrix4<T>::transform(translation, rotation));
 }
 
 template<typename T>
 inline Matrix4<T>& Matrix4<T>::makeTransform(const Vector3<T>& translation, const Quaternion<T>& rotation, const Vector3<T>& scale)
 {
-	// TODO:
-	return set(T(1));
+	// TODO : Improve ? 
+	return set(Matrix4<T>::transform(translation, rotation, scale));
 }
 
 template<typename T>
 inline Matrix4<T>& Matrix4<T>::makeViewMatrix(const Vector3<T>& translation, const Quaternion<T>& rotation)
 {
-	// TODO:
-	return set(T(1));
+	// TODO : Improve ? 
+	return set(Matrix4<T>::viewMatrix(translation, rotation));
 }
 
 template<typename T>
-inline Matrix4<T>& Matrix4<T>::makeLookAt(const Vector3<T>& eye, const Vector3<T>& target, const Vector3<T>& up)
+inline Matrix4<T>& Matrix4<T>::makeLookAt(const Vector3<T>& eye, const Vector3<T>& target, const Vector3<T>& up, const T handedness = -1)
 {
-	// TODO:
-	return set(T(1));
+	// TODO : Improve ? 
+	return set(Matrix4<T>::lookAt(eye, target, up, handedness));
 }
 
 template<typename T>
 inline Matrix4<T>& Matrix4<T>::makeOrtho(const T& left, const T& right, const T& top, const T& bottom, const T& zNear, const T& zFar)
 {
-	// TODO:
-	return set(T(1));
+	// TODO : Improve ? 
+	return set(Matrix4<T>::ortho(left, right, top, bottom, zNear, zFar));
 }
 
 template<typename T>
-inline Matrix4<T>& Matrix4<T>::makeOrtho(const T& width, const T& height, const T& zNear, const T& zFar)
+inline Matrix4<T>& Matrix4<T>::makePerspective(const T& fov, const T& ratio, const T& zNear, const T& zFar)
 {
-	// TODO:
-	return set(T(1));
-}
-
-template<typename T>
-inline Matrix4<T>& Matrix4<T>::makePerspective(const T& angle, const T& ratio, const T& zNear, const T& zFar)
-{
-	// TODO:
-	return set(T(1));
+	// TODO : Improve ? 
+	return set(Matrix4<T>::perspective(fov, ratio, zNear, zFar));
 }
 
 template<typename T>
 inline Matrix4<T>& Matrix4<T>::makeZero()
 {
-	return set(zero());
+	// TODO : Improve ? 
+	return set(Matrix4<T>::zero());
 }
 
 template<typename T>
 inline Matrix4<T>& Matrix4<T>::makeIdentity()
 {
-	return set(identity());
+	// TODO : Improve ? 
+	return set(Matrix4<T>::identity());
 }
 
 template<typename T>
 inline Matrix4<T> Matrix4<T>::rotation(const Quaternion<T>& rotation)
 {
-	// TODO : More efficient way ?
-	return Matrix4<T>().makeRotation(rotation);
+	return rotation.toMatrix4();
+}
+
+template<typename T>
+inline Matrix4<T> nu::Matrix4<T>::rotation(const Matrix3<T>& rotation)
+{
+	return Matrix4<T>(rotation);
 }
 
 template<typename T>
 inline Matrix4<T> Matrix4<T>::scale(const Vector3<T>& scale)
 {
-	// TODO : More efficient way ?
-	return Matrix4<T>().makeScale(scale);
+	return Matrix4<T>(scale.x, T(0), T(0), T(0), T(0), scale.y, T(0), T(0), T(0), T(0), scale.z, T(0), T(0), T(0), T(0), T(1));
 }
 
 template<typename T>
 inline Matrix4<T> Matrix4<T>::translation(const Vector3<T>& translation)
 {
-	// TODO : More efficient way ?
-	return Matrix4<T>().makeTranslation(translation);
+	return Matrix4<T>(T(1), T(0), T(0), T(0), T(0), T(1), T(0), T(0), T(0), T(0), T(1), T(0), translation.x, translation.y, translation.z, T(1));
 }
 
 template<typename T>
 inline Matrix4<T> Matrix4<T>::transform(const Vector3<T>& translation, const Quaternion<T>& rotation)
 {
-	// TODO : More efficient way ?
-	return Matrix4<T>().makeTransform(translation, rotation);
+	Matrix4<T> m;
+	m.setRotation(rotation);
+	m.setTranslation(translation);
+	m.data[3] = 0;
+	m.data[7] = 0;
+	m.data[11] = 0;
+	m.data[15] = 1;
+	return m;
 }
 
 template<typename T>
 inline Matrix4<T> Matrix4<T>::transform(const Vector3<T>& translation, const Quaternion<T>& rotation, const Vector3<T>& scale)
 {
-	// TODO : More efficient way ?
-	return Matrix4<T>().makeTransform(translation, rotation, scale);
+	Matrix4<T> m;
+	m.setRotation(rotation);
+	m.setTranslation(translation);
+	m.applyScale(scale);
+	m.data[3] = 0;
+	m.data[7] = 0;
+	m.data[11] = 0;
+	m.data[15] = 1;
+	return m;
 }
 
 template<typename T>
 inline Matrix4<T> Matrix4<T>::viewMatrix(const Vector3<T>& translation, const Quaternion<T>& rotation)
 {
-	// TODO:
-	return Matrix4<T>();
+	Quaternion<T> invRot = rotation.conjugated();
+	return transform(-(invRot * translation), invRot);
 }
 
 template<typename T>
-inline Matrix4<T> Matrix4<T>::lookAt(const Vector3<T>& eye, const Vector3<T>& target, const Vector3<T>& up)
+inline Matrix4<T> Matrix4<T>::lookAt(const Vector3<T>& eye, const Vector3<T>& target, const Vector3<T>& up, const T handedness = -1)
 {
-	// TODO:
-	return Matrix4<T>();
+	const Vector3<T> f((target - eye).normalized());
+	const Vector3<T> s(up.crossProduct(f).normalized());
+	const Vector3<T> u(f.crossProduct(s));
+	const Vector3<T> w(handedness * s.dotProduct(eye), -u.dotProduct(eye), handedness * f.dotProduct(eye)); 
+	const T neg = -handedness;
+	f *= neg;
+	s *= neg;
+	return Matrix4<T>(s.x, u.x, f.x, 0, s.y, u.y, f.y, 0, s.z, u.z, f.z, 0, w.x, w.y, w.z, 1);
 }
 
 template<typename T>
 inline Matrix4<T> Matrix4<T>::ortho(const T& left, const T& right, const T& top, const T& bottom, const T& zNear, const T& zFar)
 {
-	// TODO:
-	return Matrix4<T>();
+	const T width = right - left;
+	const T height = top - bottom;
+	const T zDist = zFar - zNear;
+	return Matrix4<T>(2 / width, 0, 0, 0, 0, 2 / height, 0, 0, 0, 0, 2 / zDist, 0, -(right + left) / width, -(top + bottom) / height, -(zFar + zNear) / zDist, 1);
 }
 
 template<typename T>
-inline Matrix4<T> Matrix4<T>::ortho(const T& width, const T& height, const T& zNear, const T& zFar)
+inline Matrix4<T> Matrix4<T>::perspective(const T& fov, const T& ratio, const T& zNear, const T& zFar)
 {
-	// TODO:
-	return Matrix4<T>();
-}
-
-template<typename T>
-inline Matrix4<T> Matrix4<T>::perspective(const T& angle, const T& ratio, const T& zNear, const T& zFar)
-{
-	// TODO:
-	return Matrix4<T>();
+	const T y = 1 / nu::tan(fov * T(0.5));
+	const T x = y / ratio;
+	const T zDist = zNear - zFar;
+	const T zFarPerDist = zFar / zDist;
+	return Matrix4<T>(x, 0, 0, 0, 0, y, 0, 0, 0, 0, zFarPerDist, -1, 0, 0, 2 * zNear * zFarPerDist, 0);
 }
 
 template<typename T>
 inline Matrix4<T> Matrix4<T>::zero()
 {
-	static Matrix4<T> zeroM(T(0), T(0), T(0), T(0),
+	return Matrix4<T>(T(0), T(0), T(0), T(0),
 		T(0), T(0), T(0), T(0),
 		T(0), T(0), T(0), T(0),
 		T(0), T(0), T(0), T(0));
-	return zeroM;
 }
 
 template<typename T>
 inline Matrix4<T> Matrix4<T>::identity()
 {
-	static Matrix4<T> identityM(T(1), T(0), T(0), T(0),
+	return Matrix4<T>(T(1), T(0), T(0), T(0),
 		T(0), T(1), T(0), T(0),
 		T(0), T(0), T(1), T(0),
 		T(0), T(0), T(0), T(1));
-	return identityM;
 }
-
-template<typename T>
-Vector3<T> operator*(const Vector3<T>& vector, const Matrix4<T>& matrix)
-{
-	return matrix.transformVector(vector);
-}
-
-template<typename T>
-Vector3<T>& operator*=(Vector3<T>& vector, const Matrix4<T>& matrix)
-{
-	const Vector3<T> result = matrix.transformVector(vector);
-	return vector.set(result);
-}
-
-typedef Matrix4<F32> Matrix4f;
-
-typedef Matrix4f mat4; // GLSL-like
 
 } // namespace nu
 

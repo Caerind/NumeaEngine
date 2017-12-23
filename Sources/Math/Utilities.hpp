@@ -30,7 +30,7 @@ inline T lerp(const T& range_start, const T& range_end, const T& percent)
 }
 
 template <typename T>
-inline T inRange(T val, T range_start, T range_end)
+inline bool inRange(T val, T range_start, T range_end)
 {
 	return val >= range_start && val < range_end;
 }

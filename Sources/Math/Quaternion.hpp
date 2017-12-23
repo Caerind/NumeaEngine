@@ -1,10 +1,13 @@
 #ifndef NU_QUATERNION_HPP
 #define NU_QUATERNION_HPP
 
-#include "Vector4.hpp"
-
 namespace nu
 {
+
+template <typename T> class Matrix3;
+template <typename T> class Matrix4;
+template <typename T> class Vector3;
+template <typename T> class Vector4;
 
 template <typename T>
 class Quaternion
@@ -19,8 +22,8 @@ class Quaternion
 		inline Quaternion(const T& x, const T& y, const T& z, const T& w);
 		inline Quaternion(const Vector3<T>& v, const T& s);
 		inline Quaternion(const Vector3<T>& eulerAngles);
-		inline Quaternion(const T& pitch, const T& yaw, const T& roll);
 		inline Quaternion(const T& angle, const Vector3<T>& axis);
+		inline Quaternion(const Matrix3<T>& matrix);
 		~Quaternion() = default;
 
 		inline Quaternion<T>& set(const Quaternion<T>& q);
@@ -31,8 +34,8 @@ class Quaternion
 		inline Quaternion<T>& set(const T& x, const T& y, const T& z, const T& w);
 		inline Quaternion<T>& set(const Vector3<T>& v, const T& s);
 		inline Quaternion<T>& set(const Vector3<T>& eulerAngles);
-		inline Quaternion<T>& set(const T& pitch, const T& yaw, const T& roll);
 		inline Quaternion<T>& set(const T& angle, const Vector3<T>& axis);
+		inline Quaternion<T>& set(const Matrix3<T>& matrix);
 
 		inline T& operator()(U32 i);
 		inline const T& operator()(U32 i) const;
@@ -43,6 +46,9 @@ class Quaternion
 
 		inline Quaternion<T> operator*(const Quaternion<T>& q) const;
 		inline Quaternion<T>& operator*=(const Quaternion<T>& q);
+		inline Quaternion<T> operator*(const T& s) const;
+		inline Quaternion<T>& operator*=(const T& s);
+		inline Vector3<T> operator*(const Vector3<T>& vector) const;
 
 		inline bool operator==(const Quaternion<T>& q) const;
 		inline bool operator!=(const Quaternion<T>& q) const;
@@ -53,25 +59,34 @@ class Quaternion
 		inline Quaternion<T>& inverse();
 		inline Quaternion<T> inversed();
 
-		inline Vector3<T>& rotate(Vector3<T>& vector) const;
-		inline Vector3<T> rotated(const Vector3<T>& vector) const;
-
 		inline T dotProduct(const Quaternion<T>& q) const;
 		inline T getSquaredLength() const;
 		inline T getLength() const;
 		inline Quaternion<T>& normalize(T* oldLength = nullptr);
+		inline Quaternion<T> normalized(T* oldLength = nullptr);
 		inline Quaternion<T>& ensureNormalized();
 
-		void toEulerAngles(Vector3<T>& vector) const;
-		void toAngleAxis(T& angle, Vector3<T>& axis) const;
-		//void toMatrix3(Matrix3<T>& matrix) const;
+		inline void toEulerAngles(Vector3<T>& vector) const;
+		inline Vector3<T> toEulerAngles() const;
+		inline void toAngleAxis(T& angle, Vector3<T>& axis) const;
+		inline void toMatrix3(Matrix3<T>& matrix) const;
+		inline Matrix3<T> toMatrix3() const;
 
-		static inline Quaternion<T> lerp(const Quaternion<T>& start, const Quaternion<T>& end, const T& percent);
+		inline Quaternion<T>& fromEulerAngles(const Vector3<T>& vector);
+		inline Quaternion<T>& fromAngleAxis(const T& angle, const Vector3<T>& axis);
+		inline Quaternion<T>& fromMatrix3(const Matrix3<T>& matrix);
+
+		inline void toMatrix4(Matrix4<T>& matrix) const;
+		inline Matrix4<T> toMatrix4() const;
+
 		static inline Quaternion<T> slerp(const Quaternion<T>& start, const Quaternion<T>& end, const T& percent);
+
+		static inline Quaternion<T> rotateFromTo(const Vector3<T>& start, const Vector3<T>& end);
+		static inline Quaternion<T> rotateFromTo(const Vector3<T>& start, const Vector3<T>& end, const Vector3<T>& axis);
 
 		inline Quaternion<T>& makeIdentity();
 
-		static Quaternion<T> identity();
+		static inline Quaternion<T> identity();
 
 		#include "DisableAnonymousStructBegin.hpp"
 		union
@@ -86,13 +101,31 @@ class Quaternion
 		#include "DisableAnonymousStructEnd.hpp"
 };
 
+template <typename T>
+inline Quaternion<T> operator*(const T& s, const Quaternion<T>& quaternion);
+
+typedef Quaternion<F32> Quaternionf;
+
+typedef Quaternionf quat; // GLSL-like
+
+} // namespace nu
+
+/////////////////////////////////
+// Implementation              //
+/////////////////////////////////
+
+#include "Matrix3.hpp"
+#include "Vector4.hpp"
+#include "Matrix4.hpp"
+
+namespace nu
+{
+
 template<typename T>
 inline Quaternion<T>::Quaternion()
 {
 	v = Vector3<T>::zero();
 	s = T(1);
-
-	ensureNormalized();
 }
 
 template<typename T>
@@ -100,8 +133,6 @@ inline Quaternion<T>::Quaternion(const Quaternion<T>& q)
 {
 	v = q.v;
 	s = q.s;
-
-	ensureNormalized();
 }
 
 template<typename T>
@@ -111,8 +142,6 @@ inline Quaternion<T>::Quaternion(const T* a)
 	v.y = a[1];
 	v.z = a[2];
 	s = a[3];
-
-	ensureNormalized();
 }
 
 template<typename T>
@@ -122,8 +151,6 @@ inline Quaternion<T>::Quaternion(const Vector4<T>& v)
 	this->v.y = v.y;
 	this->v.z = v.z;
 	s = v.w;
-
-	ensureNormalized();
 }
 
 template<typename T>
@@ -131,8 +158,6 @@ inline Quaternion<T>::Quaternion(const T& x, const T& y, const T& z, const T& w)
 {
 	v.set(x, y, z);
 	s = w;
-
-	ensureNormalized();
 }
 
 template<typename T>
@@ -140,57 +165,72 @@ inline Quaternion<T>::Quaternion(const Vector3<T>& v, const T& s)
 {
 	this->v = v;
 	this->s = s;
-
-	ensureNormalized();
 }
 
 template<typename T>
 inline Quaternion<T>::Quaternion(const Vector3<T>& eulerAngles)
 {
-	T cp = cos(eulerAngles.x * 0.5);
-	T sp = sin(eulerAngles.x * 0.5);
-	T cy = cos(eulerAngles.y * 0.5);
-	T sy = sin(eulerAngles.y * 0.5);
-	T cr = cos(eulerAngles.z * 0.5);
-	T sr = sin(eulerAngles.z * 0.5);
-
-	v.x = cy * sr * cp - sy * cr * sp;
-	v.y = cy * cr * sp + sy * sr * cp;
-	v.z = sy * cr * cp - cy * sr * sp;
-	s = cy * cr * cp + sy * sr * sp;
-
-	ensureNormalized();
-
-	ensureNormalized();
-}
-
-template<typename T>
-inline Quaternion<T>::Quaternion(const T& pitch, const T& yaw, const T& roll)
-{
-	T cp = cos(pitch * 0.5);
-	T sp = sin(pitch * 0.5);
-	T cy = cos(yaw * 0.5);
-	T sy = sin(yaw * 0.5);
-	T cr = cos(roll * 0.5);
-	T sr = sin(roll * 0.5);
-
-	v.x = cy * sr * cp - sy * cr * sp;
-	v.y = cy * cr * sp + sy * sr * cp;
-	v.z = sy * cr * cp - cy * sr * sp;
-	s = cy * cr * cp + sy * sr * sp;
-
-	ensureNormalized();
+	Vector3<T> halfAngles(T(0.5) * eulerAngles);
+	const T sx = nu::sin(halfAngles.x);
+	const T cx = nu::cos(halfAngles.x);
+	const T sy = nu::sin(halfAngles.y);
+	const T cy = nu::cos(halfAngles.y);
+	const T sz = nu::sin(halfAngles.z);
+	const T cz = nu::cos(halfAngles.z);
+	v.x = sx * cy * cz - cx * sy * sz;
+	v.y = cx * sy * cz + sx * cy * sz;
+	v.z = cx * cy * sz - sx * sy * cz;
+	s = cx * cy * cz + sx * sy * sz;
 }
 
 template<typename T>
 inline Quaternion<T>::Quaternion(const T& angle, const Vector3<T>& axis)
 {
 	const T halfAngle = angle * T(0.5);
+	v.set(axis.normalized() * nu::sin(halfAngle));
+	s = nu::cos(halfAngle);
+}
 
-	v.set(axis.normalize() * oe::sin(halfAngle));
-	s = oe::cos(halfAngle);
-
-	ensureNormalized();
+template<typename T>
+inline Quaternion<T>::Quaternion(const Matrix3<T>& matrix)
+{
+	const T trace = matrix.getTrace();
+	if (trace > 0)
+	{
+		const T t = nu::sqrt(trace + 1) * 2;
+		const T overT = T(1) / t;
+		v.x = (matrix[5] - matrix[7]) * overT;
+		v.y = (matrix[6] - matrix[2]) * overT;
+		v.z = (matrix[1] - matrix[3]) * overT;
+		s = t * T(0.25);
+	}
+	else if (matrix[0] > matrix[4] && matrix[0] > matrix[8])
+	{
+		const T t = nu::sqrt(matrix[0] - matrix[4] - matrix[8] + 1) * 2;
+		const T overT = 1 / t;
+		v.x = t * T(0.25);
+		v.y = (matrix[3] + matrix[1]) * overT;
+		v.z = (matrix[6] + matrix[2]) * overT;
+		s = (matrix[5] - matrix[7]) * overT;
+	}
+	else if (matrix[4] > matrix[8])
+	{
+		const T t = nu::sqrt(matrix[4] - matrix[0] - matrix[8] + 1) * 2;
+		const T overT = 1 / t;
+		v.x = (matrix[3] + matrix[1]) * overT;
+		v.y = t * T(0.25);
+		v.z = (matrix[5] + matrix[7]) * overT;
+		s = (matrix[6] - matrix[2]) * overT;
+	}
+	else
+	{
+		const T t = nu::sqrt(matrix[8] - matrix[0] - matrix[4] + 1) * 2;
+		const T overT = 1 / t;
+		v.x = (matrix[6] + matrix[2]) * overT;
+		v.y = (matrix[5] + matrix[7]) * overT;
+		v.z = t * T(0.25);
+		s = (matrix[1] - matrix[3]) * overT;
+	}
 }
 
 template<typename T>
@@ -198,8 +238,7 @@ inline Quaternion<T>& Quaternion<T>::set(const Quaternion<T>& q)
 {
 	v = q.v;
 	s = q.s;
-
-	return ensureNormalized();
+	return *this;
 }
 
 template<typename T>
@@ -209,8 +248,7 @@ inline Quaternion<T>& Quaternion<T>::set(const T* a)
 	v.y = a[1];
 	v.z = a[2];
 	s = a[3];
-
-	return ensureNormalized();
+	return *this;
 }
 
 template<typename T>
@@ -220,8 +258,7 @@ inline Quaternion<T>& Quaternion<T>::set(const Vector4<T>& v)
 	this->v.y = v.y;
 	this->v.z = v.z;
 	s = v.w;
-
-	return ensureNormalized();
+	return *this;
 }
 
 template<typename T>
@@ -229,8 +266,7 @@ inline Quaternion<T>& Quaternion<T>::set(const T& x, const T& y, const T& z, con
 {
 	v.set(x, y, z);
 	s = w;
-
-	return ensureNormalized();
+	return *this;
 }
 
 template<typename T>
@@ -238,55 +274,79 @@ inline Quaternion<T>& Quaternion<T>::set(const Vector3<T>& v, const T& s)
 {
 	this->v = v;
 	this->s = s;
-
-	return ensureNormalized();
+	return *this;
 }
 
 template<typename T>
 inline Quaternion<T>& Quaternion<T>::set(const Vector3<T>& eulerAngles)
 {
-	T cp = cos(eulerAngles.x * 0.5);
-	T sp = sin(eulerAngles.x * 0.5);
-	T cy = cos(eulerAngles.y * 0.5);
-	T sy = sin(eulerAngles.y * 0.5);
-	T cr = cos(eulerAngles.z * 0.5);
-	T sr = sin(eulerAngles.z * 0.5);
-
-	v.x = cy * sr * cp - sy * cr * sp;
-	v.y = cy * cr * sp + sy * sr * cp;
-	v.z = sy * cr * cp - cy * sr * sp;
-	s = cy * cr * cp + sy * sr * sp;
-
-	return ensureNormalized();
-}
-
-template<typename T>
-inline Quaternion<T>& Quaternion<T>::set(const T& pitch, const T& yaw, const T& roll)
-{
-	T cp = cos(pitch * 0.5);
-	T sp = sin(pitch * 0.5);
-	T cy = cos(yaw * 0.5);
-	T sy = sin(yaw * 0.5);
-	T cr = cos(roll * 0.5);
-	T sr = sin(roll * 0.5);
-
-	v.x = cy * sr * cp - sy * cr * sp;
-	v.y = cy * cr * sp + sy * sr * cp;
-	v.z = sy * cr * cp - cy * sr * sp;
-	s = cy * cr * cp + sy * sr * sp;
-
-	return ensureNormalized();
+	Vector3<T> halfAngles(T(0.5) * eulerAngles);
+	const T sx = nu::sin(halfAngles.x);
+	const T cx = nu::cos(halfAngles.x);
+	const T sy = nu::sin(halfAngles.y);
+	const T cy = nu::cos(halfAngles.y);
+	const T sz = nu::sin(halfAngles.z);
+	const T cz = nu::cos(halfAngles.z);
+	v.x = sx * cy * cz - cx * sy * sz;
+	v.y = cx * sy * cz + sx * cy * sz;
+	v.z = cx * cy * sz - sx * sy * cz;
+	s = cx * cy * cz + sx * sy * sz;
+	return *this;
 }
 
 template<typename T>
 inline Quaternion<T>& Quaternion<T>::set(const T& angle, const Vector3<T>& axis)
 {
 	const T halfAngle = angle * T(0.5);
+	v.set(axis.normalized() * nu::sin(halfAngle));
+	s = nu::cos(halfAngle);
+	return *this;
+}
 
-	v.set(axis.normalize() * oe::sin(halfAngle));
-	s = oe::cos(halfAngle);
-
-	ensureNormalized();
+template<typename T>
+inline Quaternion<T>& Quaternion<T>::set(const Matrix3<T>& matrix)
+{
+	const T trace = matrix.getTrace();
+	if (trace > 0)
+	{
+		const T t = nu::sqrt(trace + 1) * 2;
+		const T overT = 1 / t;
+		v.x = (matrix[5] - matrix[7]) * overT;
+		v.y = (matrix[6] - matrix[2]) * overT;
+		v.z = (matrix[1] - matrix[3]) * overT;
+		s = t * T(0.25);
+		return *this;
+	}
+	else if (matrix[0] > matrix[4] && matrix[0] > matrix[8])
+	{
+		const T t = nu::sqrt(matrix[0] - matrix[4] - matrix[8] + 1) * 2;
+		const T overT = 1 / t;
+		v.x = t * T(0.25);
+		v.y = (matrix[3] + matrix[1]) * overT;
+		v.z = (matrix[6] + matrix[2]) * overT;
+		s = (matrix[5] - matrix[7]) * overT;
+		return *this;
+	}
+	else if (matrix[4] > matrix[8])
+	{
+		const T t = nu::sqrt(matrix[4] - matrix[0] - matrix[8] + 1) * 2;
+		const T overT = 1 / t;
+		v.x = (matrix[3] + matrix[1]) * overT;
+		v.y = t * T(0.25);
+		v.z = (matrix[5] + matrix[7]) * overT;
+		s = (matrix[6] - matrix[2]) * overT;
+		return *this;
+	}
+	else
+	{
+		const T t = nu::sqrt(matrix[8] - matrix[0] - matrix[4] + 1) * 2;
+		const T overT = 1 / t;
+		v.x = (matrix[6] + matrix[2]) * overT;
+		v.y = (matrix[5] + matrix[7]) * overT;
+		v.z = t * T(0.25);
+		s = (matrix[1] - matrix[3]) * overT;
+		return *this;
+	}
 }
 
 template<typename T>
@@ -294,10 +354,10 @@ inline T& Quaternion<T>::operator()(U32 i)
 {
 	switch (i)
 	{
-		case 0: return v.x; break;
-		case 1: return v.y; break;
-		case 2: return v.z; break;
-		default: break;
+	case 0: return v.x; break;
+	case 1: return v.y; break;
+	case 2: return v.z; break;
+	default: break;
 	}
 	return s;
 }
@@ -307,10 +367,10 @@ inline const T& Quaternion<T>::operator()(U32 i) const
 {
 	switch (i)
 	{
-		case 0: return v.x; break;
-		case 1: return v.y; break;
-		case 2: return v.z; break;
-		default: break;
+	case 0: return v.x; break;
+	case 1: return v.y; break;
+	case 2: return v.z; break;
+	default: break;
 	}
 	return s;
 }
@@ -320,10 +380,10 @@ inline T & Quaternion<T>::operator[](U32 i)
 {
 	switch (i)
 	{
-		case 0: return v.x; break;
-		case 1: return v.y; break;
-		case 2: return v.z; break;
-		default: break;
+	case 0: return v.x; break;
+	case 1: return v.y; break;
+	case 2: return v.z; break;
+	default: break;
 	}
 	return s;
 }
@@ -333,10 +393,10 @@ inline const T & Quaternion<T>::operator[](U32 i) const
 {
 	switch (i)
 	{
-		case 0: return v.x; break;
-		case 1: return v.y; break;
-		case 2: return v.z; break;
-		default: break;
+	case 0: return v.x; break;
+	case 1: return v.y; break;
+	case 2: return v.z; break;
+	default: break;
 	}
 	return s;
 }
@@ -346,31 +406,55 @@ inline Quaternion<T>& Quaternion<T>::operator=(const Quaternion<T>& q)
 {
 	v = q.v;
 	s = q.s;
-
-	return ensureNormalized();
+	return *this;
 }
 
 template<typename T>
 inline Quaternion<T> Quaternion<T>::operator*(const Quaternion<T>& q) const
 {
-	Quaternion<T> result;
-	result.v += s * q.v;
-	result.v += q.s * v;
-	result.v += v.crossProduct(q.v);
-	result.s = s * q.s - v.dotProduct(q.v);
-	return result.ensureNormalized();
+	return Quaternion<T>(s * q.v + q.s * v + v.crossProduct(q.v), s * q.s - v.dotProduct(q.v));
 }
 
 template<typename T>
 inline Quaternion<T>& Quaternion<T>::operator*=(const Quaternion<T>& q)
 {
 	Quaternion<T> p(*this);
-	v = Vector3<T>::zero();
-	v += p.s * q.v;
+	v = p.s * q.v;
 	v += q.s * p.v;
 	v += p.v.crossProduct(q.v);
 	s = p.s * q.s - p.v.dotProduct(q.v);
-	return ensureNormalized();
+	return *this;
+}
+
+template<typename T>
+inline Quaternion<T> Quaternion<T>::operator*(const T& s) const
+{
+	T angle;
+	Vector3<T> axis;
+	toAngleAxis(angle, axis);
+	angle *= s;
+	angle *= T(0.5);
+	return Quaternion<T>(axis.normalized() * nu::sin(angle), nu::cos(angle));
+}
+
+template<typename T>
+inline Quaternion<T>& Quaternion<T>::operator*=(const T& s)
+{
+	T angle;
+	Vector3<T> axis;
+	toAngleAxis(angle, axis);
+	angle *= s;
+	angle *= T(0.5);
+	v.set(axis.normalized() * nu::sin(angle));
+	s = nu::cos(angle);
+	return *this;
+}
+
+template<typename T>
+inline Vector3<T> Quaternion<T>::operator*(const Vector3<T>& vector) const
+{
+	T ss = s + s;
+	return ss * (v.crossProduct(vector)) + (ss * q - T(1)) * vector + T(2) * (v.dotProduct(vector)) * vector;
 }
 
 template<typename T>
@@ -419,21 +503,6 @@ inline Quaternion<T> Quaternion<T>::inversed()
 }
 
 template<typename T>
-inline Vector3<T>& Quaternion<T>::rotate(Vector3<T>& vector) const
-{
-	Vector3<T> v(vector);
-	Vector3<T> u(q.x, q.y, q.z);
-	T s = q.w;
-	vector = T(2) * u.dotProduct(v) * u + (s*s - u.dotProduct(u)) * v + T(2) * s * u.crossProduct(v);
-}
-
-template<typename T>
-inline Vector3<T> Quaternion<T>::rotated(const Vector3<T>& vector) const
-{
-	return Vector3<T>(vector).rotate();
-}
-
-template<typename T>
 inline T Quaternion<T>::dotProduct(const Quaternion<T>& q) const
 {
 	return v.dotProduct(q.v) + s * q.s;
@@ -448,7 +517,7 @@ inline T Quaternion<T>::getSquaredLength() const
 template<typename T>
 inline T Quaternion<T>::getLength() const
 {
-	return std::sqrt(getSquaredLength());
+	return nu::sqrt(getSquaredLength());
 }
 
 template<typename T>
@@ -466,6 +535,12 @@ inline Quaternion<T>& Quaternion<T>::normalize(T* oldLength)
 }
 
 template<typename T>
+inline Quaternion<T> Quaternion<T>::normalized(T* oldLength)
+{
+	return Quaternion<T>(*this).normalize(oldLength);
+}
+
+template<typename T>
 inline Quaternion<T>& Quaternion<T>::ensureNormalized()
 {
 	if (!equals(getSquaredLength(), T(1)))
@@ -478,25 +553,204 @@ inline Quaternion<T>& Quaternion<T>::ensureNormalized()
 template<typename T>
 inline void Quaternion<T>::toEulerAngles(Vector3<T>& vector) const
 {
-	// TODO : 
+	const Matrix3<T> matrix(toMatrix3());
+	const T cos2 = matrix[0] * matrix[0] + matrix[1] * matrix[1];
+	if (cos2 < T(0.000001))
+	{
+		vector.set(0, (matrix[2] < 0) ? T(0.5) * nu::pi() : T(-0.5) * nu::pi(), -nu::atan2(matrix[3], matrix[4]));
+	}
+	else
+	{
+		vector.set(nu::atan2(matrix[5], matrix[8]), nu::atan2(-matrix[2], nu::sqrt(cos2)), nu::atan2(matrix[1], matrix[0]));
+	}
+}
+
+template<typename T>
+inline Vector3<T> Quaternion<T>::toEulerAngles() const
+{
+	const Matrix3<T> matrix(toMatrix3());
+	const T cos2 = matrix[0] * matrix[0] + matrix[1] * matrix[1];
+	if (cos2 < T(0.000001))
+	{
+		return Vector3<T>(0, (matrix[2] < 0) ? T(0.5) * nu::pi() : T(-0.5) * nu::pi(), -nu::atan2(matrix[3], matrix[4]));
+	}
+	else
+	{
+		return Vector3<T>(nu::atan2(matrix[5], matrix[8]), nu::atan2(-matrix[2], nu::sqrt(cos2)), nu::atan2(matrix[1], matrix[0]));
+	}
 }
 
 template<typename T>
 inline void Quaternion<T>::toAngleAxis(T& angle, Vector3<T>& axis) const
 {
-	// TODO :
+	axis = (s > T(0)) ? v : -v;
+	angle = T(2) * nu::atan(T(1), (s > T(0)) ? s : -s);
 }
 
 template<typename T>
-inline Quaternion<T> Quaternion<T>::lerp(const Quaternion<T>& start, const Quaternion<T>& end, const T& percent)
+inline void Quaternion<T>::toMatrix3(Matrix3<T>& matrix) const
 {
-	return Quaternion<T>(); // TODO : 
+	const T x2 = v.x * v.x; const T y2 = v.y * v.y; const T z2 = v.z * v.z;
+	const T xs = v.x * s;   const T ys = v.y * s;   const T zs = v.z * s;
+	const T xy = v.x * v.y; const T xz = v.x * v.z; const T yz = v.y * v.z;
+	matrix.set(1 - 2 * (y2 + z2), 2 * (xy + zs), 2 * (xz - ys),
+		2 * (xy - zs), 1 - 2 * (x2 + z2), 2 * (xs + yz),
+		2 * (ys + xz), 2 * (yz - xs), 1 - 2 * (x2 + y2));
+}
+
+template<typename T>
+inline Matrix3<T> Quaternion<T>::toMatrix3() const
+{
+	const T x2 = v.x * v.x; const T y2 = v.y * v.y; const T z2 = v.z * v.z;
+	const T xs = v.x * s;   const T ys = v.y * s;   const T zs = v.z * s;
+	const T xy = v.x * v.y; const T xz = v.x * v.z; const T yz = v.y * v.z;
+	return Matrix3<T>(1 - 2 * (y2 + z2), 2 * (xy + zs), 2 * (xz - ys),
+		2 * (xy - zs), 1 - 2 * (x2 + z2), 2 * (xs + yz),
+		2 * (ys + xz), 2 * (yz - xs), 1 - 2 * (x2 + y2));
+}
+
+template<typename T>
+inline Quaternion<T>& Quaternion<T>::fromEulerAngles(const Vector3<T>& vector)
+{
+	Vector3<T> halfAngles(T(0.5) * eulerAngles);
+	const T sx = nu::sin(halfAngles.x);
+	const T cx = nu::cos(halfAngles.x);
+	const T sy = nu::sin(halfAngles.y);
+	const T cy = nu::cos(halfAngles.y);
+	const T sz = nu::sin(halfAngles.z);
+	const T cz = nu::cos(halfAngles.z);
+	v.x = sx * cy * cz - cx * sy * sz;
+	v.y = cx * sy * cz + sx * cy * sz;
+	v.z = cx * cy * sz - sx * sy * cz;
+	s = cx * cy * cz + sx * sy * sz;
+	return *this;
+}
+
+template<typename T>
+inline Quaternion<T>& Quaternion<T>::fromAngleAxis(const T& angle, const Vector3<T>& axis)
+{
+	const T halfAngle = angle * T(0.5);
+	v.set(axis.normalized() * nu::sin(halfAngle));
+	s = nu::cos(halfAngle);
+	return *this;
+}
+
+template<typename T>
+inline Quaternion<T>& Quaternion<T>::fromMatrix3(const Matrix3<T>& matrix)
+{
+	const T trace = matrix.getTrace();
+	if (trace > 0)
+	{
+		const T t = nu::sqrt(trace + 1) * 2;
+		const T overT = 1 / t;
+		v.x = (matrix[5] - matrix[7]) * overT;
+		v.y = (matrix[6] - matrix[2]) * overT;
+		v.z = (matrix[1] - matrix[3]) * overT;
+		s = t * T(0.25);
+		return *this;
+	}
+	else if (matrix[0] > matrix[4] && matrix[0] > matrix[8])
+	{
+		const T t = nu::sqrt(matrix[0] - matrix[4] - matrix[8] + 1) * 2;
+		const T overT = 1 / t;
+		v.x = t * T(0.25);
+		v.y = (matrix[3] + matrix[1]) * overT;
+		v.z = (matrix[6] + matrix[2]) * overT;
+		s = (matrix[5] - matrix[7]) * overT;
+		return *this;
+	}
+	else if (matrix[4] > matrix[8])
+	{
+		const T t = nu::sqrt(matrix[4] - matrix[0] - matrix[8] + 1) * 2;
+		const T overT = 1 / t;
+		v.x = (matrix[3] + matrix[1]) * overT;
+		v.y = t * T(0.25);
+		v.z = (matrix[5] + matrix[7]) * overT;
+		s = (matrix[6] - matrix[2]) * overT;
+		return *this;
+	}
+	else
+	{
+		const T t = nu::sqrt(matrix[8] - matrix[0] - matrix[4] + 1) * 2;
+		const T overT = 1 / t;
+		v.x = (matrix[6] + matrix[2]) * overT;
+		v.y = (matrix[5] + matrix[7]) * overT;
+		v.z = t * T(0.25);
+		s = (matrix[1] - matrix[3]) * overT;
+		return *this;
+	}
+	return *this;
+}
+
+template<typename T>
+inline void Quaternion<T>::toMatrix4(Matrix4<T>& matrix) const
+{
+	const T x2 = v.x * v.x; const T y2 = v.y * v.y; const T z2 = v.z * v.z;
+	const T xs = v.x * s;   const T ys = v.y * s;   const T zs = v.z * s;
+	const T xy = v.x * v.y; const T xz = v.x * v.z; const T yz = v.y * v.z;
+	matrix.set(1 - 2 * (y2 + z2), 2 * (xy + zs), 2 * (xz - ys), 0,
+		2 * (xy - zs), 1 - 2 * (x2 + z2), 2 * (xs + yz), 0,
+		2 * (ys + xz), 2 * (yz - xs), 1 - 2 * (x2 + y2), 0,
+		0, 0, 0, 1);
+}
+
+template<typename T>
+inline Matrix4<T> Quaternion<T>::toMatrix4() const
+{
+	const T x2 = v.x * v.x; const T y2 = v.y * v.y; const T z2 = v.z * v.z;
+	const T xs = v.x * s;   const T ys = v.y * s;   const T zs = v.z * s;
+	const T xy = v.x * v.y; const T xz = v.x * v.z; const T yz = v.y * v.z;
+	return Matrix4<T>(1 - 2 * (y2 + z2), 2 * (xy + zs), 2 * (xz - ys), 0,
+		2 * (xy - zs), 1 - 2 * (x2 + z2), 2 * (xs + yz), 0,
+		2 * (ys + xz), 2 * (yz - xs), 1 - 2 * (x2 + y2), 0,
+		0, 0, 0, 1);
 }
 
 template<typename T>
 inline Quaternion<T> Quaternion<T>::slerp(const Quaternion<T>& start, const Quaternion<T>& end, const T& percent)
 {
-	return Quaternion<T>(); // TODO : 
+	if (start.dotProduct(end) > T(0.999999f))
+	{
+		T mp = 1 - percent;
+		return Quaternion<T>(start.v * mp + end.v * percent, start.s * mp + end.s * percent);
+	}
+	return Quaternion<T>(start * ((start.inversed() * end) * percent));
+}
+
+template<typename T>
+inline Quaternion<T> Quaternion<T>::rotateFromTo(const Vector3<T>& start, const Vector3<T>& end)
+{
+	Vector3<T> v1 = start.normalized();
+	Vector3<T> v2 = end.normalized();
+	const T dot = v1.dotProduct(v2);
+	if (dot >= T(0.99999847691))
+	{
+		return Quaternion<T>::identity();
+	}
+	if (dot <= T(-0.99999847691))
+	{
+		return Quaternion<T>(0, v1.perpendicularVector());
+	}
+	Vector3<T> cross = v1.crossProduct(v2);
+	return Quaternion<T>(cross, dot + T(1)).normalize();
+}
+
+template<typename T>
+inline Quaternion<T> Quaternion<T>::rotateFromTo(const Vector3<T>& start, const Vector3<T>& end, const Vector3<T>& axis)
+{
+	Vector3<T> v1 = start.normalized();
+	Vector3<T> v2 = end.normalized();
+	const T dot = v1.dotProduct(v2);
+	if (dot >= T(0.99999847691))
+	{
+		return Quaternion<T>::identity();
+	}
+	if (dot <= T(-0.99999847691))
+	{
+		return Quaternion<T>(0, axis);
+	}
+	Vector3<T> cross = v1.crossProduct(v2);
+	return Quaternion<T>(cross, dot + T(1)).normalize();
 }
 
 template<typename T>
@@ -512,10 +766,11 @@ inline Quaternion<T> Quaternion<T>::identity()
 	return Quaternion<T>(Vector3<T>::zero(), T(1));
 }
 
-
-typedef Quaternion<F32> Quaternionf;
-
-typedef Quaternionf quat; // GLSL-like
+template<typename T>
+inline Quaternion<T> operator*(const T& s, const Quaternion<T>& quaternion)
+{
+	return quaternion * s;
+}
 
 } // namespace nu
 

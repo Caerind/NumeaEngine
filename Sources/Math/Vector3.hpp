@@ -93,6 +93,8 @@ class Vector3
 		inline Vector3<T> crossProduct(const Vector3<T>& v) const;
 		static inline Vector3<T> crossProduct(const Vector3<T>& v1, const Vector3<T>& v2);
 
+		inline Vector3<T> perpendicularVector() const;
+
 		static inline Vector3<T> lerp(const Vector3<T>& v1, const Vector3<T>& v2, const T& percent);
 
 		inline Vector3<T>& maximize(const Vector3<T>& v);
@@ -112,13 +114,6 @@ class Vector3
 		static inline Vector3<T> unitY();
 		static inline Vector3<T> unitZ();
 		static inline Vector3<T> zero();
-
-		static inline Vector3<T> forward();
-		static inline Vector3<T> backward();
-		static inline Vector3<T> right();
-		static inline Vector3<T> left();
-		static inline Vector3<T> up();
-		static inline Vector3<T> down();
 
 		#include "DisableAnonymousStructBegin.hpp"
 		union 
@@ -580,6 +575,17 @@ inline Vector3<T> Vector3<T>::crossProduct(const Vector3<T>& v1, const Vector3<T
 }
 
 template<typename T>
+inline Vector3<T> Vector3<T>::perpendicularVector() const
+{
+	Vector3<T> axis = Vector3<T>::crossProduct(unitX(), *this);
+	if (axis.getSquaredLength() < T(0.05)) 
+	{
+		axis = Vector3<T>::crossProduct(unitY(), *this);
+	}
+	return axis.normalize();
+}
+
+template<typename T>
 inline Vector3<T> Vector3<T>::lerp(const Vector3<T>& v1, const Vector3<T>& v2, const T& percent)
 {
 	const T one_minus_percent = T(1) - percent;
@@ -674,42 +680,6 @@ template<typename T>
 inline Vector3<T> Vector3<T>::zero()
 {
 	return Vector3<T>(T(0), T(0), T(0));
-}
-
-template<typename T>
-inline Vector3<T> Vector3<T>::forward()
-{
-	return Vector3<T>(T(0), T(0), T(-1));
-}
-
-template<typename T>
-inline Vector3<T> Vector3<T>::backward()
-{
-	return Vector3<T>(T(0), T(0), T(1));
-}
-
-template<typename T>
-inline Vector3<T> Vector3<T>::right()
-{
-	return Vector3<T>(T(1), T(0), T(0));
-}
-
-template<typename T>
-inline Vector3<T> Vector3<T>::left()
-{
-	return Vector3<T>(T(-1), T(0), T(0));
-}
-
-template<typename T>
-inline Vector3<T> Vector3<T>::up()
-{
-	return Vector3<T>(T(0), T(1), T(0));
-}
-
-template<typename T>
-inline Vector3<T> Vector3<T>::down()
-{
-	return Vector3<T>(T(0), T(-1), T(0));
 }
 
 template<typename T>
