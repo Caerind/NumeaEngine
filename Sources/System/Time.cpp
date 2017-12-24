@@ -94,25 +94,25 @@ Time& Time::operator-=(const Time& time)
 
 Time Time::operator*(F32 scalar) const
 {
-	return Time(mTicks * scalar);
+	return Time(I64(F32(mTicks) * scalar));
 }
 
 Time& Time::operator*=(F32 scalar)
 {
-	mTicks *= scalar;
+	mTicks = I64(F32(mTicks) * scalar);
 	return *this;
 }
 
 Time Time::operator/(F32 scalar) const
 {
 	assert(scalar != 0.0f);
-	return Time(mTicks / scalar);
+	return Time(I64(F32(mTicks) / scalar));
 }
 
 Time& Time::operator/=(F32 scalar)
 {
 	assert(scalar != 0.0f);
-	mTicks /= scalar;
+	mTicks = I64(F32(mTicks) / scalar);
 	return *this;
 }
 
@@ -249,7 +249,7 @@ Time minutes(I32 amount)
 
 Time seconds(F32 amount)
 {
-	return Time(amount * Time::TicksPerSecond);
+	return Time(I64(amount * F32(Time::TicksPerSecond)));
 }
 
 Time milliseconds(I32 amount)

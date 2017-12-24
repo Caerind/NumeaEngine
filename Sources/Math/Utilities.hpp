@@ -10,6 +10,20 @@
 namespace nu
 {
 
+template <typename T, typename T2 = I32>
+inline T2 floor(const T& value)
+{
+	T2 i = T2(value);
+	return i - (i > value);
+}
+
+template <typename T, typename T2 = I32>
+inline T2 ceil(const T& value)
+{
+	T2 i = T2(value);
+	return i + (i < value);
+}
+
 template <typename T>
 inline T clamp(const T& x, const T& lower, const T& upper)
 {
@@ -19,14 +33,19 @@ inline T clamp(const T& x, const T& lower, const T& upper)
 template <typename T, typename T2>
 inline T lerp(const T& range_start, const T& range_end, const T2& percent)
 {
-	const T2 one_minus_percent = static_cast<T2>(1.0) - percent;
-	return range_start * one_minus_percent + range_end * percent;
+	return range_start + percent * (range_end - range_start);
 }
 
 template <typename T>
 inline T lerp(const T& range_start, const T& range_end, const T& percent)
 {
 	return lerp<T, T>(range_start, range_end, percent);
+}
+
+template <typename T>
+inline T fade(T t)
+{
+	return t * t * t * (t * (t * 6 - 15) + 10);
 }
 
 template <typename T>

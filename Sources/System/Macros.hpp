@@ -20,6 +20,9 @@
 #define NU_ALIGN64 NU_ALIGN(64)
 #define NU_ALIGN128 NU_ALIGN(128)
 
+#ifdef assert
+#undef assert
+#endif
 #if NU_ENABLE_ASSERT
 	#define assert(expr) \
 		if (expr) {} \

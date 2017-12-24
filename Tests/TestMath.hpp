@@ -9,6 +9,8 @@
 #include "../Sources/Math/Matrix3.hpp"
 #include "../Sources/Math/Matrix4.hpp"
 #include "../Sources/Math/Quaternion.hpp"
+#include "../Sources/Math/Random.hpp"
+#include "../Sources/Math/Noise.hpp"
 
 #include "../Sources/System/UnitTest.hpp"
 
@@ -17,6 +19,14 @@ BEGIN_TEST(Math)
 
 TEST("Utilities")
 {
+	CHECK(nu::floor(2.0f) == 2);
+	CHECK(nu::ceil(2.0f) == 2);
+	CHECK(nu::floor(2.4f) == 2);
+	CHECK(nu::ceil(2.4f) == 3);
+	CHECK(nu::floor(-2.7f) == -3);
+	CHECK(nu::ceil(-2.7f) == -2);
+	CHECK(nu::floor(-2.0f) == -2);
+	CHECK(nu::ceil(-2.0f) == -2);
 	CHECK(nu::clamp(50, 0, 10) == 10);
 	CHECK(nu::clamp(50, 0, 100) == 50);
 	CHECK(nu::clamp(50, 100, 1000) == 100);
@@ -50,14 +60,6 @@ TEST("Vector4")
 TEST("Matrix3")
 {
 	nu::Matrix3f mat;
-
-
-	nu::Matrix3f m(0, 1, 2, 3, 4, 5, 6, 7, 8);
-	
-	ECHO("m(1, 0) = %f, (r,c)", m(1, 0));
-	ECHO("m(0, 1) = %f, (r,c)", m(0, 1));
-
-
 }
 
 TEST("Matrix4")
@@ -68,7 +70,41 @@ TEST("Matrix4")
 TEST("Quaternion")
 {
 	nu::Quaternionf quat;
+}
 
+TEST("Random")
+{
+	I32 min = 0;
+	I32 max = 100000000;
+	I32 times = 10;
+
+	nu::RandomEngine random1(12345);
+	nu::RandomEngine random2(345678376);
+	nu::RandomEngine random3(12345);
+
+	for (I32 i = 0; i < times; i++)
+	{
+		I32 n1 = random1.get(min, max);
+		I32 n2 = random2.get(min, max);
+		I32 n3 = random3.get(min, max);
+		I32 n4 = nu::Random::get(min, max);
+
+		CHECK(n1 == n3);
+		CHECK(n1 != n2);
+		CHECK(n1 != n4);
+	}
+}
+
+TEST("Noise")
+{
+	nu::Noise noise;
+	for (U32 x = 0; x < 100; x++)
+	{
+		for (U32 y = 0; y < 100; y++)
+		{
+			noise.getNoise(x * 0.01f, y * 0.01f);
+		}
+	}
 }
 
 }
