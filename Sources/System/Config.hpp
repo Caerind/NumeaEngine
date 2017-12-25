@@ -12,5 +12,6 @@
 //#define NU_ENABLE_LOG 1
 //#define NU_ENABLE_DEFAULT_LOGGER 1
 //#define NU_ENABLE_PROFILE 1
+//#define NU_ENABLE_IMGUI 1
 
 #endif // NU_CONFIG_HPP
