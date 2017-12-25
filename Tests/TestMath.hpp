@@ -11,6 +11,14 @@
 #include "../Sources/Math/Quaternion.hpp"
 #include "../Sources/Math/Random.hpp"
 #include "../Sources/Math/Noise.hpp"
+#include "../Sources/Math/AABB.hpp"
+#include "../Sources/Math/Plane.hpp"
+#include "../Sources/Math/Ray.hpp"
+#include "../Sources/Math/Rect.hpp"
+#include "../Sources/Math/Sphere.hpp"
+#include "../Sources/Math/OBB.hpp"
+#include "../Sources/Math/Intersection.hpp"
+#include "../Sources/Math/Frustum.hpp"
 
 #include "../Sources/System/UnitTest.hpp"
 
@@ -105,6 +113,54 @@ TEST("Noise")
 			noise.getNoise(x * 0.01f, y * 0.01f);
 		}
 	}
+}
+
+TEST("AABB")
+{
+	nu::AABB box;
+
+}
+
+TEST("Plane")
+{
+	nu::Plane plane;
+
+}
+
+TEST("Ray")
+{
+	nu::Ray ray;
+
+}
+
+TEST("Rect")
+{
+	nu::Rectf rect;
+
+}
+
+TEST("Sphere")
+{
+	nu::Sphere sphere;
+
+}
+
+TEST("OBB")
+{
+	nu::OBB box;
+
+}
+
+TEST("Intersection")
+{
+	
+
+}
+
+TEST("Frustum")
+{
+	nu::Frustum frustum;
+
 }
 
 }

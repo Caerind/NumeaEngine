@@ -549,14 +549,14 @@ inline Matrix4<T>& Matrix4<T>::operator-=(const Matrix4<T>& m)
 template<typename T>
 inline Matrix4<T>& Matrix4<T>::operator*=(const Matrix4<T>& m)
 {
-	Vector3<T> r0(getRow(0));
-	Vector3<T> r1(getRow(1));
-	Vector3<T> r2(getRow(2));
-	Vector3<T> r3(getRow(3));
-	Vector3<T> c0(m.getColumn(0));
-	Vector3<T> c1(m.getColumn(1));
-	Vector3<T> c2(m.getColumn(2));
-	Vector3<T> c3(m.getColumn(3));
+	Vector4<T> r0(getRow(0));
+	Vector4<T> r1(getRow(1));
+	Vector4<T> r2(getRow(2));
+	Vector4<T> r3(getRow(3));
+	Vector4<T> c0(m.getColumn(0));
+	Vector4<T> c1(m.getColumn(1));
+	Vector4<T> c2(m.getColumn(2));
+	Vector4<T> c3(m.getColumn(3));
 	data[0] = c0.dotProduct(r0);
 	data[4] = c1.dotProduct(r0);
 	data[8] = c2.dotProduct(r0);
@@ -719,34 +719,34 @@ inline Matrix4<T>& Matrix4<T>::operator/=(const T& s)
 template<typename T>
 inline Vector3<T> Matrix4<T>::operator*(const Vector3<T>& vector) const
 {
-	return Vector3<T>(v.x * data[0] + v.y * data[4] + v.z * data[8] + data[12],
-		v.x * data[1] + v.y * data[5] + v.z * data[9] + data[13],
-		v.x * data[2] + v.y * data[6] + v.z * data[10] + data[14]);
+	return Vector3<T>(vector.x * data[0] + vector.y * data[4] + vector.z * data[8] + data[12],
+		vector.x * data[1] + vector.y * data[5] + vector.z * data[9] + data[13],
+		vector.x * data[2] + vector.y * data[6] + vector.z * data[10] + data[14]);
 }
 
 template<typename T>
 inline Vector4<T> Matrix4<T>::operator*(const Vector4<T>& vector) const
 {
-	return Vector4<T>(v.x * data[0] + v.y * data[4] + v.z * data[8] + v.w * data[12],
-		v.x * data[1] + v.y * data[5] + v.z * data[9] + v.w * data[13],
-		v.x * data[2] + v.y * data[6] + v.z * data[10] + v.w * data[14],
-		v.x * data[3] + v.y * data[7] + v.z * data[11] + v.w * data[15]);
+	return Vector4<T>(vector.x * data[0] + vector.y * data[4] + vector.z * data[8] + vector.w * data[12],
+		vector.x * data[1] + vector.y * data[5] + vector.z * data[9] + vector.w * data[13],
+		vector.x * data[2] + vector.y * data[6] + vector.z * data[10] + vector.w * data[14],
+		vector.x * data[3] + vector.y * data[7] + vector.z * data[11] + vector.w * data[15]);
 }
 
 template<typename T>
 inline Vector3<T> Matrix4<T>::transformPosition(const Vector3<T>& position) const
 {
-	return Vector3<T>(v.x * data[0] + v.y * data[4] + v.z * data[8] + data[12],
-		v.x * data[1] + v.y * data[5] + v.z * data[9] + data[13],
-		v.x * data[2] + v.y * data[6] + v.z * data[10] + data[14]);
+	return Vector3<T>(position.x * data[0] + position.y * data[4] + position.z * data[8] + data[12],
+		position.x * data[1] + position.y * data[5] + position.z * data[9] + data[13],
+		position.x * data[2] + position.y * data[6] + position.z * data[10] + data[14]);
 }
 
 template<typename T>
 inline Vector3<T> Matrix4<T>::transformDirection(const Vector3<T>& direction) const
 {
-	return Vector3<T>(v.x * data[0] + v.y * data[4] + v.z * data[8],
-		v.x * data[1] + v.y * data[5] + v.z * data[9],
-		v.x * data[2] + v.y * data[6] + v.z * data[10]);
+	return Vector3<T>(direction.x * data[0] + direction.y * data[4] + direction.z * data[8],
+		direction.x * data[1] + direction.y * data[5] + direction.z * data[9],
+		direction.x * data[2] + direction.y * data[6] + direction.z * data[10]);
 }
 
 template<typename T>
@@ -933,103 +933,23 @@ inline T Matrix4<T>::getDeterminant() const
 template<typename T>
 inline Matrix4<T>& Matrix4<T>::inverse(bool* succeeded)
 {
-	T inv[9];
-	inv[0] = m[5] * m[10] * m[15] -
-		m[5] * m[11] * m[14] -
-		m[9] * m[6] * m[15] +
-		m[9] * m[7] * m[14] +
-		m[13] * m[6] * m[11] -
-		m[13] * m[7] * m[10];
-	inv[4] = -m[4] * m[10] * m[15] +
-		m[4] * m[11] * m[14] +
-		m[8] * m[6] * m[15] -
-		m[8] * m[7] * m[14] -
-		m[12] * m[6] * m[11] +
-		m[12] * m[7] * m[10];
-	inv[8] = m[4] * m[9] * m[15] -
-		m[4] * m[11] * m[13] -
-		m[8] * m[5] * m[15] +
-		m[8] * m[7] * m[13] +
-		m[12] * m[5] * m[11] -
-		m[12] * m[7] * m[9];
-	inv[12] = -m[4] * m[9] * m[14] +
-		m[4] * m[10] * m[13] +
-		m[8] * m[5] * m[14] -
-		m[8] * m[6] * m[13] -
-		m[12] * m[5] * m[10] +
-		m[12] * m[6] * m[9];
-	inv[1] = -m[1] * m[10] * m[15] +
-		m[1] * m[11] * m[14] +
-		m[9] * m[2] * m[15] -
-		m[9] * m[3] * m[14] -
-		m[13] * m[2] * m[11] +
-		m[13] * m[3] * m[10];
-	inv[5] = m[0] * m[10] * m[15] -
-		m[0] * m[11] * m[14] -
-		m[8] * m[2] * m[15] +
-		m[8] * m[3] * m[14] +
-		m[12] * m[2] * m[11] -
-		m[12] * m[3] * m[10];
-	inv[9] = -m[0] * m[9] * m[15] +
-		m[0] * m[11] * m[13] +
-		m[8] * m[1] * m[15] -
-		m[8] * m[3] * m[13] -
-		m[12] * m[1] * m[11] +
-		m[12] * m[3] * m[9];
-	inv[13] = m[0] * m[9] * m[14] -
-		m[0] * m[10] * m[13] -
-		m[8] * m[1] * m[14] +
-		m[8] * m[2] * m[13] +
-		m[12] * m[1] * m[10] -
-		m[12] * m[2] * m[9];
-	inv[2] = m[1] * m[6] * m[15] -
-		m[1] * m[7] * m[14] -
-		m[5] * m[2] * m[15] +
-		m[5] * m[3] * m[14] +
-		m[13] * m[2] * m[7] -
-		m[13] * m[3] * m[6];
-	inv[6] = -m[0] * m[6] * m[15] +
-		m[0] * m[7] * m[14] +
-		m[4] * m[2] * m[15] -
-		m[4] * m[3] * m[14] -
-		m[12] * m[2] * m[7] +
-		m[12] * m[3] * m[6];
-	inv[10] = m[0] * m[5] * m[15] -
-		m[0] * m[7] * m[13] -
-		m[4] * m[1] * m[15] +
-		m[4] * m[3] * m[13] +
-		m[12] * m[1] * m[7] -
-		m[12] * m[3] * m[5];
-	inv[14] = -m[0] * m[5] * m[14] +
-		m[0] * m[6] * m[13] +
-		m[4] * m[1] * m[14] -
-		m[4] * m[2] * m[13] -
-		m[12] * m[1] * m[6] +
-		m[12] * m[2] * m[5];
-	inv[3] = -m[1] * m[6] * m[11] +
-		m[1] * m[7] * m[10] +
-		m[5] * m[2] * m[11] -
-		m[5] * m[3] * m[10] -
-		m[9] * m[2] * m[7] +
-		m[9] * m[3] * m[6];
-	inv[7] = m[0] * m[6] * m[11] -
-		m[0] * m[7] * m[10] -
-		m[4] * m[2] * m[11] +
-		m[4] * m[3] * m[10] +
-		m[8] * m[2] * m[7] -
-		m[8] * m[3] * m[6];
-	inv[11] = -m[0] * m[5] * m[11] +
-		m[0] * m[7] * m[9] +
-		m[4] * m[1] * m[11] -
-		m[4] * m[3] * m[9] -
-		m[8] * m[1] * m[7] +
-		m[8] * m[3] * m[5];
-	inv[15] = m[0] * m[5] * m[10] -
-		m[0] * m[6] * m[9] -
-		m[4] * m[1] * m[10] +
-		m[4] * m[2] * m[9] +
-		m[8] * m[1] * m[6] -
-		m[8] * m[2] * m[5];
+	T inv[16];
+	inv[0] = data[5] * data[10] * data[15] - data[5] * data[11] * data[14] - data[9] * data[6] * data[15] + data[9] * data[7] * data[14] + data[13] * data[6] * data[11] - data[13] * data[7] * data[10];
+	inv[4] = -data[4] * data[10] * data[15] + data[4] * data[11] * data[14] + data[8] * data[6] * data[15] - data[8] * data[7] * data[14] - data[12] * data[6] * data[11] + data[12] * data[7] * data[10];
+	inv[8] = data[4] * data[9] * data[15] - data[4] * data[11] * data[13] - data[8] * data[5] * data[15] + data[8] * data[7] * data[13] + data[12] * data[5] * data[11] - data[12] * data[7] * data[9];
+	inv[12] = -data[4] * data[9] * data[14] + data[4] * data[10] * data[13] + data[8] * data[5] * data[14] - data[8] * data[6] * data[13] - data[12] * data[5] * data[10] + data[12] * data[6] * data[9];
+	inv[1] = -data[1] * data[10] * data[15] + data[1] * data[11] * data[14] + data[9] * data[2] * data[15] - data[9] * data[3] * data[14] - data[13] * data[2] * data[11] + data[13] * data[3] * data[10];
+	inv[5] = data[0] * data[10] * data[15] - data[0] * data[11] * data[14] - data[8] * data[2] * data[15] + data[8] * data[3] * data[14] + data[12] * data[2] * data[11] - data[12] * data[3] * data[10];
+	inv[9] = -data[0] * data[9] * data[15] + data[0] * data[11] * data[13] + data[8] * data[1] * data[15] - data[8] * data[3] * data[13] - data[12] * data[1] * data[11] + data[12] * data[3] * data[9];
+	inv[13] = data[0] * data[9] * data[14] - data[0] * data[10] * data[13] - data[8] * data[1] * data[14] + data[8] * data[2] * data[13] + data[12] * data[1] * data[10] - data[12] * data[2] * data[9];
+	inv[2] = data[1] * data[6] * data[15] - data[1] * data[7] * data[14] - data[5] * data[2] * data[15] + data[5] * data[3] * data[14] + data[13] * data[2] * data[7] - data[13] * data[3] * data[6];
+	inv[6] = -data[0] * data[6] * data[15] + data[0] * data[7] * data[14] + data[4] * data[2] * data[15] - data[4] * data[3] * data[14] - data[12] * data[2] * data[7] + data[12] * data[3] * data[6];
+	inv[10] = data[0] * data[5] * data[15] - data[0] * data[7] * data[13] - data[4] * data[1] * data[15] + data[4] * data[3] * data[13] + data[12] * data[1] * data[7] - data[12] * data[3] * data[5];
+	inv[14] = -data[0] * data[5] * data[14] + data[0] * data[6] * data[13] + data[4] * data[1] * data[14] - data[4] * data[2] * data[13] - data[12] * data[1] * data[6] + data[12] * data[2] * data[5];
+	inv[3] = -data[1] * data[6] * data[11] + data[1] * data[7] * data[10] + data[5] * data[2] * data[11] - data[5] * data[3] * data[10] - data[9] * data[2] * data[7] + data[9] * data[3] * data[6];
+	inv[7] = data[0] * data[6] * data[11] - data[0] * data[7] * data[10] - data[4] * data[2] * data[11] + data[4] * data[3] * data[10] + data[8] * data[2] * data[7] - data[8] * data[3] * data[6];
+	inv[11] = -data[0] * data[5] * data[11] + data[0] * data[7] * data[9] + data[4] * data[1] * data[11] - data[4] * data[3] * data[9] - data[8] * data[1] * data[7] + data[8] * data[3] * data[5];
+	inv[15] = data[0] * data[5] * data[10] - data[0] * data[6] * data[9] - data[4] * data[1] * data[10] + data[4] * data[2] * data[9] + data[8] * data[1] * data[6] - data[8] * data[2] * data[5];
 
 	const T det = m[0] * inv[0] + m[1] * inv[4] + m[2] * inv[8] + m[3] * inv[12];
 	if (equals(det, T(0)))
@@ -1057,105 +977,25 @@ inline Matrix4<T>& Matrix4<T>::inverse(bool* succeeded)
 template<typename T>
 inline Matrix4<T> Matrix4<T>::inversed(bool* succeeded) const
 {
-	T inv[9];
-	inv[0] = m[5] * m[10] * m[15] -
-		m[5] * m[11] * m[14] -
-		m[9] * m[6] * m[15] +
-		m[9] * m[7] * m[14] +
-		m[13] * m[6] * m[11] -
-		m[13] * m[7] * m[10];
-	inv[4] = -m[4] * m[10] * m[15] +
-		m[4] * m[11] * m[14] +
-		m[8] * m[6] * m[15] -
-		m[8] * m[7] * m[14] -
-		m[12] * m[6] * m[11] +
-		m[12] * m[7] * m[10];
-	inv[8] = m[4] * m[9] * m[15] -
-		m[4] * m[11] * m[13] -
-		m[8] * m[5] * m[15] +
-		m[8] * m[7] * m[13] +
-		m[12] * m[5] * m[11] -
-		m[12] * m[7] * m[9];
-	inv[12] = -m[4] * m[9] * m[14] +
-		m[4] * m[10] * m[13] +
-		m[8] * m[5] * m[14] -
-		m[8] * m[6] * m[13] -
-		m[12] * m[5] * m[10] +
-		m[12] * m[6] * m[9];
-	inv[1] = -m[1] * m[10] * m[15] +
-		m[1] * m[11] * m[14] +
-		m[9] * m[2] * m[15] -
-		m[9] * m[3] * m[14] -
-		m[13] * m[2] * m[11] +
-		m[13] * m[3] * m[10];
-	inv[5] = m[0] * m[10] * m[15] -
-		m[0] * m[11] * m[14] -
-		m[8] * m[2] * m[15] +
-		m[8] * m[3] * m[14] +
-		m[12] * m[2] * m[11] -
-		m[12] * m[3] * m[10];
-	inv[9] = -m[0] * m[9] * m[15] +
-		m[0] * m[11] * m[13] +
-		m[8] * m[1] * m[15] -
-		m[8] * m[3] * m[13] -
-		m[12] * m[1] * m[11] +
-		m[12] * m[3] * m[9];
-	inv[13] = m[0] * m[9] * m[14] -
-		m[0] * m[10] * m[13] -
-		m[8] * m[1] * m[14] +
-		m[8] * m[2] * m[13] +
-		m[12] * m[1] * m[10] -
-		m[12] * m[2] * m[9];
-	inv[2] = m[1] * m[6] * m[15] -
-		m[1] * m[7] * m[14] -
-		m[5] * m[2] * m[15] +
-		m[5] * m[3] * m[14] +
-		m[13] * m[2] * m[7] -
-		m[13] * m[3] * m[6];
-	inv[6] = -m[0] * m[6] * m[15] +
-		m[0] * m[7] * m[14] +
-		m[4] * m[2] * m[15] -
-		m[4] * m[3] * m[14] -
-		m[12] * m[2] * m[7] +
-		m[12] * m[3] * m[6];
-	inv[10] = m[0] * m[5] * m[15] -
-		m[0] * m[7] * m[13] -
-		m[4] * m[1] * m[15] +
-		m[4] * m[3] * m[13] +
-		m[12] * m[1] * m[7] -
-		m[12] * m[3] * m[5];
-	inv[14] = -m[0] * m[5] * m[14] +
-		m[0] * m[6] * m[13] +
-		m[4] * m[1] * m[14] -
-		m[4] * m[2] * m[13] -
-		m[12] * m[1] * m[6] +
-		m[12] * m[2] * m[5];
-	inv[3] = -m[1] * m[6] * m[11] +
-		m[1] * m[7] * m[10] +
-		m[5] * m[2] * m[11] -
-		m[5] * m[3] * m[10] -
-		m[9] * m[2] * m[7] +
-		m[9] * m[3] * m[6];
-	inv[7] = m[0] * m[6] * m[11] -
-		m[0] * m[7] * m[10] -
-		m[4] * m[2] * m[11] +
-		m[4] * m[3] * m[10] +
-		m[8] * m[2] * m[7] -
-		m[8] * m[3] * m[6];
-	inv[11] = -m[0] * m[5] * m[11] +
-		m[0] * m[7] * m[9] +
-		m[4] * m[1] * m[11] -
-		m[4] * m[3] * m[9] -
-		m[8] * m[1] * m[7] +
-		m[8] * m[3] * m[5];
-	inv[15] = m[0] * m[5] * m[10] -
-		m[0] * m[6] * m[9] -
-		m[4] * m[1] * m[10] +
-		m[4] * m[2] * m[9] +
-		m[8] * m[1] * m[6] -
-		m[8] * m[2] * m[5];
+	T inv[16];
+	inv[0] = data[5] * data[10] * data[15] - data[5] * data[11] * data[14] - data[9] * data[6] * data[15] + data[9] * data[7] * data[14] + data[13] * data[6] * data[11] - data[13] * data[7] * data[10];
+	inv[4] = -data[4] * data[10] * data[15] + data[4] * data[11] * data[14] + data[8] * data[6] * data[15] - data[8] * data[7] * data[14] - data[12] * data[6] * data[11] + data[12] * data[7] * data[10];
+	inv[8] = data[4] * data[9] * data[15] - data[4] * data[11] * data[13] - data[8] * data[5] * data[15] + data[8] * data[7] * data[13] + data[12] * data[5] * data[11] - data[12] * data[7] * data[9];
+	inv[12] = -data[4] * data[9] * data[14] + data[4] * data[10] * data[13] + data[8] * data[5] * data[14] - data[8] * data[6] * data[13] - data[12] * data[5] * data[10] + data[12] * data[6] * data[9];
+	inv[1] = -data[1] * data[10] * data[15] + data[1] * data[11] * data[14] + data[9] * data[2] * data[15] - data[9] * data[3] * data[14] - data[13] * data[2] * data[11] + data[13] * data[3] * data[10];
+	inv[5] = data[0] * data[10] * data[15] - data[0] * data[11] * data[14] - data[8] * data[2] * data[15] + data[8] * data[3] * data[14] + data[12] * data[2] * data[11] - data[12] * data[3] * data[10];
+	inv[9] = -data[0] * data[9] * data[15] + data[0] * data[11] * data[13] + data[8] * data[1] * data[15] - data[8] * data[3] * data[13] - data[12] * data[1] * data[11] + data[12] * data[3] * data[9];
+	inv[13] = data[0] * data[9] * data[14] - data[0] * data[10] * data[13] - data[8] * data[1] * data[14] + data[8] * data[2] * data[13] + data[12] * data[1] * data[10] - data[12] * data[2] * data[9];
+	inv[2] = data[1] * data[6] * data[15] - data[1] * data[7] * data[14] - data[5] * data[2] * data[15] + data[5] * data[3] * data[14] + data[13] * data[2] * data[7] - data[13] * data[3] * data[6];
+	inv[6] = -data[0] * data[6] * data[15] + data[0] * data[7] * data[14] + data[4] * data[2] * data[15] - data[4] * data[3] * data[14] - data[12] * data[2] * data[7] + data[12] * data[3] * data[6];
+	inv[10] = data[0] * data[5] * data[15] - data[0] * data[7] * data[13] - data[4] * data[1] * data[15] + data[4] * data[3] * data[13] + data[12] * data[1] * data[7] - data[12] * data[3] * data[5];
+	inv[14] = -data[0] * data[5] * data[14] + data[0] * data[6] * data[13] + data[4] * data[1] * data[14] - data[4] * data[2] * data[13] - data[12] * data[1] * data[6] + data[12] * data[2] * data[5];
+	inv[3] = -data[1] * data[6] * data[11] + data[1] * data[7] * data[10] + data[5] * data[2] * data[11] - data[5] * data[3] * data[10] - data[9] * data[2] * data[7] + data[9] * data[3] * data[6];
+	inv[7] = data[0] * data[6] * data[11] - data[0] * data[7] * data[10] - data[4] * data[2] * data[11] + data[4] * data[3] * data[10] + data[8] * data[2] * data[7] - data[8] * data[3] * data[6];
+	inv[11] = -data[0] * data[5] * data[11] + data[0] * data[7] * data[9] + data[4] * data[1] * data[11] - data[4] * data[3] * data[9] - data[8] * data[1] * data[7] + data[8] * data[3] * data[5];
+	inv[15] = data[0] * data[5] * data[10] - data[0] * data[6] * data[9] - data[4] * data[1] * data[10] + data[4] * data[2] * data[9] + data[8] * data[1] * data[6] - data[8] * data[2] * data[5];
 
-	const T det = m[0] * inv[0] + m[1] * inv[4] + m[2] * inv[8] + m[3] * inv[12];
+	const T det = data[0] * inv[0] + data[1] * inv[4] + data[2] * inv[8] + data[3] * inv[12];
 	if (equals(det, T(0)))
 	{
 		if (succeeded != nullptr)
@@ -1451,10 +1291,10 @@ inline Matrix4<T> Matrix4<T>::viewMatrix(const Vector3<T>& translation, const Qu
 template<typename T>
 inline Matrix4<T> Matrix4<T>::lookAt(const Vector3<T>& eye, const Vector3<T>& target, const Vector3<T>& up, const T handedness = -1)
 {
-	const Vector3<T> f((target - eye).normalized());
-	const Vector3<T> s(up.crossProduct(f).normalized());
-	const Vector3<T> u(f.crossProduct(s));
-	const Vector3<T> w(handedness * s.dotProduct(eye), -u.dotProduct(eye), handedness * f.dotProduct(eye)); 
+	Vector3<T> f((target - eye).normalized());
+	Vector3<T> s(up.crossProduct(f).normalized());
+	Vector3<T> u(f.crossProduct(s));
+	Vector3<T> w(handedness * s.dotProduct(eye), -u.dotProduct(eye), handedness * f.dotProduct(eye)); 
 	const T neg = -handedness;
 	f *= neg;
 	s *= neg;
