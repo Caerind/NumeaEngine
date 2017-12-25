@@ -85,7 +85,7 @@ bool Image::loadFromFile(const std::string& filename)
 	}
 	else
 	{
-		fprintf(stderr, "Failed to load image : %s. Reason : %s\n", filename.c_str(), stbi_failure_reason());
+		LogError(nu::LogChannel::Graphics, 2, "Failed to load image : %s. Reason : %s\n", filename.c_str(), stbi_failure_reason());
 		return false;
 	}
 }
@@ -123,7 +123,7 @@ bool Image::saveToFile(const std::string& filename) const
 				return true;
 		}
 	}
-	fprintf(stderr, "Failed to save image : %s\n", filename.c_str());
+	LogError(nu::LogChannel::Graphics, 2, "Failed to save image : %s\n", filename.c_str());
 	return false;
 }
 
@@ -170,7 +170,7 @@ const U8* Image::getPixels() const
 	}
 	else
 	{
-		fprintf(stderr, "Trying to access the pixels of an empty image\n");
+		LogError(nu::LogChannel::Graphics, 2, "Trying to access the pixels of an empty image\n");
 		return nullptr;
 	}
 }

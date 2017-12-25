@@ -14,7 +14,7 @@ int windows = 0;
 
 void error(int error, const char* description)
 {
-	fprintf(stderr, "GLFWWrapper : %s\n", description);
+	LogError(nu::LogChannel::Application, 10, "Failed to initialize GLFW : %s", description);
 }
 
 } // namespace priv

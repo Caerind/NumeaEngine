@@ -25,7 +25,7 @@ bool init()
 		glewExperimental = true; // Needed in core profile
 		if (glewInit() != GLEW_OK)
 		{
-			fprintf(stderr, "GLEWWrapper : Failed to initialize GLEW\n");
+			LogError(nu::LogChannel::Application, 10, "Failed to initialize GLEW");
 			priv::initialized = false;
 		}
 		else

@@ -57,12 +57,14 @@ enum class LogType : U32
 // LogChannel
 enum class LogChannel : U32
 { 
-	None   = 0x00,
-	Global = 0x01,
-	System = 0x02, 
-	Math   = 0x04,
+	None        = 0x00,
+	Global      = 0x01,
+	System      = 0x02, 
+	Math        = 0x04,
+	Application = 0x08,
+	Graphics    = 0x10,
 	// TODO : Add others
-	All    = 0xFF,
+	All         = 0xFF,
 };
 
 } // namespace nu

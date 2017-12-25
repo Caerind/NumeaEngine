@@ -11,6 +11,8 @@ Application::Application()
 	, mFps(0)
 	, mRunning(true)
 {
+	LogManager::initialize();
+
 	#if NU_ENABLE_IMGUI == 1
 	ImGuiWrapper::init(mWindow);
 	#endif
