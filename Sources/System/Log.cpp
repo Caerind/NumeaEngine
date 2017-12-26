@@ -1,6 +1,6 @@
 #include "Log.hpp"
 
-#if NU_COMPILER_MSVC
+#if NU_PLATFORM_WINDOWS
 	#include <windows.h>
 #endif
 
@@ -327,11 +327,44 @@ void VisualStudioLogger::write(LogType type, LogChannel channel, U32 importance,
 	static const U32 mDebugBufferSize = 256;
 	static char mDebugBuffer[mDebugBufferSize];
 
-	U32 size = sprintf_s(mDebugBuffer, "[%s][%s][%d] %s\n", LogManager::typeToString(type), LogManager::channelToString(channel), importance, message.c_str());
+	sprintf_s(mDebugBuffer, "[%s][%s][%d] %s\n", LogManager::typeToString(type), LogManager::channelToString(channel), importance, message.c_str());
 
 	OutputDebugStringA(mDebugBuffer);
 }
 
 #endif // NU_COMPILER_MSVC
+
+#if NU_PLATFORM_WINDOWS
+
+MessageBoxLogger::MessageBoxLogger()
+	: Logger()
+{
+}
+
+MessageBoxLogger::~MessageBoxLogger()
+{
+	unregisterLogger();
+}
+
+void MessageBoxLogger::write(LogType type, LogChannel channel, U32 importance, const std::string& message)
+{
+	static const U32 mDebugBufferSize = 256;
+	static char mDebugBuffer[mDebugBufferSize];
+
+	sprintf_s(mDebugBuffer, "NumeaEngine [%s] [%d]", LogManager::channelToString(channel), importance);
+
+	U32 mbOption;
+	switch (type)
+	{
+		case LogType::Error: mbOption = MB_ICONERROR; break;
+		case LogType::Warning: mbOption = MB_ICONWARNING; break;
+		case LogType::Info: mbOption = MB_ICONINFORMATION; break;
+		default: mbOption = MB_OK; break;
+	}
+
+	MessageBox(nullptr, message.c_str(), mDebugBuffer, mbOption);
+}
+
+#endif // NU_PLATFORM_WINDOWS
 
 } // namespace nu

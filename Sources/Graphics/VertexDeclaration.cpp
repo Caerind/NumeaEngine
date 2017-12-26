@@ -3,9 +3,13 @@
 namespace nu
 {
 
+bool VertexDeclaration::sInitialized = false;
+VertexDeclaration VertexDeclaration::sDeclarations[];
+
 VertexDeclaration& VertexDeclaration::setStruct(VertexStruct vertex)
 {
 	mStruct = vertex;
+	return *this;
 }
 
 VertexStruct VertexDeclaration::getStruct() const

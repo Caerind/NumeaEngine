@@ -3,6 +3,8 @@
 
 #include "Platform.hpp"
 
+#include <type_traits>
+
 #define NU_PREPROCESSOR_TOSTRING(x) NU_PREPROCESSOR_TOSTRING_IMPL(x)
 #define NU_PREPROCESSOR_TOSTRING_IMPL(x) #x
 
@@ -48,6 +50,8 @@
 	#define NU_DEPRECATED
 #endif
 
+#define NU_STATIC_BASE_OF(Base, Derived) static_assert(std::is_base_of<Base, Derived>::value, #Derived " must be a descendant of " #Base);
+#define NU_BASE_OF(Base, Derived) bool(std::is_base_of<Base, Derived>::value));
 
 namespace nu
 {

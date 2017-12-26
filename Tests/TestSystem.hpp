@@ -30,6 +30,10 @@ TEST("Log")
 
 	CHECK(nu::LogManager::isInitialized());
 
+	#ifdef NU_PLATFORM_WINDOWS
+	//nu::MessageBoxLogger msgLogger;
+	#endif
+
 	LogInfo(nu::LogChannel::Global, 1, "Test %d", nu::LogManager::getLoggerCount());
 
 	nu::FileLogger testLogger("log.txt");

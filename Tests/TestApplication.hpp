@@ -5,6 +5,7 @@
 #include "../Sources/Application/GLFWWrapper.hpp"
 #include "../Sources/Application/ImGuiWrapper.hpp"
 #include "../Sources/Application/Window.hpp"
+#include "../Sources/Application/ResourceManager.hpp"
 #include "../Sources/Application/StateManager.hpp"
 #include "../Sources/Application/Application.hpp"
 
@@ -68,6 +69,30 @@ TEST("ImGuiWrapper")
 		nu::ImGuiWrapper::render();
 		window.display();
 	}
+}
+
+TEST("ResourceManager")
+{
+	class TestResource : public nu::Resource<TestResource>
+	{
+		public:
+			TestResource() {}
+	};
+
+	nu::Loader<TestResource> loader([](TestResource&) -> bool { return true; });
+	
+	nu::ResourceManager manager;
+
+	TestResource::Ptr r = manager.get(10, loader);
+	if (r)
+	{
+		// valid ptr
+	}
+	else
+	{
+		// error
+	}
+
 }
 
 TEST("StateManager")

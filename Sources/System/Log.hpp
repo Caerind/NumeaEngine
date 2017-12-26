@@ -136,6 +136,19 @@ class VisualStudioLogger : public Logger
 
 #endif // NU_COMPILER_MSVC
 
+#if NU_PLATFORM_WINDOWS
+
+class MessageBoxLogger : public Logger
+{
+	public:
+		MessageBoxLogger();
+		virtual ~MessageBoxLogger();
+
+		virtual void write(LogType type, LogChannel channel, U32 importance, const std::string& message);
+};
+
+#endif // NU_PLATFORM_WINDOWS
+
 } // namespace nu
 
 #endif // NU_LOG_HPP
