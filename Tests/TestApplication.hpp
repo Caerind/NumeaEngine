@@ -6,6 +6,7 @@
 #include "../Sources/Application/ImGuiWrapper.hpp"
 #include "../Sources/Application/Window.hpp"
 #include "../Sources/Application/ResourceManager.hpp"
+#include "../Sources/Application/ResourceHolder.hpp"
 #include "../Sources/Application/StateManager.hpp"
 #include "../Sources/Application/Application.hpp"
 
@@ -28,18 +29,10 @@ TEST("Window")
 {
 	nu::Window window;
 	window.create(800, 600, "Test");
-	while (window.isOpen())
-	{
-		window.pollEvents();
-		if (window.isKeyPressed(GLFW_KEY_ESCAPE))
-		{
-			window.close();
-		}
-
-		window.clear();
-
-		window.display();
-	}
+	CHECK(window.isOpen());
+	CHECK(window.getSize().x == 800);
+	CHECK(window.getSize().y == 600);
+	window.close();
 }
 
 TEST("ImGuiWrapper")
@@ -47,28 +40,19 @@ TEST("ImGuiWrapper")
 	nu::Window window;
 	window.create(800, 600, "Test");
 	nu::ImGuiWrapper::init(window);
-	while (window.isOpen())
-	{
-		window.pollEvents();
-		if (window.isKeyPressed(GLFW_KEY_ESCAPE))
-		{
-			window.close();
-		}
-
-		nu::ImGuiWrapper::newFrame();
-
-		ImGuiWrapper_Begin();
-		ImGui::SetNextWindowSize(ImVec2(100, 100), ImGuiSetCond_FirstUseEver);
-		ImGui::Begin("Window");
-		ImGui::Text("Hello World !");
-		ImGui::End();
-		ImGuiWrapper_End();
-
-		window.clear();
-		nu::ImGuiWrapper::preRender();
-		nu::ImGuiWrapper::render();
-		window.display();
-	}
+	window.pollEvents();
+	nu::ImGuiWrapper::newFrame();
+	ImGuiWrapper_Begin();
+	ImGui::SetNextWindowSize(ImVec2(100, 100), ImGuiSetCond_FirstUseEver);
+	ImGui::Begin("Window");
+	ImGui::Text("Hello World !");
+	ImGui::End();
+	ImGuiWrapper_End();
+	window.clear();
+	nu::ImGuiWrapper::preRender();
+	nu::ImGuiWrapper::render();
+	window.display();
+	window.close();
 }
 
 TEST("ResourceManager")
@@ -83,16 +67,14 @@ TEST("ResourceManager")
 	
 	nu::ResourceManager manager;
 
-	TestResource::Ptr r = manager.get(10, loader);
-	if (r)
-	{
-		// valid ptr
-	}
-	else
-	{
-		// error
-	}
+	nu::ResourceHolder holder(manager);
 
+	TestResource::Ptr r = holder.get(10, loader);
+	CHECK(r != nullptr);
+	CHECK(r);
+	CHECK(r->isLoaded());
+	CHECK(r->isManaged());
+	CHECK(r->getId() != InvalidU32);
 }
 
 TEST("StateManager")

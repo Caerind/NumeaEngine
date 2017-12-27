@@ -7,22 +7,21 @@
 
 #include "Color.hpp"
 #include "../Math/Vector2.hpp"
-
-// TODO : Load From Memory
+#include "../Application/Resource.hpp"
 
 namespace nu
 {
 
-class Image
+class Image : public Resource<Image>
 {
 	public:
 		Image();
 
+		bool load(const nu::Loader<Image>& loader);
+		bool save(const nu::Saver<Image>& saver);
+
 		void create(U32 width, U32 height, const Color& color = Color(0, 0, 0));
 		void create(U32 width, U32 height, const U8* pixels);
-
-		bool loadFromFile(const std::string& filename);
-		bool saveToFile(const std::string& filename) const; 
 		
 		const Vector2u& getSize() const;
 
@@ -39,6 +38,16 @@ class Image
 	private:
 		std::vector<U8> mPixels;
 		Vector2u mSize;
+};
+
+class ImageLoader
+{
+	public:
+		friend class Image;
+
+		static Loader<Image> fromFile(const std::string& filename);
+
+		static Saver<Image> toFile(const std::string& filename);
 };
 
 } // namespace nu

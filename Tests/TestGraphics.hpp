@@ -7,7 +7,7 @@
 
 #include "../Sources/System/UnitTest.hpp"
 
-BEGIN_TEST(Application)
+BEGIN_TEST(Graphics)
 {
 
 TEST("Color")
@@ -24,11 +24,21 @@ TEST("LinearColor")
 
 TEST("Image")
 {
-	nu::Image image;
+	nu::LinearColor red = nu::LinearColor::Red;
 
+	nu::Image image;
+	CHECK(image.load(nu::ImageLoader::fromFile("testnoise.png")));
+	for (U32 i = 0; i < image.getSize().x; i++)
+	{
+		for (U32 j = 0; j < image.getSize().y; j++)
+		{
+			image.setPixel(i, j, nu::Color(red * nu::LinearColor(image.getPixel(i, j))));
+		}
+	}
+	CHECK(image.save(nu::ImageLoader::toFile("testfire.png")));
 }
 
 }
 END_TEST;
 
-#endif // NU_TESTAPPLICATION_HPP
+#endif // NU_TESTGRAPHICS_HPP

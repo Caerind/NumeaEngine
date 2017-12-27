@@ -19,14 +19,17 @@ namespace nu
 class ResourceManager
 {
 	public:
+		enum KnownStrategy { Reuse = 0, Reload, Null };
+
+	public:
 		ResourceManager();
 		~ResourceManager();
 
 		template <class T> ResourcePtr<T> get(const std::string& str);
 		template <class T> ResourcePtr<T> get(U32 id);
 
-		template <class T> ResourcePtr<T> get(const std::string& str, const Loader<T>& loader);
-		template <class T> ResourcePtr<T> get(U32 id, const Loader<T>& loader);
+		template <class T> ResourcePtr<T> get(const std::string& str, const Loader<T>& loader, KnownStrategy known = Reuse);
+		template <class T> ResourcePtr<T> get(U32 id, const Loader<T>& loader, KnownStrategy known = Reuse);
 
 		bool has(const std::string& str) const;
 		bool has(U32 id) const;
@@ -69,26 +72,52 @@ inline ResourcePtr<T> ResourceManager::get(U32 id)
 }
 
 template<class T>
-inline ResourcePtr<T> ResourceManager::get(const std::string& str, const Loader<T>& loader)
+inline ResourcePtr<T> ResourceManager::get(const std::string& str, const Loader<T>& loader, KnownStrategy known)
 {
 	U32 id = StringId::hash(str);
 	auto itr = mResources.find(id);
 	if (itr != mResources.end())
 	{
-		LogWarning(LogChannel::Application, 2, "Resource already loaded : %d, %s", id, str.c_str());
-		return ResourcePtr<T>(static_cast<T*>(itr->second), this);
+		switch (known)
+		{
+			case Reuse:
+				return ResourcePtr<T>(static_cast<T*>(itr->second), this); 
+				break;
+
+			case Reload: 
+				release(id);
+				break;
+
+			case Null: 
+				LogWarning(LogChannel::Application, 2, "Resource already loaded : %d, %s", id, str.c_str());
+				return ResourcePtr<T>();
+				break;
+		}
 	}
 	return load(id, loader);
 }
 
 template<class T>
-inline ResourcePtr<T> ResourceManager::get(U32 id, const Loader<T>& loader)
+inline ResourcePtr<T> ResourceManager::get(U32 id, const Loader<T>& loader, KnownStrategy known)
 {
 	auto itr = mResources.find(id);
 	if (itr != mResources.end())
 	{
-		LogWarning(LogChannel::Application, 2, "Resource already loaded : %d", id);
-		return ResourcePtr<T>(static_cast<T*>(itr->second), this);
+		switch (known)
+		{
+			case Reuse:
+				return ResourcePtr<T>(static_cast<T*>(itr->second), this);
+				break;
+
+			case Reload:
+				release(id);
+				break;
+
+			case Null:
+				LogWarning(LogChannel::Application, 2, "Resource already loaded : %d", id);
+				return ResourcePtr<T>();
+				break;
+		}
 	}
 	return load(id, loader);
 }

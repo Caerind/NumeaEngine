@@ -2,6 +2,7 @@
 #define NU_RESOURCE_HPP
 
 #include "../System/Prerequisites.hpp"
+#include "Loader.hpp"
 
 namespace nu
 {

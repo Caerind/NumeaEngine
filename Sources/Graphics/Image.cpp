@@ -16,6 +16,17 @@ Image::Image()
 {
 }
 
+bool Image::load(const nu::Loader<Image>& loader)
+{
+	mLoaded = loader.load(*this);
+	return mLoaded;
+}
+
+bool Image::save(const nu::Saver<Image>& saver)
+{
+	return saver.save(*this);
+}
+
 void Image::create(U32 width, U32 height, const Color& color)
 {
 	if (width && height)
@@ -57,74 +68,6 @@ void Image::create(U32 width, U32 height, const U8* pixels)
 		mSize.x = 0;
 		mSize.y = 0;
 	}
-}
-
-bool Image::loadFromFile(const std::string& filename)
-{
-	mPixels.clear();
-	int width = 0;
-	int height = 0;
-	int channels = 0;
-	U8* ptr = stbi_load(filename.c_str(), &width, &height, &channels, STBI_rgb_alpha);
-	if (ptr)
-	{
-		if (width && height)
-		{
-			mSize.x = width;
-			mSize.y = height;
-			mPixels.resize(width * height * 4);
-			memcpy(&mPixels[0], ptr, mPixels.size());
-		}
-		else
-		{
-			mSize.x = 0;
-			mSize.y = 0;
-		}
-		stbi_image_free(ptr);
-		return true;
-	}
-	else
-	{
-		LogError(nu::LogChannel::Graphics, 2, "Failed to load image : %s. Reason : %s\n", filename.c_str(), stbi_failure_reason());
-		return false;
-	}
-}
-
-bool Image::saveToFile(const std::string& filename) const
-{
-	if (!mPixels.empty() && (mSize.x > 0) && (mSize.y > 0))
-	{
-		const I32 dot = filename.find_last_of('.');
-		std::string extension = "";
-		if (dot != std::string::npos)
-		{
-			extension = filename.substr(dot + 1);
-			for (std::string::iterator i = extension.begin(); i != extension.end(); ++i)
-				*i = static_cast<I8>(std::tolower(*i));
-		}
-		if (extension == "bmp")
-		{
-			if (stbi_write_bmp(filename.c_str(), mSize.x, mSize.y, 4, &mPixels[0]))
-				return true;
-		}
-		else if (extension == "tga")
-		{
-			if (stbi_write_tga(filename.c_str(), mSize.x, mSize.y, 4, &mPixels[0]))
-				return true;
-		}
-		else if (extension == "png")
-		{
-			if (stbi_write_png(filename.c_str(), mSize.x, mSize.y, 4, &mPixels[0], 0))
-				return true;
-		}
-		else if (extension == "jpg" || extension == "jpeg")
-		{
-			if (stbi_write_jpg(filename.c_str(), mSize.x, mSize.y, 4, &mPixels[0], 90))
-				return true;
-		}
-	}
-	LogError(nu::LogChannel::Graphics, 2, "Failed to save image : %s\n", filename.c_str());
-	return false;
 }
 
 const Vector2u& Image::getSize() const
@@ -208,6 +151,77 @@ void Image::flipVertically()
 			bottom -= rowSize;
 		}
 	}
+}
+
+Loader<Image> ImageLoader::fromFile(const std::string& filename)
+{
+	return Loader<Image>([=](Image& image)
+	{
+		int width = 0;
+		int height = 0;
+		int channels = 0;
+		U8* ptr = stbi_load(filename.c_str(), &width, &height, &channels, STBI_rgb_alpha);
+		if (ptr)
+		{
+			if (width && height)
+			{
+				image.create(width, height, ptr);
+			}
+			else
+			{
+				image.create(0, 0, nullptr);
+			}
+			stbi_image_free(ptr);
+			return true;
+		}
+		else
+		{
+			image.create(0, 0, nullptr);
+			LogError(nu::LogChannel::Graphics, 2, "Failed to load image : %s. Reason : %s\n", filename.c_str(), stbi_failure_reason());
+			return false;
+		}
+	});
+}
+
+Saver<Image> ImageLoader::toFile(const std::string& filename)
+{
+	return Saver<Image>([=](Image& image)
+	{
+		const Vector2u& size = image.getSize();
+		if (size.x > 0 && size.y > 0)
+		{
+			const I32 dot = filename.find_last_of('.');
+			std::string extension = "";
+			if (dot != std::string::npos)
+			{
+				extension = filename.substr(dot + 1);
+				for (std::string::iterator i = extension.begin(); i != extension.end(); ++i)
+					*i = static_cast<I8>(std::tolower(*i));
+			}
+			if (extension == "bmp")
+			{
+				if (stbi_write_bmp(filename.c_str(), size.x, size.y, 4, &image.getPixels()[0]))
+					return true;
+			}
+			else if (extension == "tga")
+			{
+				if (stbi_write_tga(filename.c_str(), size.x, size.y, 4, &image.getPixels()[0]))
+					return true;
+			}
+			else if (extension == "png")
+			{
+				if (stbi_write_png(filename.c_str(), size.x, size.y, 4, &image.getPixels()[0], 0))
+					return true;
+			}
+			else if (extension == "jpg" || extension == "jpeg")
+			{
+				if (stbi_write_jpg(filename.c_str(), size.x, size.y, 4, &image.getPixels()[0], 90))
+					return true;
+			}
+		}
+		LogError(nu::LogChannel::Graphics, 2, "Failed to save image : %s\n", filename.c_str());
+		return false;
+	});
 }
 
 } // namespace nu

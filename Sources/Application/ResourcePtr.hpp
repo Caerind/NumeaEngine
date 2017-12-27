@@ -19,7 +19,9 @@ class ResourcePtr
 
 		ResourcePtr(const ResourcePtr& ptr) = default;
 		ResourcePtr& operator=(const ResourcePtr& ptr) = default;
-
+	
+		bool operator==(EmptyClass* ptr); // Use only with nullptr
+		bool operator!=(EmptyClass* ptr); // Use only with nullptr
 		operator bool() const;
 
 		bool isValid() const;
@@ -47,6 +49,18 @@ inline ResourcePtr<T>::ResourcePtr(T* p, ResourceManager* mgr)
 	{
 		mId = p->getId();
 	}
+}
+
+template<class T>
+inline bool ResourcePtr<T>::operator==(EmptyClass* ptr)
+{
+	return !isValid();
+}
+
+template<class T>
+inline bool ResourcePtr<T>::operator!=(EmptyClass* ptr)
+{
+	return isValid();
 }
 
 template<class T>

@@ -53,6 +53,8 @@
 #define NU_STATIC_BASE_OF(Base, Derived) static_assert(std::is_base_of<Base, Derived>::value, #Derived " must be a descendant of " #Base);
 #define NU_BASE_OF(Base, Derived) bool(std::is_base_of<Base, Derived>::value));
 
+class EmptyClass {}; // Used for operator==(), used to restrict only to nullptr comparasion 
+
 namespace nu
 {
 
