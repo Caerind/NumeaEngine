@@ -14,7 +14,7 @@ class StateManager;
 class State
 {
 	public:
-		State(StateManager& manager);
+		State();
 		virtual ~State();
 
 		using Ptr = std::shared_ptr<State>;
@@ -34,7 +34,8 @@ class State
 		Application& getApplication();
 
 	private:
-		StateManager& mManager;
+		friend class StateManager;
+		StateManager* mManager;
 };
 
 class StateManager
@@ -83,13 +84,13 @@ class StateManager
 template <typename T, typename ... Args>
 void State::pushState(Args&& ... args)
 {
-	mManager.pushState<T>(std::forward<Args>(args)...);
+	mManager->pushState<T>(std::forward<Args>(args)...);
 }
 
 template <typename T, typename ... Args>
 void StateManager::pushState(Args&& ... args)
 {
-	mChanges.emplace_back(Action::Push, std::make_shared<T>(*this, std::forward<Args>(args)...));
+	mChanges.emplace_back(Action::Push, std::make_shared<T>(std::forward<Args>(args)...));
 }
 
 } // namespace nu

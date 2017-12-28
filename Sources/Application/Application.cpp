@@ -5,13 +5,14 @@ namespace nu
 
 Application::Application()
 	: mStates(*this)
-	, mWindow()
-	, mFpsAccumulator(Time::Zero)
-	, mFpsTemp(0)
+	, mWindow(800, 600, "NumeaEngine")
+	, mRenderer(nullptr)
 	, mFps(0)
 	, mRunning(true)
 {
 	LogManager::initialize();
+
+	mRenderer = new Renderer();
 
 	#if NU_ENABLE_IMGUI == 1
 	ImGuiWrapper::init(mWindow);
@@ -23,6 +24,8 @@ Application::~Application()
 	#if NU_ENABLE_IMGUI == 1
 	ImGuiWrapper::shutdown();
 	#endif
+
+	delete mRenderer;
 
 	if (mWindow.isOpen())
 	{
@@ -37,6 +40,11 @@ Application::~Application()
 Window& Application::getWindow()
 {
 	return mWindow;
+}
+
+Renderer& Application::getRenderer()
+{
+	return *mRenderer;
 }
 
 void Application::stop()
@@ -61,8 +69,8 @@ const U32& Application::getFPS() const
 
 void Application::run()
 {
-	const Time TimePerFrame = seconds(1.0f / 60.0f);
-	Time accumulator = Time::Zero;
+	Time fpsAccumulator = Time::Zero;
+	U32 fpsTemp = 0;
 	Clock clock;
 
 	// Running loop
@@ -70,38 +78,21 @@ void Application::run()
 	{
 		// Time
 		Time dt = clock.restart();
-		accumulator += dt;
-		mFpsAccumulator += dt;
 
-		// Usefull when using Breakpoints on Debugging
-		#ifdef NU_BUILD_DEBUG
-		if (accumulator > Time::Second)
-		{
-			accumulator = TimePerFrame;
-		}
-		#endif
-
-		// Update
-		while (accumulator >= TimePerFrame)
-		{
-			accumulator -= TimePerFrame;
-
-			events();;
-			preUpdate();
-			update(TimePerFrame);
-			postUpdate();
-		}
-
-		// Rendering
+		events();
+		preUpdate();
+		update(dt);
+		postUpdate();
 		render();
 
 		// FPS
-		mFpsTemp++;
-		if (mFpsAccumulator > Time::Second)
+		fpsTemp++;
+		fpsAccumulator += dt;
+		if (fpsAccumulator > Time::Second)
 		{
-			mFpsAccumulator -= Time::Second;
-			mFps = mFpsTemp;
-			mFpsTemp = 0;
+			fpsAccumulator -= Time::Second;
+			mFps = fpsTemp;
+			fpsTemp = 0;
 		}
 
 		// Stop ?
@@ -133,13 +124,13 @@ void Application::update(Time dt)
 void Application::postUpdate()
 {
 	#if NU_ENABLE_IMGUI == 1
-	ImGuiWrapper::preRender();
+	ImGuiWrapper::endFrame();
 	#endif
 }
 
 void Application::render()
 {
-	mWindow.clear();
+	mRenderer->begin();
 
 	mStates.render();
 
@@ -147,6 +138,7 @@ void Application::render()
 	ImGuiWrapper::render();
 	#endif
 
+	mRenderer->end();
 	mWindow.display();
 }
 

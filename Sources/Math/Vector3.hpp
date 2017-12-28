@@ -132,6 +132,12 @@ class Vector3
 template <typename T>
 Vector3<T> operator*(const T& scale, const Vector3<T>& vector);
 
+template <typename T>
+T dot(const Vector3<T>& v1, const Vector3<T>& v2);
+
+template <typename T>
+Vector3<T> cross(const Vector3<T>& v1, const Vector3<T>& v2);
+
 template<typename T>
 inline Vector3<T>::Vector3()
 {
@@ -686,6 +692,18 @@ template<typename T>
 inline Vector3<T> operator*(const T& scale, const Vector3<T>& vector)
 {
 	return vector * scale;
+}
+
+template<typename T>
+T dot(const Vector3<T>& v1, const Vector3<T>& v2)
+{
+	return v1.dotProduct(v2);
+}
+
+template<typename T>
+Vector3<T> cross(const Vector3<T>& v1, const Vector3<T>& v2)
+{
+	return v1.crossProduct(v2);
 }
 
 typedef Vector3<F32> Vector3f;

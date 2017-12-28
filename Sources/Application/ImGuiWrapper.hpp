@@ -28,7 +28,7 @@ namespace ImGuiWrapper
 
 bool init(Window& window);
 void newFrame();
-void preRender();
+void endFrame();
 void render();
 void shutdown();
 

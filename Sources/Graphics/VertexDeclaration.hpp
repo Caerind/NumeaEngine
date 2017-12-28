@@ -9,13 +9,28 @@ namespace nu
 
 struct VertexElement
 {
-	VertexElement(U32 type, U32 nb = 1)
+	enum Type
+	{
+		Byte,
+		UnsignedByte,
+		Short,
+		UnsignedShort,
+		Int,
+		UnsignedInt,
+		HalfFloat,
+		Float,
+		Double
+	};
+
+	VertexElement(Type type, U32 typeSize, U32 nb = 1)
 		: typeOfElement(type)
+		, sizeOfElement(typeSize)
 		, nbOfElement(nb)
 	{
 	}
 
-	U32 typeOfElement;
+	Type typeOfElement;
+	U32 sizeOfElement;
 	U32 nbOfElement;
 };
 
@@ -27,7 +42,7 @@ class VertexDeclaration
 		VertexDeclaration& setStruct(VertexStruct vertex);
 		VertexStruct getStruct() const;
 
-		VertexDeclaration& addElement(U32 type, U32 nb = 1);
+		VertexDeclaration& addElement(VertexElement::Type type, U32 size, U32 nb = 1);
 
 		const VertexElement& getElement(U32 index) const;
 		U32 getElements() const;

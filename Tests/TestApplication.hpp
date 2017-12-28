@@ -28,7 +28,7 @@ TEST("GLFWWrapper")
 TEST("Window")
 {
 	nu::Window window;
-	window.create(800, 600, "Test");
+	window.create(800, 600, "Window");
 	CHECK(window.isOpen());
 	CHECK(window.getSize().x == 800);
 	CHECK(window.getSize().y == 600);
@@ -38,21 +38,29 @@ TEST("Window")
 TEST("ImGuiWrapper")
 {
 	nu::Window window;
-	window.create(800, 600, "Test");
+	window.create(800, 600, "ImGuiWrapper");
 	nu::ImGuiWrapper::init(window);
-	window.pollEvents();
-	nu::ImGuiWrapper::newFrame();
-	ImGuiWrapper_Begin();
-	ImGui::SetNextWindowSize(ImVec2(100, 100), ImGuiSetCond_FirstUseEver);
-	ImGui::Begin("Window");
-	ImGui::Text("Hello World !");
-	ImGui::End();
-	ImGuiWrapper_End();
-	window.clear();
-	nu::ImGuiWrapper::preRender();
-	nu::ImGuiWrapper::render();
-	window.display();
-	window.close();
+	while (window.isOpen())
+	{
+		window.pollEvents();
+		if (window.isKeyPressed(GLFW_KEY_ESCAPE))
+		{
+			window.close();
+		}
+		nu::ImGuiWrapper::newFrame();
+		ImGuiWrapper_Begin();
+		ImGui::SetNextWindowSize(ImVec2(100, 100), ImGuiSetCond_FirstUseEver);
+		ImGui::Begin("Window");
+		ImGui::Text("Hello World !");
+		ImGui::End();
+		ImGuiWrapper_End();
+		window.clear();
+		nu::ImGuiWrapper::endFrame();
+		nu::ImGuiWrapper::render();
+		window.display();
+
+		window.close();
+	}
 }
 
 TEST("ResourceManager")
@@ -84,7 +92,7 @@ TEST("StateManager")
 
 TEST("Application")
 {
-	
+	nu::Application app;
 }
 
 }

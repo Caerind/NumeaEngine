@@ -139,6 +139,9 @@ class Vector4
 template <typename T>
 Vector4<T> operator*(const T& scale, const Vector4<T>& vector);
 
+template <typename T>
+T dot(const Vector4<T>& v1, const Vector4<T>& v2);
+
 template<typename T>
 inline Vector4<T>::Vector4()
 {
@@ -761,6 +764,12 @@ template<typename T>
 inline Vector4<T> operator*(const T& scale, const Vector4<T>& vector)
 {
 	return vector * scale;
+}
+
+template<typename T>
+T dot(const Vector4<T>& v1, const Vector4<T>& v2)
+{
+	return v1.dotProduct(v2);
 }
 
 typedef Vector4<float>			Vector4f;

@@ -4,8 +4,8 @@
 namespace nu
 {
 
-State::State(StateManager& manager)
-	: mManager(manager)
+State::State()
+	: mManager(nullptr)
 {
 }
 
@@ -37,17 +37,17 @@ void State::render()
 
 void State::popState()
 {
-	mManager.popState();
+	mManager->popState();
 }
 
 void State::clearStates()
 {
-	mManager.clearStates();
+	mManager->clearStates();
 }
 
 Application& State::getApplication()
 {
-	return mManager.getApplication();
+	return mManager->getApplication();
 }
 
 StateManager::StateManager(Application& application)
@@ -128,6 +128,7 @@ void StateManager::applyPendingChanges()
 					mStates.back()->onDeactivate();
 				}
 				mStates.push_back(change.state);
+				mStates.back()->mManager = this;
 				mStates.back()->onActivate();
 				break;
 

@@ -43,8 +43,6 @@ class Image : public Resource<Image>
 class ImageLoader
 {
 	public:
-		friend class Image;
-
 		static Loader<Image> fromFile(const std::string& filename);
 
 		static Saver<Image> toFile(const std::string& filename);

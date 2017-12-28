@@ -57,7 +57,7 @@ inline bool inRange(T val, T range_start, T range_end)
 template <typename T>
 inline bool equals(const T& a, const T& b, const T& epsilon = std::numeric_limits<T>::epsilon())
 {
-	return std::abs(a - b) < epsilon;
+	return std::fabs(a - b) < epsilon;
 }
 
 } // namespace nu

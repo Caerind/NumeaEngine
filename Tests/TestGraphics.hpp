@@ -4,6 +4,10 @@
 #include "../Sources/Graphics/Color.hpp"
 #include "../Sources/Graphics/LinearColor.hpp"
 #include "../Sources/Graphics/Image.hpp"
+#include "../Sources/Graphics/Camera.hpp"
+#include "../Sources/Graphics/Texture.hpp"
+#include "../Sources/Graphics/Shader.hpp"
+#include "../Sources/Graphics/Mesh.hpp"
 
 #include "../Sources/System/UnitTest.hpp"
 

@@ -1,6 +1,8 @@
 #ifndef NU_MATRIX4_HPP
 #define NU_MATRIX4_HPP
 
+#include "../System/Prerequisites.hpp"
+
 namespace nu
 {
 
@@ -122,7 +124,7 @@ class Matrix4
 		inline Matrix4<T>& makeTransform(const Vector3<T>& translation, const Quaternion<T>& rotation, const Vector3<T>& scale);
 
 		inline Matrix4<T>& makeViewMatrix(const Vector3<T>& translation, const Quaternion<T>& rotation);
-		inline Matrix4<T>& makeLookAt(const Vector3<T>& eye, const Vector3<T>& target, const Vector3<T>& up, const T handedness = -1);
+		inline Matrix4<T>& makeLookAt(const Vector3<T>& eye, const Vector3<T>& target, const Vector3<T>& up);
 		inline Matrix4<T>& makeOrtho(const T& left, const T& right, const T& top, const T& bottom, const T& zNear, const T& zFar);
 		inline Matrix4<T>& makePerspective(const T& fov, const T& ratio, const T& zNear, const T& zFar);
 
@@ -137,7 +139,7 @@ class Matrix4
 		static inline Matrix4<T> transform(const Vector3<T>& translation, const Quaternion<T>& rotation, const Vector3<T>& scale);
 
 		static inline Matrix4<T> viewMatrix(const Vector3<T>& translation, const Quaternion<T>& rotation);
-		static inline Matrix4<T> lookAt(const Vector3<T>& eye, const Vector3<T>& target, const Vector3<T>& up, const T handedness = -1);
+		static inline Matrix4<T> lookAt(const Vector3<T>& eye, const Vector3<T>& target, const Vector3<T>& up);
 		static inline Matrix4<T> ortho(const T& left, const T& right, const T& top, const T& bottom, const T& zNear, const T& zFar);
 		static inline Matrix4<T> perspective(const T& fov, const T& ratio, const T& zNear, const T& zFar);
 
@@ -257,7 +259,7 @@ inline Matrix4<T>::Matrix4(const T& a11, const T& a21, const T& a31, const T& a4
 {
 	data[0] = a11;
 	data[1] = a21;
-	data[2] = a21;
+	data[2] = a31;
 	data[3] = a41;
 	data[4] = a12;
 	data[5] = a22;
@@ -481,7 +483,7 @@ inline Matrix4<T> Matrix4<T>::operator*(const Matrix4<T>& m) const
 	{
 		Vector4<T> row(getRow(3));
 		out.data[3] = c0.dotProduct(row);
-		out.data[5] = c1.dotProduct(row);
+		out.data[7] = c1.dotProduct(row);
 		out.data[11] = c2.dotProduct(row);
 		out.data[15] = c3.dotProduct(row);
 	}
@@ -570,7 +572,7 @@ inline Matrix4<T>& Matrix4<T>::operator*=(const Matrix4<T>& m)
 	data[10] = c2.dotProduct(r2);
 	data[14] = c3.dotProduct(r2);
 	data[3] = c0.dotProduct(r3);
-	data[5] = c1.dotProduct(r3);
+	data[7] = c1.dotProduct(r3);
 	data[11] = c2.dotProduct(r3);
 	data[15] = c3.dotProduct(r3);
 	return *this;
@@ -951,7 +953,7 @@ inline Matrix4<T>& Matrix4<T>::inverse(bool* succeeded)
 	inv[11] = -data[0] * data[5] * data[11] + data[0] * data[7] * data[9] + data[4] * data[1] * data[11] - data[4] * data[3] * data[9] - data[8] * data[1] * data[7] + data[8] * data[3] * data[5];
 	inv[15] = data[0] * data[5] * data[10] - data[0] * data[6] * data[9] - data[4] * data[1] * data[10] + data[4] * data[2] * data[9] + data[8] * data[1] * data[6] - data[8] * data[2] * data[5];
 
-	const T det = m[0] * inv[0] + m[1] * inv[4] + m[2] * inv[8] + m[3] * inv[12];
+	const T det = data[0] * inv[0] + data[1] * inv[4] + data[2] * inv[8] + data[3] * inv[12];
 	if (equals(det, T(0)))
 	{
 		if (succeeded != nullptr)
@@ -1196,10 +1198,10 @@ inline Matrix4<T>& Matrix4<T>::makeViewMatrix(const Vector3<T>& translation, con
 }
 
 template<typename T>
-inline Matrix4<T>& Matrix4<T>::makeLookAt(const Vector3<T>& eye, const Vector3<T>& target, const Vector3<T>& up, const T handedness = -1)
+inline Matrix4<T>& Matrix4<T>::makeLookAt(const Vector3<T>& eye, const Vector3<T>& target, const Vector3<T>& up)
 {
 	// TODO : Improve ? 
-	return set(Matrix4<T>::lookAt(eye, target, up, handedness));
+	return set(Matrix4<T>::lookAt(eye, target, up));
 }
 
 template<typename T>
@@ -1289,16 +1291,12 @@ inline Matrix4<T> Matrix4<T>::viewMatrix(const Vector3<T>& translation, const Qu
 }
 
 template<typename T>
-inline Matrix4<T> Matrix4<T>::lookAt(const Vector3<T>& eye, const Vector3<T>& target, const Vector3<T>& up, const T handedness = -1)
+inline Matrix4<T> Matrix4<T>::lookAt(const Vector3<T>& eye, const Vector3<T>& target, const Vector3<T>& up)
 {
-	Vector3<T> f((target - eye).normalized());
-	Vector3<T> s(up.crossProduct(f).normalized());
-	Vector3<T> u(f.crossProduct(s));
-	Vector3<T> w(handedness * s.dotProduct(eye), -u.dotProduct(eye), handedness * f.dotProduct(eye)); 
-	const T neg = -handedness;
-	f *= neg;
-	s *= neg;
-	return Matrix4<T>(s.x, u.x, f.x, 0, s.y, u.y, f.y, 0, s.z, u.z, f.z, 0, w.x, w.y, w.z, 1);
+	const Vector3f f((target - eye).normalized());
+	const Vector3f s(f.crossProduct(up).normalized());
+	const Vector3f u(s.crossProduct(f));
+	return Matrix4<T>(s.x, u.x, -f.x, 0, s.y, u.y, -f.y, 0, s.z, u.z, -f.z, 0, -s.dotProduct(eye), -u.dotProduct(eye), f.dotProduct(eye), 1);
 }
 
 template<typename T>
@@ -1313,11 +1311,11 @@ inline Matrix4<T> Matrix4<T>::ortho(const T& left, const T& right, const T& top,
 template<typename T>
 inline Matrix4<T> Matrix4<T>::perspective(const T& fov, const T& ratio, const T& zNear, const T& zFar)
 {
+	assert(!equals(ratio, 0.0f));
 	const T y = 1 / nu::tan(fov * T(0.5));
 	const T x = y / ratio;
-	const T zDist = zNear - zFar;
-	const T zFarPerDist = zFar / zDist;
-	return Matrix4<T>(x, 0, 0, 0, 0, y, 0, 0, 0, 0, zFarPerDist, -1, 0, 0, 2 * zNear * zFarPerDist, 0);
+	const T zDist = zFar - zNear;
+	return Matrix4<T>(x, 0, 0, 0, 0, y, 0, 0, 0, 0, -(zFar + zNear) / zDist, -1, 0, 0, (-2 * zFar * zNear) / zDist, 0);
 }
 
 template<typename T>

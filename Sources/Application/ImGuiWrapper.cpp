@@ -319,7 +319,7 @@ void newFrame()
 	ImGui::NewFrame();
 }
 
-void preRender()
+void endFrame()
 {
 	ImGui::Render();
 }
@@ -327,6 +327,11 @@ void preRender()
 void render()
 {
 	ImDrawData* draw_data = ImGui::GetDrawData();
+
+	if (!draw_data)
+	{
+		return;
+	}
 
 	ImGuiIO& io = ImGui::GetIO();
 	int fb_width = (int)(io.DisplaySize.x * io.DisplayFramebufferScale.x);

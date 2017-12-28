@@ -13,7 +13,7 @@ const Time Time::Zero(0LL);
 const Time Time::Second(Time::TicksPerSecond);
 
 Time::Time()
-	: mTicks(Time::now().mTicks)
+	: mTicks(0LL)
 {
 }
 

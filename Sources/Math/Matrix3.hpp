@@ -518,7 +518,7 @@ template<typename T>
 inline Matrix3<T>& Matrix3<T>::inverse(bool* succeeded)
 {
 	const T det11 = data[4] * data[8] - data[5] * data[7];
-	const T det12 = -data[1] * data[8] + datam[2] * data[7];
+	const T det12 = -data[1] * data[8] + data[2] * data[7];
 	const T det13 = data[1] * data[5] - data[2] * data[4];
 	const T det = data[0] * det11 + data[3] * det12 + data[6] * det13;
 	if (equals(det, T(0)))
@@ -558,7 +558,7 @@ template<typename T>
 inline Matrix3<T> Matrix3<T>::inversed(bool* succeeded) const
 {
 	const T det11 = data[4] * data[8] - data[5] * data[7];
-	const T det12 = -data[1] * data[8] + datam[2] * data[7];
+	const T det12 = -data[1] * data[8] + data[2] * data[7];
 	const T det13 = data[1] * data[5] - data[2] * data[4];
 	const T det = data[0] * det11 + data[3] * det12 + data[6] * det13;
 	if (equals(det, T(0)))

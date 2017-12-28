@@ -68,11 +68,39 @@ TEST("Vector4")
 TEST("Matrix3")
 {
 	nu::Matrix3f mat;
+
+	// Inverse
+	nu::Matrix3f invTest(2, 0, -1, 0, 1, 0, 1, 0, 1);
+	nu::Matrix3f invResult(1 / 3.f, 0, 1 / 3.f, 0, 1, 0, -1 / 3.f, 0, 2 / 3.f);
+	CHECK(invTest.inversed() == invResult);
+	CHECK(invTest.inverse() == invResult);
+	CHECK(invResult.inversed().inversed() == invResult);
+
+	// Transpose
+	nu::Matrix3f transposeTest(0, 1, 2, 3, 4, 5, 6, 7, 8);
+	nu::Matrix3f transposeResult(0, 3, 6, 1, 4, 7, 2, 5, 8);
+	CHECK(transposeTest.transposed() == transposeResult);
+	CHECK(transposeTest.transpose() == transposeResult);
+	CHECK(transposeResult.transposed().transposed() == transposeResult);
 }
 
 TEST("Matrix4")
 {
 	nu::Matrix4f mat;
+
+	// Inverse
+	nu::Matrix4f invTest(2, 0, -1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1);
+	nu::Matrix4f invResult(1 / 3.f, 0, 1 / 3.f, 0, 0, 1, 0, 0, -1 / 3.f, 0, 2 / 3.f, 0, 0, 0, 0, 1);
+	CHECK(invTest.inversed() == invResult);
+	CHECK(invTest.inverse() == invResult);
+	CHECK(invResult.inversed().inversed() == invResult);
+
+	// Transpose
+	nu::Matrix4f transposeTest(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
+	nu::Matrix4f transposeResult(0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15);
+	CHECK(transposeTest.transposed() == transposeResult);
+	CHECK(transposeTest.transpose() == transposeResult);
+	CHECK(transposeResult.transposed().transposed() == transposeResult);
 }
 
 TEST("Quaternion")

@@ -7,6 +7,10 @@
 #include "ImGuiWrapper.hpp"
 #include "StateManager.hpp"
 
+#include "../Graphics/Renderer.hpp"
+
+// TODO : This class is broken yet
+
 namespace nu
 {
 
@@ -17,6 +21,7 @@ class Application
 		~Application();
 
 		Window& getWindow();
+		Renderer& getRenderer();
 
 		template <typename State, typename ... Args>
 		void start(Args&& ... args);
@@ -41,9 +46,8 @@ class Application
 	private:
 		StateManager mStates;
 		Window mWindow;
+		Renderer* mRenderer;
 
-		Time mFpsAccumulator;
-		U32 mFpsTemp;
 		U32 mFps;
 		bool mRunning;
 };

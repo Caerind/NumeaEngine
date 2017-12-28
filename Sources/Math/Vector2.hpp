@@ -122,6 +122,9 @@ class Vector2
 template <typename T>
 Vector2<T> operator*(const T& scale, const Vector2<T>& vector);
 
+template <typename T>
+T dot(const Vector2<T>& v1, const Vector2<T>& v2);
+
 template<typename T>
 inline Vector2<T>::Vector2()
 {
@@ -612,6 +615,12 @@ template<typename T>
 inline Vector2<T> operator*(const T& scale, const Vector2<T>& vector)
 {
 	return vector * scale;
+}
+
+template<typename T>
+T dot(const Vector2<T>& v1, const Vector2<T>& v2)
+{
+	return v1.dotProduct(v2);
 }
 
 typedef Vector2<F32> Vector2f;

@@ -17,10 +17,10 @@ VertexStruct VertexDeclaration::getStruct() const
 	return mStruct;
 }
 
-VertexDeclaration& VertexDeclaration::addElement(U32 type, U32 nb)
+VertexDeclaration& VertexDeclaration::addElement(VertexElement::Type type, U32 size, U32 nb)
 {
-	mElements.push_back(VertexElement(type, nb));
-	mStride += type * nb;
+	mElements.push_back(VertexElement(type, size, nb));
+	mStride += size * nb;
 	return *this;
 }
 
@@ -49,23 +49,27 @@ bool VertexDeclaration::initialize()
 {
 	if (!sInitialized)
 	{
-		U32 svec2 = sizeof(Vector2f);
-		U32 svec3 = sizeof(Vector3f);
-		U32 scol = sizeof(Color);
-
 		#define DECL(s) sDeclarations[s].setStruct(s)
 
-		DECL(VertexStruct_XY).addElement(svec2);
-		DECL(VertexStruct_XY_Color).addElement(svec2).addElement(scol);
-		DECL(VertexStruct_XY_UV).addElement(svec2).addElement(svec2);
-		DECL(VertexStruct_XY_Color_UV).addElement(svec2).addElement(scol).addElement(svec2);
-		DECL(VertexStruct_XYZ).addElement(svec3);
-		DECL(VertexStruct_XYZ_Color).addElement(svec3).addElement(scol);
-		DECL(VertexStruct_XYZ_Color_UV).addElement(svec3).addElement(scol).addElement(svec2);
-		DECL(VertexStruct_XYZ_Normal).addElement(svec3).addElement(svec3);
-		DECL(VertexStruct_XYZ_Normal_UV).addElement(svec3).addElement(svec3).addElement(svec2);
-		DECL(VertexStruct_XYZ_Normal_UV_Tangent).addElement(svec3).addElement(svec3).addElement(svec2).addElement(svec3);
-		DECL(VertexStruct_XYZ_UV).addElement(svec3).addElement(svec2);
+		#define v2f VertexElement::Float, sizeof(F32) * 2, 2
+		#define v3f VertexElement::Float, sizeof(F32) * 3, 3
+		#define col VertexElement::UnsignedByte, sizeof(U8) * 4, 4
+
+		DECL(VertexStruct_XY).addElement(v2f);
+		DECL(VertexStruct_XY_Color).addElement(v2f).addElement(col);
+		DECL(VertexStruct_XY_UV).addElement(v2f).addElement(v2f);
+		DECL(VertexStruct_XY_Color_UV).addElement(v2f).addElement(col).addElement(v2f);
+		DECL(VertexStruct_XYZ).addElement(v3f);
+		DECL(VertexStruct_XYZ_Color).addElement(v3f).addElement(col);
+		DECL(VertexStruct_XYZ_Color_UV).addElement(v3f).addElement(col).addElement(v2f);
+		DECL(VertexStruct_XYZ_Normal).addElement(v3f).addElement(v3f);
+		DECL(VertexStruct_XYZ_Normal_UV).addElement(v3f).addElement(v3f).addElement(v2f);
+		DECL(VertexStruct_XYZ_Normal_UV_Tangent).addElement(v3f).addElement(v3f).addElement(v2f).addElement(v3f);
+		DECL(VertexStruct_XYZ_UV).addElement(v3f).addElement(v2f);
+
+		#undef v2f
+		#undef v3f
+		#undef col
 
 		#undef DECL
 

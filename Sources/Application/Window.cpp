@@ -69,16 +69,28 @@ bool Window::isOpen() const
 
 Vector2u Window::getSize() const
 {
-	int w, h;
+	I32 w, h;
 	glfwGetWindowSize(mWindow, &w, &h);
-	return Vector2u((unsigned int)w, (unsigned int)h);
+	return Vector2u((U32)w, (U32)h);
 }
 
 Vector2u Window::getFramebufferSize() const
 {
-	int w, h;
+	I32 w, h;
 	glfwGetFramebufferSize(mWindow, &w, &h);
-	return Vector2u((unsigned int)w, (unsigned int)h);
+	return Vector2u((U32)w, (U32)h);
+}
+
+F32 Window::getSizeRatio() const
+{
+	Vector2u size = getSize();
+	return (F32(size.x) / F32(size.y));
+}
+
+F32 Window::getFramebufferSizeRatio() const
+{
+	Vector2u size = getFramebufferSize();
+	return (F32(size.x) / F32(size.y));
 }
 
 void Window::clear()

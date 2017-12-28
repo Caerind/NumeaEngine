@@ -25,6 +25,8 @@ class Window
 
 		Vector2u getSize() const;
 		Vector2u getFramebufferSize() const;
+		F32 getSizeRatio() const;
+		F32 getFramebufferSizeRatio() const;
 
 		void clear();
 		void display();
