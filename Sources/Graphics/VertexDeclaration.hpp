@@ -24,7 +24,7 @@ struct VertexElement
 
 	VertexElement(Type type, U32 typeSize, U32 nb = 1)
 		: typeOfElement(type)
-		, sizeOfElement(typeSize)
+		, sizeOfElement(typeSize * nb)
 		, nbOfElement(nb)
 	{
 	}
@@ -37,15 +37,15 @@ struct VertexElement
 class VertexDeclaration
 {
 	public:
-		VertexDeclaration() = default;
+		VertexDeclaration();
+		~VertexDeclaration();
 
 		VertexDeclaration& setStruct(VertexStruct vertex);
-		VertexStruct getStruct() const;
-
 		VertexDeclaration& addElement(VertexElement::Type type, U32 size, U32 nb = 1);
 
 		const VertexElement& getElement(U32 index) const;
 		U32 getElements() const;
+		VertexStruct getStruct() const;
 		U32 getStride() const;
 
 		static bool isInitialized();
@@ -56,9 +56,10 @@ class VertexDeclaration
 		std::vector<VertexElement> mElements;
 		VertexStruct mStruct;
 		U32 mStride;
+		U32 mIndex;
 
 		static bool sInitialized;
-		static VertexDeclaration sDeclarations[VertexStruct_Count];
+		static VertexDeclaration* sDeclarations[VertexStruct_Count];
 };
 
 } // namespace nu

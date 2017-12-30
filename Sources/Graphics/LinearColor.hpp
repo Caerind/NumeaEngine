@@ -41,6 +41,8 @@ class LinearColor
 		Color toColor() const;
 		LinearColor& fromColor(const Color& color);
 
+		LinearColor& fromRedGreenScalar(F32 scalar);
+
 		F32 r;
 		F32 g;
 		F32 b;

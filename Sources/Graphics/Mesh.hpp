@@ -16,14 +16,18 @@ class Mesh : public Resource<Mesh>
 		bool load(const nu::Loader<Mesh>& loader);
 
 		void bind();
+		void draw();
 
 		void set(const std::vector<Vertex_XYZ_Normal_UV>& vertices, const std::vector<U32>& indices);
+
+		VertexBuffer& getVertexBuffer();
+		IndexBuffer& getIndexBuffer();
 
 		U32 getVertices() const;
 		U32 getIndices() const;
 
 	private:
-		VertexBuffer<Vertex_XYZ_Normal_UV> mVertices;
+		VertexBuffer mVertices;
 		IndexBuffer mIndices;
 };
 

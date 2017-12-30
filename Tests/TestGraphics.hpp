@@ -8,6 +8,8 @@
 #include "../Sources/Graphics/Texture.hpp"
 #include "../Sources/Graphics/Shader.hpp"
 #include "../Sources/Graphics/Mesh.hpp"
+#include "../Sources/Graphics/VertexArray.hpp"
+#include "../Sources/Graphics/DebugDraw.hpp"
 
 #include "../Sources/System/UnitTest.hpp"
 

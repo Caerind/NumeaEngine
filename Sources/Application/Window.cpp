@@ -52,7 +52,7 @@ bool Window::create(unsigned int width, unsigned int height, const std::string& 
 		glfwSetInputMode(mWindow, GLFW_STICKY_KEYS, GL_TRUE);
 		glfwSetInputMode(mWindow, GLFW_STICKY_MOUSE_BUTTONS, GL_TRUE);
 		makeContextCurrent();
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glCheck(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
 		return true;
 	}
 }
@@ -95,8 +95,8 @@ F32 Window::getFramebufferSizeRatio() const
 
 void Window::clear()
 {
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glCheck(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
+	glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }
 
 void Window::display()

@@ -4,17 +4,24 @@ namespace nu
 {
 
 bool VertexDeclaration::sInitialized = false;
-VertexDeclaration VertexDeclaration::sDeclarations[];
+VertexDeclaration* VertexDeclaration::sDeclarations[];
+
+VertexDeclaration::VertexDeclaration()
+	: mElements()
+	, mStruct(VertexStruct_Count)
+	, mStride(0)
+	, mIndex(0)
+{
+}
+
+VertexDeclaration::~VertexDeclaration()
+{
+}
 
 VertexDeclaration& VertexDeclaration::setStruct(VertexStruct vertex)
 {
 	mStruct = vertex;
 	return *this;
-}
-
-VertexStruct VertexDeclaration::getStruct() const
-{
-	return mStruct;
 }
 
 VertexDeclaration& VertexDeclaration::addElement(VertexElement::Type type, U32 size, U32 nb)
@@ -35,6 +42,11 @@ U32 VertexDeclaration::getElements() const
 	return mElements.size();
 }
 
+VertexStruct VertexDeclaration::getStruct() const
+{
+	return mStruct;
+}
+
 U32 VertexDeclaration::getStride() const
 {
 	return mStride;
@@ -49,11 +61,16 @@ bool VertexDeclaration::initialize()
 {
 	if (!sInitialized)
 	{
-		#define DECL(s) sDeclarations[s].setStruct(s)
+		for (U32 i = 0; i < (U32)VertexStruct_Count; i++)
+		{
+			sDeclarations[i] = new VertexDeclaration();
+		}
 
-		#define v2f VertexElement::Float, sizeof(F32) * 2, 2
-		#define v3f VertexElement::Float, sizeof(F32) * 3, 3
-		#define col VertexElement::UnsignedByte, sizeof(U8) * 4, 4
+		#define DECL(s) sDeclarations[s]->setStruct(s)
+
+		#define v2f VertexElement::Float, sizeof(F32), 2
+		#define v3f VertexElement::Float, sizeof(F32), 3
+		#define col VertexElement::UnsignedByte, sizeof(U8), 4
 
 		DECL(VertexStruct_XY).addElement(v2f);
 		DECL(VertexStruct_XY_Color).addElement(v2f).addElement(col);
@@ -85,7 +102,7 @@ VertexDeclaration* VertexDeclaration::get(VertexStruct vertex)
 		LogWarning(nu::LogChannel::Graphics, 1, "VertexDeclaration : Initialization within get() is not recommanded");
 		initialize();
 	}
-	return &sDeclarations[vertex];
+	return sDeclarations[vertex];
 }
 
 } // namespace nu

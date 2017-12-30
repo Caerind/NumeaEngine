@@ -5,10 +5,17 @@
 
 #include "LinearColor.hpp"
 #include "VertexDeclaration.hpp"
+#include "VertexArray.hpp"
 #include "Camera.hpp"
 
 namespace nu
 {
+
+enum class Primitive
+{
+	Triangles,
+	Lines
+};
 
 class Renderer
 {
@@ -21,16 +28,25 @@ class Renderer
 		void enable(U32 flags);
 		void disable(U32 flags);
 
-		void draw();
+		void drawArrays(Primitive mode, U32 vertices);
+		void drawElements(Primitive mode, U32 vertices);
 
 		void begin(const Color& clearColor = Color::Black);
 		void end();
 
 		Camera& getCamera();
 
+		static bool instantiated();
+		static Renderer& instance();
+
 	private:
-		U32 mVertexArray;
+		static GLenum convertPrimitive(Primitive mode);
+
+	private:
 		Camera mCamera;
+
+
+		static Renderer* sSingleton;
 };
 
 } // namespace nu

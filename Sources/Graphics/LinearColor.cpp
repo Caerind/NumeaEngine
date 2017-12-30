@@ -212,6 +212,14 @@ LinearColor& LinearColor::fromColor(const Color& color)
 	return *this;
 }
 
+LinearColor& LinearColor::fromRedGreenScalar(F32 scalar)
+{
+	r = nu::clamp(1.0f - scalar, 0.f, 1.f);
+	g = nu::clamp(scalar, 0.f, 1.f);
+	b = 0.0f;
+	return *this;
+}
+
 bool operator==(const LinearColor& left, const LinearColor& right)
 {
 	return left.equals(right, 0.00001f);

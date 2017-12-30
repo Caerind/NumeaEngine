@@ -10,12 +10,12 @@ Texture::Texture()
 	, mIsSmooth(false)
 	, mHasMipmap(false)
 {
-	glGenTextures(1, &mIndex);
+	glCheck(glGenTextures(1, &mIndex));
 }
 
 Texture::~Texture()
 {
-	glDeleteTextures(1, &mIndex);
+	glCheck(glDeleteTextures(1, &mIndex));
 }
 
 bool Texture::load(const Loader<Texture>& loader)
@@ -42,12 +42,12 @@ bool Texture::create(U32 width, U32 height)
 	mSize.y = height;
 	mActualSize = actualSize;
 
-	glBindTexture(GL_TEXTURE_2D, mIndex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mActualSize.x, mActualSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mIsSmooth ? GL_LINEAR : GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mIsSmooth ? GL_LINEAR : GL_NEAREST);
+	glCheck(glBindTexture(GL_TEXTURE_2D, mIndex));
+	glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mActualSize.x, mActualSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL));
+	glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+	glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+	glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mIsSmooth ? GL_LINEAR : GL_NEAREST));
+	glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mIsSmooth ? GL_LINEAR : GL_NEAREST));
 	mHasMipmap = false;
 	return true;
 }
@@ -71,9 +71,9 @@ void Texture::update(const U8* pixels, U32 width, U32 height, U32 x, U32 y)
 {
 	if (pixels && mIndex)
 	{
-		glBindTexture(GL_TEXTURE_2D, mIndex);
-		glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mIsSmooth ? GL_LINEAR : GL_NEAREST);
+		glCheck(glBindTexture(GL_TEXTURE_2D, mIndex));
+		glCheck(glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels));
+		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mIsSmooth ? GL_LINEAR : GL_NEAREST));
 		mHasMipmap = false;
 	}
 }
@@ -94,14 +94,14 @@ void Texture::update(const Texture& texture, U32 x, U32 y)
 		GLint readFramebuffer = 0;
 		GLint drawFramebuffer = 0;
 
-		glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &readFramebuffer);
-		glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &drawFramebuffer);
+		glCheck(glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &readFramebuffer));
+		glCheck(glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &drawFramebuffer));
 
 		// Create the framebuffers
 		GLuint sourceFrameBuffer = 0;
 		GLuint destFrameBuffer = 0;
-		glGenFramebuffers(1, &sourceFrameBuffer);
-		glGenFramebuffers(1, &destFrameBuffer);
+		glCheck(glGenFramebuffers(1, &sourceFrameBuffer));
+		glCheck(glGenFramebuffers(1, &destFrameBuffer));
 
 		if (!sourceFrameBuffer || !destFrameBuffer)
 		{
@@ -110,21 +110,21 @@ void Texture::update(const Texture& texture, U32 x, U32 y)
 		}
 
 		// Link the source texture to the source frame buffer
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, sourceFrameBuffer);
-		glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture.mIndex, 0);
+		glCheck(glBindFramebuffer(GL_READ_FRAMEBUFFER, sourceFrameBuffer));
+		glCheck(glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture.mIndex, 0));
 
 		// Link the destination texture to the destination frame buffer
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, destFrameBuffer);
-		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mIndex, 0);
+		glCheck(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, destFrameBuffer));
+		glCheck(glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mIndex, 0));
 
 		// A final check, just to be sure...
-		GLenum sourceStatus = glCheckFramebufferStatus(GL_READ_FRAMEBUFFER);
-		GLenum destStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+		glCheck(GLenum sourceStatus = glCheckFramebufferStatus(GL_READ_FRAMEBUFFER));
+		glCheck(GLenum destStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER));
 
 		if ((sourceStatus == GL_FRAMEBUFFER_COMPLETE) && (destStatus == GL_FRAMEBUFFER_COMPLETE))
 		{
 			// Blit the texture contents from the source to the destination texture
-			glBlitFramebuffer(0, 0, texture.mSize.x, texture.mSize.y, x, y, x + texture.mSize.x, y + texture.mSize.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+			glCheck(glBlitFramebuffer(0, 0, texture.mSize.x, texture.mSize.y, x, y, x + texture.mSize.x, y + texture.mSize.y, GL_COLOR_BUFFER_BIT, GL_NEAREST));
 		}
 		else
 		{
@@ -132,12 +132,12 @@ void Texture::update(const Texture& texture, U32 x, U32 y)
 		}
 
 		// Restore previously bound framebuffers
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, readFramebuffer);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, drawFramebuffer);
+		glCheck(glBindFramebuffer(GL_READ_FRAMEBUFFER, readFramebuffer));
+		glCheck(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, drawFramebuffer));
 
 		// Delete the framebuffers
-		glDeleteFramebuffers(1, &sourceFrameBuffer);
-		glDeleteFramebuffers(1, &destFrameBuffer);
+		glCheck(glDeleteFramebuffers(1, &sourceFrameBuffer));
+		glCheck(glDeleteFramebuffers(1, &destFrameBuffer));
 
 		return;
 	}
@@ -152,14 +152,14 @@ Image Texture::copyToImage() const
 	std::vector<U8> pixels(mSize.x * mSize.y * 4);
 	if ((mSize == mActualSize))
 	{
-		glBindTexture(GL_TEXTURE_2D, mIndex);
-		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, &pixels[0]);
+		glCheck(glBindTexture(GL_TEXTURE_2D, mIndex));
+		glCheck(glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, &pixels[0]));
 	}
 	else
 	{
 		std::vector<U8> allPixels(mActualSize.x * mActualSize.y * 4);
-		glBindTexture(GL_TEXTURE_2D, mIndex);
-		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, &allPixels[0]);
+		glCheck(glBindTexture(GL_TEXTURE_2D, mIndex));
+		glCheck(glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, &allPixels[0]));
 		const U8* src = &allPixels[0];
 		U8* dst = &pixels[0];
 		U32 srcPitch = mActualSize.x * 4;
@@ -183,15 +183,15 @@ void Texture::setSmooth(bool smooth)
 		mIsSmooth = smooth;
 		if (glIsTexture(mIndex))
 		{
-			glBindTexture(GL_TEXTURE_2D, mIndex);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mIsSmooth ? GL_LINEAR : GL_NEAREST);
+			glCheck(glBindTexture(GL_TEXTURE_2D, mIndex));
+			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mIsSmooth ? GL_LINEAR : GL_NEAREST));
 			if (mHasMipmap)
 			{
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mIsSmooth ? GL_LINEAR_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_LINEAR);
+				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mIsSmooth ? GL_LINEAR_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_LINEAR));
 			}
 			else
 			{
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mIsSmooth ? GL_LINEAR : GL_NEAREST);
+				glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mIsSmooth ? GL_LINEAR : GL_NEAREST));
 			}
 		}
 	}
@@ -206,9 +206,9 @@ bool Texture::generateMipmap()
 {
 	if (!glIsTexture(mIndex))
 		return false;
-	glBindTexture(GL_TEXTURE_2D, mIndex);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mIsSmooth ? GL_LINEAR_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_LINEAR);
+	glCheck(glBindTexture(GL_TEXTURE_2D, mIndex));
+	glCheck(glGenerateMipmap(GL_TEXTURE_2D));
+	glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mIsSmooth ? GL_LINEAR_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_LINEAR));
 	mHasMipmap = true;
 	return true;
 }
@@ -217,8 +217,8 @@ void Texture::invalidateMipmap()
 {
 	if (!mHasMipmap)
 		return;
-	glBindTexture(GL_TEXTURE_2D, mIndex);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mIsSmooth ? GL_LINEAR : GL_NEAREST);
+	glCheck(glBindTexture(GL_TEXTURE_2D, mIndex));
+	glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mIsSmooth ? GL_LINEAR : GL_NEAREST));
 	mHasMipmap = false;
 }
 
@@ -243,7 +243,7 @@ const Vector2u& Texture::getSize() const
 
 void Texture::bind() const
 {
-	glBindTexture(GL_TEXTURE_2D, mIndex);
+	glCheck(glBindTexture(GL_TEXTURE_2D, mIndex));
 }
 
 bool Texture::isValid() const
@@ -259,7 +259,7 @@ U32 Texture::getIndex() const
 U32 Texture::getMaximumSize()
 {
 	I32 size = 0;
-	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &size);
+	glCheck(glGetIntegerv(GL_MAX_TEXTURE_SIZE, &size));
 	return U32(size);
 }
 

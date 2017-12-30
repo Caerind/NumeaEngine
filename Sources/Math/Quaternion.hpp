@@ -454,7 +454,7 @@ template<typename T>
 inline Vector3<T> Quaternion<T>::operator*(const Vector3<T>& vector) const
 {
 	T ss = s + s;
-	return ss * (v.crossProduct(vector)) + (ss * q - T(1)) * vector + T(2) * (v.dotProduct(vector)) * vector;
+	return ss * (v.crossProduct(vector)) + (ss * s - T(1)) * vector + T(2) * (v.dotProduct(vector)) * vector;
 }
 
 template<typename T>

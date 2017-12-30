@@ -4,6 +4,10 @@
 	#include <windows.h>
 #endif
 
+#include "../Application/GLEWWrapper.hpp"
+
+#include "String.hpp"
+
 namespace nu
 {
 
@@ -90,6 +94,14 @@ void LogManager::write(LogType type, LogChannel channel, U32 importance, const c
 	va_list argList;
 	va_start(argList, message);
 	internalWrite(type, channel, importance, message, argList);
+	va_end(argList);
+}
+
+void LogManager::error(const char * message, ...)
+{
+	va_list argList;
+	va_start(argList, message);
+	internalWrite(LogType::Error, LogChannel::Global, 10, message, argList);
 	va_end(argList);
 }
 

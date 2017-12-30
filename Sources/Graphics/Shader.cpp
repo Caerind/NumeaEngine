@@ -10,12 +10,12 @@ Shader::Shader()
 	: mProgram(0)
 	, mCurrentTexture(-1)
 {
-	mProgram = glCreateProgram();
+	glCheck(mProgram = glCreateProgram());
 }
 
 Shader::~Shader()
 {
-	glDeleteProgram(mProgram);
+	glCheck(glDeleteProgram(mProgram));
 }
 
 bool Shader::load(const Loader<Shader>& loader)
@@ -26,19 +26,19 @@ bool Shader::load(const Loader<Shader>& loader)
 
 void Shader::bind() const
 {
-	glUseProgram(mProgram);
+	glCheck(glUseProgram(mProgram));
 	auto itr = mTextures.begin();
 	for (U32 i = 1; i <= mTextures.size(); i++)
 	{
-		glActiveTexture(GL_TEXTURE0 + i);
-		glUniform1i(itr->first, i);
+		glCheck(glActiveTexture(GL_TEXTURE0 + i));
+		glCheck(glUniform1i(itr->first, i));
 		itr->second->bind();
 		++itr;
 	}
-	glActiveTexture(GL_TEXTURE0);
+	glCheck(glActiveTexture(GL_TEXTURE0));
 	if (mCurrentTexture != -1)
 	{
-		glUniform1i(mCurrentTexture, 0);
+		glCheck(glUniform1i(mCurrentTexture, 0));
 	}
 }
 
@@ -52,7 +52,7 @@ void Shader::setUniform(const std::string& name, F32 x)
 	I32 location = getUniformLocation(name);
 	if (location != -1)
 	{
-		glUniform1f(location, x);
+		glCheck(glUniform1f(location, x));
 	}
 }
 
@@ -61,7 +61,7 @@ void Shader::setUniform(const std::string& name, F32 x, F32 y)
 	I32 location = getUniformLocation(name);
 	if (location != -1)
 	{
-		glUniform2f(location, x, y);
+		glCheck(glUniform2f(location, x, y));
 	}
 }
 
@@ -70,7 +70,7 @@ void Shader::setUniform(const std::string& name, F32 x, F32 y, F32 z)
 	I32 location = getUniformLocation(name);
 	if (location != -1)
 	{
-		glUniform3f(location, x, y, z);
+		glCheck(glUniform3f(location, x, y, z));
 	}
 }
 
@@ -79,7 +79,7 @@ void Shader::setUniform(const std::string& name, F32 x, F32 y, F32 z, F32 w)
 	I32 location = getUniformLocation(name);
 	if (location != -1)
 	{
-		glUniform4f(location, x, y, z, w);
+		glCheck(glUniform4f(location, x, y, z, w));
 	}
 }
 
@@ -88,7 +88,7 @@ void Shader::setUniform(const std::string& name, const Vector2f& v)
 	I32 location = getUniformLocation(name);
 	if (location != -1)
 	{
-		glUniform2fv(location, 1, &v[0]);
+		glCheck(glUniform2fv(location, 1, &v[0]));
 	}
 }
 
@@ -97,7 +97,7 @@ void Shader::setUniform(const std::string& name, const Vector3f& v)
 	I32 location = getUniformLocation(name);
 	if (location != -1)
 	{
-		glUniform3fv(location, 1, &v[0]);
+		glCheck(glUniform3fv(location, 1, &v[0]));
 	}
 }
 
@@ -106,7 +106,7 @@ void Shader::setUniform(const std::string& name, const Vector4f& v)
 	I32 location = getUniformLocation(name);
 	if (location != -1)
 	{
-		glUniform4fv(location, 1, &v[0]);
+		glCheck(glUniform4fv(location, 1, &v[0]));
 	}
 }
 
@@ -115,7 +115,7 @@ void Shader::setUniform(const std::string& name, const Matrix3f& m)
 	I32 location = getUniformLocation(name);
 	if (location != -1)
 	{
-		glUniformMatrix3fv(location, 1, GL_FALSE, &m.data[0]);
+		glCheck(glUniformMatrix3fv(location, 1, GL_FALSE, &m.m[0][0]));
 	}
 }
 
@@ -124,7 +124,7 @@ void Shader::setUniform(const std::string& name, const Matrix4f& m)
 	I32 location = getUniformLocation(name);
 	if (location != -1)
 	{
-		glUniformMatrix4fv(location, 1, GL_FALSE, &m.data[0]);
+		glCheck(glUniformMatrix4fv(location, 1, GL_FALSE, &m.m[0][0]));
 	}
 }
 
@@ -139,7 +139,7 @@ void Shader::setUniform(const std::string& name, const LinearColor& color)
 	if (location != -1)
 	{
 		// TODO : Color as vector4 is faster ?
-		glUniform4f(location, color.r, color.g, color.b, color.a);
+		glCheck(glUniform4f(location, color.r, color.g, color.b, color.a));
 	}
 }
 
@@ -170,7 +170,7 @@ void Shader::setUniform(const std::string& name, SpecialUniforms type)
 
 I32 Shader::getAttribLocation(const std::string& name) const
 {
-	return glGetAttribLocation(mProgram, name.c_str());
+	return glCheck(glGetAttribLocation(mProgram, name.c_str()));
 }
 
 U32 Shader::getIndex() const
@@ -190,24 +190,24 @@ U32 Shader::compileShader(const std::string& shader, ShaderType type)
 	U32 shaderIndex;
 	switch (type)
 	{
-		case VertexShader: shaderIndex = glCreateShader(GL_VERTEX_SHADER); break;
-		case FragmentShader: shaderIndex = glCreateShader(GL_FRAGMENT_SHADER); break;
-		case GeometryShader: shaderIndex = glCreateShader(GL_GEOMETRY_SHADER); break;
+		case VertexShader: shaderIndex = glCheck(glCreateShader(GL_VERTEX_SHADER)); break;
+		case FragmentShader: shaderIndex = glCheck(glCreateShader(GL_FRAGMENT_SHADER)); break;
+		case GeometryShader: shaderIndex = glCheck(glCreateShader(GL_GEOMETRY_SHADER)); break;
 		default: shaderIndex = 0; break;
 	}
 	if (glIsShader(shaderIndex))
 	{
 		const char* source = shader.c_str();
-		glShaderSource(shaderIndex, 1, &source, nullptr);
-		glCompileShader(shaderIndex);
+		glCheck(glShaderSource(shaderIndex, 1, &source, nullptr));
+		glCheck(glCompileShader(shaderIndex));
 		I32 compiled;
-		glGetShaderiv(shaderIndex, GL_COMPILE_STATUS, &compiled);
+		glCheck(glGetShaderiv(shaderIndex, GL_COMPILE_STATUS, &compiled));
 		if (!compiled)
 		{
 			I32 len;
-			glGetShaderiv(shaderIndex, GL_INFO_LOG_LENGTH, &len);
+			glCheck(glGetShaderiv(shaderIndex, GL_INFO_LOG_LENGTH, &len));
 			GLchar* log = new GLchar[len + 1];
-			glGetShaderInfoLog(shaderIndex, len, &len, log);
+			glCheck(glGetShaderInfoLog(shaderIndex, len, &len, log));
 			switch (type)
 			{
 				case VertexShader: LogError(LogChannel::Graphics, 4, "Vertex shader compilation failed : %s\n", log); break;
@@ -236,7 +236,7 @@ I32 Shader::getUniformLocation(const std::string& name)
 	}
 	else
 	{
-		I32 location = glGetUniformLocation(mProgram, name.c_str());
+		glCheck(I32 location = glGetUniformLocation(mProgram, name.c_str()));
 		mUniforms.insert(std::make_pair(name, location));
 		if (location == -1)
 		{
@@ -255,7 +255,7 @@ Loader<Shader> ShaderLoader::fromFile(const std::string& vs, const std::string& 
 		std::ifstream vsFile(vs, std::ios::in | std::ios::binary);
 		if (!vsFile)
 		{
-			fprintf(stderr, "Failed to open vertex shader : %s\n", vs.c_str());
+			LogError(LogChannel::Graphics, 3, "Failed to open vertex shader : %s\n", vs.c_str());
 			error = true;
 		}
 		std::stringstream vsBuffer;
@@ -264,7 +264,7 @@ Loader<Shader> ShaderLoader::fromFile(const std::string& vs, const std::string& 
 		std::ifstream fsFile(fs, std::ios::in | std::ios::binary);
 		if (!fsFile)
 		{
-			fprintf(stderr, "Failed to open fragment shader : %s\n", fs.c_str());
+			LogError(LogChannel::Graphics, 3, "Failed to open fragment shader : %s\n", fs.c_str());
 			error = true;
 		}
 		std::stringstream fsBuffer;
@@ -285,25 +285,25 @@ Loader<Shader> ShaderLoader::fromFile(const std::string& vs, const std::string& 
 			return false;
 		}
 
-		glAttachShader(program, vertex);
-		glAttachShader(program, fragment);
-		glLinkProgram(program);
+		glCheck(glAttachShader(program, vertex));
+		glCheck(glAttachShader(program, fragment));
+		glCheck(glLinkProgram(program));
 
 		I32 linked;
-		glGetProgramiv(program, GL_LINK_STATUS, &linked);
+		glCheck(glGetProgramiv(program, GL_LINK_STATUS, &linked));
 		if (!linked)
 		{
 			I32 len;
-			glGetProgramiv(program, GL_INFO_LOG_LENGTH, &len);
+			glCheck(glGetProgramiv(program, GL_INFO_LOG_LENGTH, &len));
 			GLchar* log = new GLchar[len + 1];
-			glGetProgramInfoLog(program, len, &len, log);
+			glCheck(glGetProgramInfoLog(program, len, &len, log));
 			LogError(LogChannel::Graphics, 4, "Program linking failed: %s\n", log);
 			delete[] log;
 			return false;
 		}
 
-		glDeleteShader(vertex);
-		glDeleteShader(fragment);
+		glCheck(glDeleteShader(vertex));
+		glCheck(glDeleteShader(fragment));
 
 		return shader.isValid();
 	});
@@ -314,10 +314,6 @@ Loader<Shader> ShaderLoader::fromSource(const std::string& vs, const std::string
 	return Loader<Shader>([=](Shader& shader)
 	{
 		U32 program = shader.getIndex();
-		if (glIsProgram(program))
-		{
-			return false;
-		}
 		shader.reset();
 
 		U32 vertex = Shader::compileShader(vs, Shader::VertexShader);
@@ -327,25 +323,25 @@ Loader<Shader> ShaderLoader::fromSource(const std::string& vs, const std::string
 			return false;
 		}
 
-		glAttachShader(program, vertex);
-		glAttachShader(program, fragment);
-		glLinkProgram(program);
+		glCheck(glAttachShader(program, vertex));
+		glCheck(glAttachShader(program, fragment));
+		glCheck(glLinkProgram(program));
 
 		I32 linked;
-		glGetProgramiv(program, GL_LINK_STATUS, &linked);
+		glCheck(glGetProgramiv(program, GL_LINK_STATUS, &linked));
 		if (!linked)
 		{
 			I32 len;
-			glGetProgramiv(program, GL_INFO_LOG_LENGTH, &len);
+			glCheck(glGetProgramiv(program, GL_INFO_LOG_LENGTH, &len));
 			GLchar* log = new GLchar[len + 1];
-			glGetProgramInfoLog(program, len, &len, log);
+			glCheck(glGetProgramInfoLog(program, len, &len, log));
 			LogError(LogChannel::Graphics, 4, "Program linking failed: %s\n", log);
 			delete[] log;
 			return false;
 		}
 
-		glDeleteShader(vertex);
-		glDeleteShader(fragment);
+		glCheck(glDeleteShader(vertex));
+		glCheck(glDeleteShader(fragment));
 
 		return true;
 	});

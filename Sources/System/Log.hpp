@@ -51,6 +51,7 @@ class LogManager
 
 	public:
 		static void write(LogType type, LogChannel channel, U32 importance, const char* message, ...);
+		static void error(const char* message, ...);
 
 		static void setTypeFilter(U32 typeFilter);
 		static U32 getTypeFilter();

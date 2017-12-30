@@ -3,47 +3,54 @@
 namespace nu
 {
 
-Renderer::Renderer()
-	: mVertexArray(0)
-	, mCamera()
-{
-	VertexDeclaration::initialize();
+Renderer* Renderer::sSingleton = nullptr;
 
-	glGenVertexArrays(1, &mVertexArray);
+Renderer::Renderer()
+	: mCamera()
+{
+	nu::VertexDeclaration::initialize();
+	nu::VertexArray::initialize();
+
+	sSingleton = this;
 
 	reset();
 }
 
 Renderer::~Renderer()
 {
-	glDeleteVertexArrays(1, &mVertexArray);
 }
 
 void Renderer::reset()
 {
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
+	glCheck(glEnable(GL_DEPTH_TEST));
+	glCheck(glDepthFunc(GL_LESS));
 }
 
 void Renderer::enable(U32 flags)
 {
-	glEnable(flags);
+	glCheck(glEnable(flags));
 }
 
 void Renderer::disable(U32 flags)
 {
-	glDisable(flags);
+	glCheck(glDisable(flags));
 }
 
-void Renderer::draw()
+void Renderer::drawArrays(Primitive mode, U32 vertices)
 {
+	glCheck(glDrawArrays(convertPrimitive(mode), 0, vertices));
+}
+
+void Renderer::drawElements(Primitive mode, U32 vertices)
+{
+	glCheck(glDrawElements(convertPrimitive(mode), vertices, GL_UNSIGNED_INT, 0));
 }
 
 void Renderer::begin(const Color& clearColor)
 {
 	LinearColor color(clearColor);
-	glClearColor(color.r, color.g, color.b, color.a);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glCheck(glClearColor(color.r, color.g, color.b, color.a));
+	glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }
 
 void Renderer::end()
@@ -53,6 +60,27 @@ void Renderer::end()
 Camera& Renderer::getCamera()
 {
 	return mCamera;
+}
+
+bool Renderer::instantiated()
+{
+	return sSingleton != nullptr;
+}
+
+Renderer& Renderer::instance()
+{
+	assert(sSingleton != nullptr);
+	return *sSingleton;
+}
+
+GLenum Renderer::convertPrimitive(Primitive mode)
+{
+	switch (mode)
+	{
+		case Primitive::Triangles: return GL_TRIANGLES; break;
+		case Primitive::Lines: return GL_LINES; break;
+	}
+	return GL_TRIANGLES;
 }
 
 } // namespace nu
