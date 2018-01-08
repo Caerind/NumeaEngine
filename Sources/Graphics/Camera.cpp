@@ -3,18 +3,59 @@
 namespace nu
 {
 
-Camera::Camera()
+Camera::Camera(ProjectionMode projMode)
 {
 	perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f);
+	ortho(0.0f, 0.0f, 0.0f, 0.0f, 0.1f, 100.0f);
 	lookAt(Vector3f::zero(), Vector3f::zero());
+	mProjectionMode = projMode;
 }
 
 Camera::~Camera()
 {
 }
 
+const Matrix4f& Camera::getViewProjectionMatrix() const
+{
+	if (!mViewProjectionUpdated)
+	{
+		mViewProjection = getProjectionMatrix() * getViewMatrix();
+		mViewProjectionUpdated = true;
+	}
+	return mViewProjection;
+}
+
+void Camera::setProjectionMode(ProjectionMode projMode)
+{
+	mProjectionMode = projMode;
+	updateProjection();
+}
+
+Camera::ProjectionMode Camera::getProjectionMode() const
+{
+	return mProjectionMode;
+}
+
+const Matrix4f& Camera::getProjectionMatrix() const
+{
+	if (!mProjectionUpdated)
+	{
+		if (mProjectionMode == ProjectionMode::Perspective)
+		{
+			mProjection.makePerspective(mFov, mRatio, mNear, mFar);
+		}
+		else if (mProjectionMode == ProjectionMode::Orthographic)
+		{
+			mProjection.makeOrtho(mLeft, mRight, mTop, mBottom, mNear, mFar);
+		}
+		mProjectionUpdated = true;
+	}
+	return mProjection;
+}
+
 void Camera::perspective(F32 fov, F32 ratio, F32 near, F32 far)
 {
+	mProjectionMode = ProjectionMode::Perspective;
 	mFov = fov;
 	mRatio = ratio;
 	mNear = near;
@@ -46,14 +87,14 @@ void Camera::setRatio(F32 ratio)
 	updateProjection();
 }
 
-const Matrix4f& Camera::getProjectionMatrix() const
+F32 Camera::getFOV() const
 {
-	if (!mProjectionUpdated)
-	{
-		mProjection.makePerspective(mFov, mRatio, mNear, mFar);
-		mProjectionUpdated = true;
-	}
-	return mProjection;
+	return mFov;
+}
+
+F32 Camera::getRatio() const
+{
+	return mRatio;
 }
 
 F32 Camera::getNear() const
@@ -66,14 +107,58 @@ F32 Camera::getFar() const
 	return mFar;
 }
 
-F32 Camera::getFOV() const
+void Camera::ortho(F32 left, F32 right, F32 top, F32 bottom, F32 zNear, F32 zFar)
 {
-	return mFov;
+	mProjectionMode = ProjectionMode::Orthographic;
+	mLeft = left;
+	mRight = right;
+	mTop = top;
+	mBottom = bottom;
+	updateProjection();
 }
 
-F32 Camera::getRatio() const
+void Camera::setLeft(F32 left)
 {
-	return mRatio;
+	mLeft = left;
+	updateProjection();
+}
+
+void Camera::setRight(F32 right)
+{
+	mRight = right;
+	updateProjection();
+}
+
+void Camera::setTop(F32 top)
+{
+	mTop = top;
+	updateProjection();
+}
+
+void Camera::setBottom(F32 bottom)
+{
+	mBottom = bottom;
+	updateProjection();
+}
+
+F32 Camera::getLeft() const
+{
+	return mLeft;
+}
+
+F32 Camera::getRight() const
+{
+	return mRight;
+}
+
+F32 Camera::getTop() const
+{
+	return mTop;
+}
+
+F32 Camera::getBottom() const
+{
+	return mBottom;
 }
 
 void Camera::lookAt(const Vector3f& position, const Vector3f& target, const Vector3f& up)
@@ -142,11 +227,13 @@ Frustum Camera::buildFrustum() const
 void Camera::updateProjection()
 {
 	mProjectionUpdated = false;
+	mViewProjectionUpdated = false;
 }
 
 void Camera::updateView()
 {
 	mViewUpdated = false;
+	mViewProjectionUpdated = false;
 }
 
 } // namespace nu

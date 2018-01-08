@@ -8,6 +8,9 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "../ExtLibs/stb/stb_image_write.h"
 
+#define STB_IMAGE_RESIZE_IMPLEMENTATION
+#include "../ExtLibs/stb/stb_image_resize.h"
+
 namespace nu
 {
 
@@ -118,6 +121,43 @@ const U8* Image::getPixels() const
 	}
 }
 
+bool Image::resize(U32 newWidth, U32 newHeight)
+{
+	if (newWidth && newHeight)
+	{
+		const U8* input = getPixels();
+		if (input && mSize.x && mSize.y)
+		{
+			U8* output = (U8*)malloc(4 * newWidth * newHeight);
+			if (stbir_resize_uint8(input, mSize.x, mSize.y, 0, output, newWidth, newHeight, 0, STBI_rgb_alpha))
+			{
+				create(newWidth, newHeight, output);
+				free(output);
+			}
+			else
+			{
+				create(0, 0, nullptr);
+				free(output);
+				return false;
+			}
+		}
+		else
+		{
+			create(newWidth, newHeight, Color::Black);
+		}
+	}
+	else
+	{
+		create(0, 0, nullptr);
+	}
+	return true;
+}
+
+bool Image::resize(F32 widthScale, F32 heightScale)
+{
+	return resize(U32(F32(mSize.x) * widthScale), U32(F32(mSize.y) * heightScale));
+}
+
 void Image::flipHorizontally()
 {
 	if (!mPixels.empty())
@@ -157,9 +197,9 @@ Loader<Image> ImageLoader::fromFile(const std::string& filename)
 {
 	return Loader<Image>([=](Image& image)
 	{
-		int width = 0;
-		int height = 0;
-		int channels = 0;
+		I32 width = 0;
+		I32 height = 0;
+		I32 channels = 0;
 		U8* ptr = stbi_load(filename.c_str(), &width, &height, &channels, STBI_rgb_alpha);
 		if (ptr)
 		{
@@ -178,6 +218,40 @@ Loader<Image> ImageLoader::fromFile(const std::string& filename)
 		{
 			image.create(0, 0, nullptr);
 			LogError(nu::LogChannel::Graphics, 2, "Failed to load image : %s. Reason : %s\n", filename.c_str(), stbi_failure_reason());
+			return false;
+		}
+	});
+}
+
+Loader<Image> ImageLoader::fromMemory(const void* data, U32 dataSize)
+{
+	return Loader<Image>([=](Image& image)
+	{
+		if (data && dataSize)
+		{
+			image.create(0, 0, nullptr);
+			I32 width = 0;
+			I32 height = 0;
+			I32 channels = 0;
+			const U8* buffer = static_cast<const U8*>(data);
+			U8* ptr = stbi_load_from_memory(buffer, static_cast<I32>(dataSize), &width, &height, &channels, STBI_rgb_alpha);
+			if (ptr)
+			{
+				image.create(width, height, ptr);
+				stbi_image_free(ptr);
+				return true;
+			}
+			else
+			{
+				image.create(0, 0, nullptr);
+				LogError(nu::LogChannel::Graphics, 2, "Failed to load image from memory. Reason : %s\n", stbi_failure_reason());
+				return false;
+			}
+		}
+		else
+		{
+			image.create(0, 0, nullptr);
+			LogError(nu::LogChannel::Graphics, 2, "Failed to load image from memory, no data provided\n");
 			return false;
 		}
 	});

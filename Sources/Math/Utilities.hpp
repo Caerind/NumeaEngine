@@ -4,7 +4,6 @@
 #include "../System/Prerequisites.hpp"
 
 #include <algorithm>
-#include <memory>
 #include <type_traits>
 
 namespace nu

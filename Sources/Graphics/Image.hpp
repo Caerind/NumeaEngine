@@ -32,6 +32,9 @@ class Image : public Resource<Image>
 
 		const U8* getPixels() const;
 
+		bool resize(U32 newWidth, U32 newHeight);
+		bool resize(F32 widthScale, F32 heightScale);
+
 		void flipHorizontally();
 		void flipVertically();
 
@@ -44,6 +47,7 @@ class ImageLoader
 {
 	public:
 		static Loader<Image> fromFile(const std::string& filename);
+		static Loader<Image> fromMemory(const void* data, U32 dataSize);
 
 		static Saver<Image> toFile(const std::string& filename);
 };

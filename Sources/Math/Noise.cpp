@@ -1,8 +1,5 @@
 #include "Noise.hpp"
 
-#include <algorithm>
-#include <numeric>
-
 namespace nu
 {
 
@@ -12,8 +9,10 @@ Noise::Noise(U32 seed)
 	mLacunarity = 2.0f;
 	mGain = 0.5f;
 
-	auto itr = std::begin(mPermutations);
-	std::iota(itr, itr + 256, 0);
+	for (I32 i = 0; i < 256; i++)
+	{
+		mPermutations[i] = i;
+	}
 
 	setSeed(seed);
 }

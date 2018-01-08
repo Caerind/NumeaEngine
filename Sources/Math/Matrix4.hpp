@@ -1,7 +1,7 @@
 #ifndef NU_MATRIX4_HPP
 #define NU_MATRIX4_HPP
 
-#include "../System/Prerequisites.hpp"
+#include "Trigonometry.hpp"
 
 namespace nu
 {

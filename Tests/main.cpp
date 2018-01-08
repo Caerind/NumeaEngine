@@ -36,6 +36,7 @@ int main()
 	nu::Texture::Ptr texture2 = manager.get("texture2", nu::TextureLoader::fromFile("meganne.png"));
 	nu::Shader::Ptr shader = manager.get("shader", nu::ShaderLoader::fromFile("shader.vert", "shader.frag"));
 	nu::Mesh::Ptr mesh = manager.get("mesh", nu::MeshLoader::fromFile("suzanne.obj"));
+	nu::Mesh::Ptr mesh2 = manager.get("mesh2", nu::MeshLoader::fromFile("sheep.obj"));
 
 	nu::DebugDraw debug;
 
@@ -112,8 +113,6 @@ int main()
 		debug.circle(nu::Vector3f(3, 3, 3), nu::Vector3f(0, 0, 1), 2, nu::Color::Blue);
 		debug.cone(nu::Vector3f(4, 4, 0), nu::Vector3f(0, -1, 0), 4, 2, nu::Color::Yellow);
 
-
-
 		// ImGui config
 		nu::ImGuiWrapper::newFrame();
 		ImGuiWrapper_Begin();
@@ -183,8 +182,8 @@ int main()
 		shader->setUniform("MVP", mvp2);
 		shader->setUniform("N", n2);
 		texture2->bind();
-		mesh->bind();
-		mesh->draw();
+		mesh2->bind();
+		mesh2->draw();
 
 
 		renderer.end();

@@ -34,7 +34,7 @@ bool ParserIni::loadFromFile(const std::string& filename)
 			{
 				std::string index;
 				std::string value;
-				U32 found = line.find_first_of('=');
+				U32 found = line.find('=');
 				if (found != std::string::npos)
 				{
 					index = line.substr(0, found);

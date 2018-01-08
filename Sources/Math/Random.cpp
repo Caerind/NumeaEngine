@@ -2,8 +2,6 @@
 
 #include "../System/Time.hpp"
 
-#include <sstream>
-
 namespace nu
 {
 
