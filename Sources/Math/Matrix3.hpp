@@ -92,12 +92,19 @@ class Matrix3
 		static inline Matrix3<T> zero();
 		static inline Matrix3<T> identity();
 
+		#include "DisableAnonymousStructBegin.hpp"
 		union
 		{
 			T data[9];
 			T m[3][3];
 		};
+		#include "DisableAnonymousStructEnd.hpp"
 };
+
+template <typename T> Matrix3<T> operator+(const T& s, const Matrix3<T>& matrix);
+template <typename T> Matrix3<T> operator-(const T& s, const Matrix3<T>& matrix);
+template <typename T> Matrix3<T> operator*(const T& s, const Matrix3<T>& matrix);
+template <typename T> Matrix3<T> operator/(const T& s, const Matrix3<T>& matrix);
 
 template<typename T>
 inline Matrix3<T>::Matrix3()
@@ -708,6 +715,39 @@ inline Matrix3<T> Matrix3<T>::identity()
 typedef Matrix3<F32> Matrix3f;
 
 typedef Matrix3f mat3; // GLSL-like
+
+template<typename T>
+Matrix3<T> operator+(const T& s, const Matrix3<T>& matrix)
+{
+	return matrix + s;
+}
+
+template<typename T>
+Matrix3<T> operator-(const T& s, const Matrix3<T>& matrix)
+{
+	return matrix.operator-() + s;
+}
+
+template<typename T>
+Matrix3<T> operator*(const T& s, const Matrix3<T>& matrix)
+{
+	return matrix * s;
+}
+
+template<typename T>
+Matrix3<T> operator/(const T& s, const Matrix3<T>& matrix)
+{
+	assert(!equals(matrix[0], T(0)));
+	assert(!equals(matrix[1], T(0)));
+	assert(!equals(matrix[2], T(0)));
+	assert(!equals(matrix[3], T(0)));
+	assert(!equals(matrix[4], T(0)));
+	assert(!equals(matrix[5], T(0)));
+	assert(!equals(matrix[6], T(0)));
+	assert(!equals(matrix[7], T(0)));
+	assert(!equals(matrix[8], T(0)));
+	return Matrix3<T>(s / matrix[0], s / matrix[1], s / matrix[2], s / matrix[3], s / matrix[4], s / matrix[5], s / matrix[6], s / matrix[7], s / matrix[8]);
+}
 
 } // namespace nu
 

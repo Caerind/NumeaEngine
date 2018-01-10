@@ -52,13 +52,9 @@ class Matrix4
 		inline Matrix4<T> operator+(const Matrix4<T>& m) const;
 		inline Matrix4<T> operator-(const Matrix4<T>& m) const;
 		inline Matrix4<T> operator*(const Matrix4<T>& m) const;
-		inline Matrix4<T> operator*(const Quaternion<T>& q) const;
-		inline Matrix4<T> operator*(const Matrix3<T>& m) const;
 		inline Matrix4<T>& operator+=(const Matrix4<T>& m);
 		inline Matrix4<T>& operator-=(const Matrix4<T>& m);
 		inline Matrix4<T>& operator*=(const Matrix4<T>& m);
-		inline Matrix4<T>& operator*=(const Quaternion<T>& q);
-		inline Matrix4<T>& operator*=(const Matrix3<T>& m);
 
 		inline Matrix4<T> operator+(const T& s) const;
 		inline Matrix4<T> operator-(const T& s) const;
@@ -102,17 +98,27 @@ class Matrix4
 		inline Matrix4<T>& setRotation(const Quaternion<T>& rotation);
 		inline Matrix4<T>& setRotation(const Matrix3<T>& rotation);
 		inline Matrix4<T>& setScale(const Vector3<T>& scale);
+		inline Matrix4<T>& setScale(const T& sx, const T& sy, const T& sz);
+		inline Matrix4<T>& setScale(const T& s);
 		inline Matrix4<T>& setTranslation(const Vector3<T>& translation);
+		inline Matrix4<T>& setTranslation(const T& tx, const T& ty, const T& tz);
 
 		inline Matrix4<T>& applyRotation(const Quaternion<T>& rotation);
 		inline Matrix4<T>& applyRotation(const Matrix3<T>& rotation);
 		inline Matrix4<T>& applyScale(const Vector3<T>& scale);
+		inline Matrix4<T>& applyScale(const T& sx, const T& sy, const T& sz);
+		inline Matrix4<T>& applyScale(const T& s);
 		inline Matrix4<T>& applyTranslation(const Vector3<T>& translation);
+		inline Matrix4<T>& applyTranslation(const T& tx, const T& ty, const T& tz);
+		// TODO : ApplyTransformation
 
 		inline Matrix4<T> rotated(const Quaternion<T>& rotation);
 		inline Matrix4<T> rotated(const Matrix3<T>& rotation);
 		inline Matrix4<T> scaled(const Vector3<T>& scale);
+		inline Matrix4<T> scaled(const T& sx, const T& sy, const T& sz); // TODO
+		inline Matrix4<T> scaled(const T& s);
 		inline Matrix4<T> translated(const Vector3<T>& translation);
+		inline Matrix4<T> translated(const T& tx, const T& ty, const T& tz);
 		inline Matrix4<T> transformed(const Vector3<T>& translation, const Quaternion<T>& rotation);
 		inline Matrix4<T> transformed(const Vector3<T>& translation, const Quaternion<T>& rotation, const Vector3<T>& scale);
 
@@ -134,7 +140,10 @@ class Matrix4
 		static inline Matrix4<T> rotation(const Quaternion<T>& rotation);
 		static inline Matrix4<T> rotation(const Matrix3<T>& rotation);
 		static inline Matrix4<T> scale(const Vector3<T>& scale);
+		static inline Matrix4<T> scale(const T& sx, const T& sy, const T& sz);
+		static inline Matrix4<T> scale(const T& s);
 		static inline Matrix4<T> translation(const Vector3<T>& translation);
+		static inline Matrix4<T> translation(const T& tx, const T& ty, const T& tz);
 		static inline Matrix4<T> transform(const Vector3<T>& translation, const Quaternion<T>& rotation);
 		static inline Matrix4<T> transform(const Vector3<T>& translation, const Quaternion<T>& rotation, const Vector3<T>& scale);
 
@@ -491,20 +500,6 @@ inline Matrix4<T> Matrix4<T>::operator*(const Matrix4<T>& m) const
 }
 
 template<typename T>
-inline Matrix4<T> Matrix4<T>::operator*(const Quaternion<T>& q) const
-{
-	// TODO : Improve ?
-	return operator*(q.toMatrix4());
-}
-
-template<typename T>
-inline Matrix4<T> Matrix4<T>::operator*(const Matrix3<T>& m) const
-{
-	// TODO : Improve ?
-	return operator*(Matrix4<T>::rotation(m));
-}
-
-template<typename T>
 inline Matrix4<T>& Matrix4<T>::operator+=(const Matrix4<T>& m)
 {
 	data[0] += m.data[0];
@@ -576,20 +571,6 @@ inline Matrix4<T>& Matrix4<T>::operator*=(const Matrix4<T>& m)
 	data[11] = c2.dotProduct(r3);
 	data[15] = c3.dotProduct(r3);
 	return *this;
-}
-
-template<typename T>
-inline Matrix4<T>& Matrix4<T>::operator*=(const Quaternion<T>& q)
-{
-	// TODO : Improve ?
-	return operator*=(q.toMatrix4());
-}
-
-template<typename T>
-inline Matrix4<T>& Matrix4<T>::operator*=(const Matrix3<T>& m)
-{
-	// TODO : Improve ?
-	return operator*=(Matrix4<T>::rotation(m));
 }
 
 template<typename T>
@@ -1065,11 +1046,48 @@ inline Matrix4<T>& Matrix4<T>::setScale(const Vector3<T>& scale)
 }
 
 template<typename T>
+inline Matrix4<T>& Matrix4<T>::setScale(const T& sx, const T& sy, const T& sz)
+{
+	data[0] = sx;
+	data[1] = 0;
+	data[2] = 0;
+	data[4] = 0;
+	data[5] = sy;
+	data[6] = 0;
+	data[8] = 0;
+	data[9] = 0;
+	data[10] = sz;
+}
+
+template<typename T>
+inline Matrix4<T>& Matrix4<T>::setScale(const T& s)
+{
+	data[0] = s;
+	data[1] = 0;
+	data[2] = 0;
+	data[4] = 0;
+	data[5] = s;
+	data[6] = 0;
+	data[8] = 0;
+	data[9] = 0;
+	data[10] = s;
+}
+
+template<typename T>
 inline Matrix4<T>& Matrix4<T>::setTranslation(const Vector3<T>& translation)
 {
 	data[12] = translation.x;
 	data[13] = translation.y;
 	data[14] = translation.z;
+	return *this;
+}
+
+template<typename T>
+inline Matrix4<T>& Matrix4<T>::setTranslation(const T& tx, const T& ty, const T& tz)
+{
+	data[12] = tx;
+	data[13] = ty;
+	data[14] = tz;
 	return *this;
 }
 
@@ -1098,11 +1116,36 @@ inline Matrix4<T>& Matrix4<T>::applyScale(const Vector3<T>& scale)
 }
 
 template<typename T>
+inline Matrix4<T>& Matrix4<T>::applyScale(const T& sx, const T& sy, const T& sz)
+{
+	// TODO : Improve ? 
+	operator*=(Matrix4<T>::scale(sx, sy, sz));
+	return *this;
+}
+
+template<typename T>
+inline Matrix4<T>& Matrix4<T>::applyScale(const T& s)
+{
+	// TODO : Improve ? 
+	operator*=(Matrix4<T>::scale(s));
+	return *this;
+}
+
+template<typename T>
 inline Matrix4<T>& Matrix4<T>::applyTranslation(const Vector3<T>& translation)
 {
 	data[12] += translation.x;
 	data[13] += translation.y;
 	data[14] += translation.z;
+	return *this;
+}
+
+template<typename T>
+inline Matrix4<T>& Matrix4<T>::applyTranslation(const T& tx, const T& ty, const T& tz)
+{
+	data[12] += tx;
+	data[13] += ty;
+	data[14] += tz;
 	return *this;
 }
 
@@ -1128,10 +1171,31 @@ inline Matrix4<T> Matrix4<T>::scaled(const Vector3<T>& scale)
 }
 
 template<typename T>
+inline Matrix4<T> Matrix4<T>::scaled(const T& sx, const T& sy, const T& sz)
+{
+	// TODO : Improve ?
+	return Matrix4<T>(*this).applyScale(sx, sy, sz);
+}
+
+template<typename T>
+inline Matrix4<T> Matrix4<T>::scaled(const T& s)
+{
+	// TODO : Improve ?
+	return Matrix4<T>(*this).applyScale(s);
+}
+
+template<typename T>
 inline Matrix4<T> Matrix4<T>::translated(const Vector3<T>& translation)
 {
 	// TODO : Improve ? 
 	return Matrix4<T>(*this).applyTranslation(translation);
+}
+
+template<typename T>
+inline Matrix4<T> Matrix4<T>::translated(const T& tx, const T& ty, const T& tz)
+{
+	// TODO : Improve ?
+	return Matrix4<T>(*this).applyTranslation(tx, ty, tz);
 }
 
 template<typename T>
@@ -1251,9 +1315,27 @@ inline Matrix4<T> Matrix4<T>::scale(const Vector3<T>& scale)
 }
 
 template<typename T>
+inline Matrix4<T> Matrix4<T>::scale(const T& sx, const T& sy, const T& sz)
+{
+	return Matrix4<T>(sx, T(0), T(0), T(0), T(0), sy, T(0), T(0), T(0), T(0), sz, T(0), T(0), T(0), T(0), T(1));
+}
+
+template<typename T>
+inline Matrix4<T> Matrix4<T>::scale(const T& s)
+{
+	return Matrix4<T>(s, T(0), T(0), T(0), T(0), s, T(0), T(0), T(0), T(0), s, T(0), T(0), T(0), T(0), T(1));
+}
+
+template<typename T>
 inline Matrix4<T> Matrix4<T>::translation(const Vector3<T>& translation)
 {
 	return Matrix4<T>(T(1), T(0), T(0), T(0), T(0), T(1), T(0), T(0), T(0), T(0), T(1), T(0), translation.x, translation.y, translation.z, T(1));
+}
+
+template<typename T>
+inline Matrix4<T> Matrix4<T>::translation(const T & tx, const T & ty, const T & tz)
+{
+	return Matrix4<T>(T(1), T(0), T(0), T(0), T(0), T(1), T(0), T(0), T(0), T(0), T(1), T(0), tx, ty, tz, T(1));
 }
 
 template<typename T>

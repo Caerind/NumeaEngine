@@ -67,23 +67,15 @@ class Vector3
 		inline bool operator>(const Vector3<T>& vec) const;
 		inline bool operator>=(const Vector3<T>& vec) const;
 
-		inline Vector2<T> xy();
-		inline const Vector2<T> xy() const;
-		inline Vector2<T> xz();
-		inline const Vector2<T> xz() const;
-		inline Vector2<T> yz();
-		inline const Vector2<T> yz() const;
+		inline Vector2<T> xy() const;
+		inline Vector2<T> xz() const;
+		inline Vector2<T> yz() const;
 
 		inline T dotProduct(const Vector3<T>& v) const;
 		static inline T dotProduct(const Vector3<T>& v1, const Vector3<T>& v2);
 
 		inline T getSquaredLength() const;
 		inline T getLength() const;
-
-		inline T getSquaredDistance(const Vector3<T>& v);
-		static inline T getSquaredDistance(const Vector3<T>& v1, const Vector3<T>& v2);
-		inline T getDistance(const Vector3<T>& v);
-		static inline T getDistance(const Vector3<T>& v1, const Vector3<T>& v2);
 
 		inline Vector3<T>& setLength(const T& length, T* oldLength = nullptr);
 
@@ -129,14 +121,16 @@ class Vector3
 		#include "DisableAnonymousStructEnd.hpp"
 };
 
-template <typename T>
-Vector3<T> operator*(const T& scale, const Vector3<T>& vector);
+template <typename T> Vector3<T> operator+(const T& scale, const Vector3<T>& vector);
+template <typename T> Vector3<T> operator-(const T& scale, const Vector3<T>& vector);
+template <typename T> Vector3<T> operator*(const T& scale, const Vector3<T>& vector);
+template <typename T> Vector3<T> operator/(const T& scale, const Vector3<T>& vector);
 
-template <typename T>
-T dot(const Vector3<T>& v1, const Vector3<T>& v2);
+template <typename T> T dot(const Vector3<T>& v1, const Vector3<T>& v2);
 
-template <typename T>
-Vector3<T> cross(const Vector3<T>& v1, const Vector3<T>& v2);
+template <typename T> Vector3<T> normalize(const Vector3<T>& vec, T* oldLength = nullptr);
+
+template <typename T> Vector3<T> cross(const Vector3<T>& v1, const Vector3<T>& v2);
 
 template<typename T>
 inline Vector3<T>::Vector3()
@@ -458,37 +452,19 @@ inline bool Vector3<T>::operator>=(const Vector3<T>& vec) const
 }
 
 template<typename T>
-inline Vector2<T> Vector3<T>::xy()
+inline Vector2<T> Vector3<T>::xy() const
 {
 	return Vector2<T>(x ,y);
 }
 
 template<typename T>
-inline const Vector2<T> Vector3<T>::xy() const
-{
-	return Vector2<T>(x, y);
-}
-
-template<typename T>
-inline Vector2<T> Vector3<T>::xz()
+inline Vector2<T> Vector3<T>::xz() const
 {
 	return Vector2<T>(x, z);
 }
 
 template<typename T>
-inline const Vector2<T> Vector3<T>::xz() const
-{
-	return Vector2<T>(x, z);
-}
-
-template<typename T>
-inline Vector2<T> Vector3<T>::yz()
-{
-	return Vector2<T>(y, z);
-}
-
-template<typename T>
-inline const Vector2<T> Vector3<T>::yz() const
+inline Vector2<T> Vector3<T>::yz() const
 {
 	return Vector2<T>(y, z);
 }
@@ -515,30 +491,6 @@ template<typename T>
 inline T Vector3<T>::getLength() const
 {
 	return std::sqrt(getSquaredLength());
-}
-
-template<typename T>
-inline T Vector3<T>::getSquaredDistance(const Vector3<T>& v)
-{
-	return (*this - v).getSquaredLength();
-}
-
-template<typename T>
-inline T Vector3<T>::getSquaredDistance(const Vector3<T>& v1, const Vector3<T>& v2)
-{
-	return (v1 - v2).getSquaredLength();
-}
-
-template<typename T>
-inline T Vector3<T>::getDistance(const Vector3<T>& v)
-{
-	return std::sqrt(getSquaredDistance(v));
-}
-
-template<typename T>
-inline T Vector3<T>::getDistance(const Vector3<T>& v1, const Vector3<T>& v2)
-{
-	return std::sqrt(getSquaredDistance(v1, v2));
 }
 
 template<typename T>
@@ -689,15 +641,42 @@ inline Vector3<T> Vector3<T>::zero()
 }
 
 template<typename T>
+Vector3<T> operator+(const T & scale, const Vector3<T>& vector)
+{
+	return vector + scale;
+}
+
+template<typename T>
+Vector3<T> operator-(const T& scale, const Vector3<T>& vector)
+{
+	return scale + (vector.operator-());
+}
+
+template<typename T>
 inline Vector3<T> operator*(const T& scale, const Vector3<T>& vector)
 {
 	return vector * scale;
 }
 
 template<typename T>
+Vector3<T> operator/(const T& scale, const Vector3<T>& vector)
+{
+	assert(!equals(vector[0], T(0)));
+	assert(!equals(vector[1], T(0)));
+	assert(!equals(vector[2], T(0)));
+	return Vector3<T>(scale / vector[0], scale / vector[1], scale / vector[2]);
+}
+
+template<typename T>
 T dot(const Vector3<T>& v1, const Vector3<T>& v2)
 {
 	return v1.dotProduct(v2);
+}
+
+template<typename T>
+Vector3<T> normalize(const Vector3<T>& vec, T * oldLength)
+{
+	return vec.normalized(oldLength);
 }
 
 template<typename T>

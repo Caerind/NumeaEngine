@@ -69,27 +69,17 @@ class Vector4
 		inline bool operator>(const Vector4<T>& vec) const;
 		inline bool operator>=(const Vector4<T>& vec) const;
 
-		inline Vector3<T> xyz();
-		inline const Vector3<T> xyz() const;
-		inline Vector2<T> xy();
-		inline const Vector2<T> xy() const;
-		inline Vector2<T> xz();
-		inline const Vector2<T> xz() const;
-		inline Vector2<T> yz();
-		inline const Vector2<T> yz() const;
-		inline Vector2<T> zw();
-		inline const Vector2<T> zw() const;
+		inline Vector3<T> xyz() const;
+		inline Vector2<T> xy() const;
+		inline Vector2<T> xz() const;
+		inline Vector2<T> yz() const;
+		inline Vector2<T> zw() const;
 
 		inline T dotProduct(const Vector4<T>& v) const;
 		static inline T dotProduct(const Vector4<T>& v1, const Vector4<T>& v2);
 
 		inline T getSquaredLength() const;
 		inline T getLength() const;
-
-		inline T getSquaredDistance(const Vector4<T>& v);
-		static inline T getSquaredDistance(const Vector4<T>& v1, const Vector4<T>& v2);
-		inline T getDistance(const Vector4<T>& v);
-		static inline T getDistance(const Vector4<T>& v1, const Vector4<T>& v2);
 
 		inline Vector4<T>& setLength(const T& length, T* oldLength = nullptr);
 
@@ -136,11 +126,14 @@ class Vector4
 		#include "DisableAnonymousStructEnd.hpp"
 };
 
-template <typename T>
-Vector4<T> operator*(const T& scale, const Vector4<T>& vector);
+template <typename T> Vector4<T> operator+(const T& scale, const Vector4<T>& vector);
+template <typename T> Vector4<T> operator-(const T& scale, const Vector4<T>& vector);
+template <typename T> Vector4<T> operator*(const T& scale, const Vector4<T>& vector);
+template <typename T> Vector4<T> operator/(const T& scale, const Vector4<T>& vector);
 
-template <typename T>
-T dot(const Vector4<T>& v1, const Vector4<T>& v2);
+template <typename T> T dot(const Vector4<T>& v1, const Vector4<T>& v2);
+
+template <typename T> Vector4<T> normalize(const Vector4<T>& vector, T* oldLength = nullptr);
 
 template<typename T>
 inline Vector4<T>::Vector4()
@@ -502,61 +495,31 @@ inline bool Vector4<T>::operator>=(const Vector4<T>& vec) const
 }
 
 template<typename T>
-inline Vector3<T> Vector4<T>::xyz()
+inline Vector3<T> Vector4<T>::xyz() const
 {
 	return Vector3<T>(x, y, z);
 }
 
 template<typename T>
-inline const Vector3<T> Vector4<T>::xyz() const
-{
-	return Vector3<T>(x, y, z);
-}
-
-template<typename T>
-inline Vector2<T> Vector4<T>::xy()
+inline Vector2<T> Vector4<T>::xy() const
 {
 	return Vector2<T>(x ,y);
 }
 
 template<typename T>
-inline const Vector2<T> Vector4<T>::xy() const
-{
-	return Vector2<T>(x, y);
-}
-
-template<typename T>
-inline Vector2<T> Vector4<T>::xz()
+inline Vector2<T> Vector4<T>::xz() const
 {
 	return Vector2<T>(x, z);
 }
 
 template<typename T>
-inline const Vector2<T> Vector4<T>::xz() const
-{
-	return Vector2<T>(x, z);
-}
-
-template<typename T>
-inline Vector2<T> Vector4<T>::yz()
+inline Vector2<T> Vector4<T>::yz() const
 {
 	return Vector2<T>(y, z);
 }
 
 template<typename T>
-inline const Vector2<T> Vector4<T>::yz() const
-{
-	return Vector2<T>(y, z);
-}
-
-template<typename T>
-inline Vector2<T> Vector4<T>::zw()
-{
-	return Vector2<T>(z, w);
-}
-
-template<typename T>
-inline const Vector2<T> Vector4<T>::zw() const
+inline Vector2<T> Vector4<T>::zw() const
 {
 	return Vector2<T>(z, w);
 }
@@ -583,30 +546,6 @@ template<typename T>
 inline T Vector4<T>::getLength() const
 {
 	return std::sqrt(getSquaredLength());
-}
-
-template<typename T>
-inline T Vector4<T>::getSquaredDistance(const Vector4<T>& v)
-{
-	return (*this - v).getSquaredLength();
-}
-
-template<typename T>
-inline T Vector4<T>::getSquaredDistance(const Vector4<T>& v1, const Vector4<T>& v2)
-{
-	return (v1 - v2).getSquaredLength();
-}
-
-template<typename T>
-inline T Vector4<T>::getDistance(const Vector4<T>& v)
-{
-	return std::sqrt(getSquaredDistance(v));
-}
-
-template<typename T>
-inline T Vector4<T>::getDistance(const Vector4<T>& v1, const Vector4<T>& v2)
-{
-	return std::sqrt(getSquaredDistance(v1, v2));
 }
 
 template<typename T>
@@ -761,15 +700,43 @@ inline Vector4<T> Vector4<T>::zero()
 }
 
 template<typename T>
+Vector4<T> operator+(const T& scale, const Vector4<T>& vector)
+{
+	return vector + scale;
+}
+
+template<typename T>
+Vector4<T> operator-(const T& scale, const Vector4<T>& vector)
+{
+	return scale + (vector.operator-());
+}
+
+template<typename T>
 inline Vector4<T> operator*(const T& scale, const Vector4<T>& vector)
 {
 	return vector * scale;
 }
 
 template<typename T>
+Vector4<T> operator/(const T & scale, const Vector4<T>& vector)
+{
+	assert(!equals(vector[0], T(0)));
+	assert(!equals(vector[1], T(0)));
+	assert(!equals(vector[2], T(0)));
+	assert(!equals(vector[3], T(0)));
+	return Vector4<T>(scale / vector[0], scale / vector[1], scale / vector[2], scale / vector[3]);
+}
+
+template<typename T>
 T dot(const Vector4<T>& v1, const Vector4<T>& v2)
 {
 	return v1.dotProduct(v2);
+}
+
+template<typename T>
+Vector4<T> normalize(const Vector4<T>& vector, T* oldLength)
+{
+	return vector.normalized(oldLength);
 }
 
 typedef Vector4<float>			Vector4f;

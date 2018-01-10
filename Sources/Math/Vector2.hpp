@@ -70,11 +70,6 @@ class Vector2
 		inline T getSquaredLength() const;
 		inline T getLength() const;
 
-		inline T getSquaredDistance(const Vector2<T>& v);
-		static inline T getSquaredDistance(const Vector2<T>& v1, const Vector2<T>& v2);
-		inline T getDistance(const Vector2<T>& v);
-		static inline T getDistance(const Vector2<T>& v1, const Vector2<T>& v2);
-
 		inline Vector2<T>& setLength(const T& length, T* oldLength = nullptr);
 
 		inline Vector2<T>& normalize(T* oldLength = nullptr);
@@ -119,11 +114,14 @@ class Vector2
 		#include "DisableAnonymousStructEnd.hpp"
 };
 
-template <typename T>
-Vector2<T> operator*(const T& scale, const Vector2<T>& vector);
+template <typename T> Vector2<T> operator+(const T& scale, const Vector2<T>& vector);
+template <typename T> Vector2<T> operator-(const T& scale, const Vector2<T>& vector);
+template <typename T> Vector2<T> operator*(const T& scale, const Vector2<T>& vector);
+template <typename T> Vector2<T> operator/(const T& scale, const Vector2<T>& vector);
 
-template <typename T>
-T dot(const Vector2<T>& v1, const Vector2<T>& v2);
+template <typename T> T dot(const Vector2<T>& v1, const Vector2<T>& v2);
+
+template <typename T> Vector2<T> normalize(const Vector2<T>& vector, T* oldLength = nullptr);
 
 template<typename T>
 inline Vector2<T>::Vector2()
@@ -433,30 +431,6 @@ inline T Vector2<T>::getLength() const
 }
 
 template<typename T>
-inline T Vector2<T>::getSquaredDistance(const Vector2<T>& v)
-{
-	return (*this - v).getSquaredLength();
-}
-
-template<typename T>
-inline T Vector2<T>::getSquaredDistance(const Vector2<T>& v1, const Vector2<T>& v2)
-{
-	return (v1 - v2).getSquaredLength();
-}
-
-template<typename T>
-inline T Vector2<T>::getDistance(const Vector2<T>& v)
-{
-	return std::sqrt(getSquaredDistance(v));
-}
-
-template<typename T>
-inline T Vector2<T>::getDistance(const Vector2<T>& v1, const Vector2<T>& v2)
-{
-	return std::sqrt(getSquaredDistance(v1, v2));
-}
-
-template<typename T>
 inline Vector2<T>& Vector2<T>::setLength(const T& length, T* oldLength)
 {
 	const T currentLength = getLength();
@@ -612,15 +586,41 @@ inline Vector2<T> Vector2<T>::polar(T angle, T length)
 }
 
 template<typename T>
+Vector2<T> operator+(const T & scale, const Vector2<T>& vector)
+{
+	return vector + scale;
+}
+
+template<typename T>
+Vector2<T> operator-(const T& scale, const Vector2<T>& vector)
+{
+	return scale + (vector.operator-());
+}
+
+template<typename T>
 inline Vector2<T> operator*(const T& scale, const Vector2<T>& vector)
 {
 	return vector * scale;
 }
 
 template<typename T>
+Vector2<T> operator/(const T& scale, const Vector2<T>& vector)
+{
+	assert(!equals(vector[0], T(0)));
+	assert(!equals(vector[1], T(0)));
+	return Vector2<T>(scale / vector[0], scale / vector[1]);
+}
+
+template<typename T>
 T dot(const Vector2<T>& v1, const Vector2<T>& v2)
 {
 	return v1.dotProduct(v2);
+}
+
+template<typename T>
+Vector2<T> normalize(const Vector2<T>& vector, T* oldLength)
+{
+	return vector.normalized(oldLength);
 }
 
 typedef Vector2<F32> Vector2f;
