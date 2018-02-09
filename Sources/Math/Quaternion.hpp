@@ -86,7 +86,7 @@ class Quaternion
 
 		inline Quaternion<T>& makeIdentity();
 
-		static inline Quaternion<T> identity();
+		static const Quaternion<T> identity;
 
 		#include "DisableAnonymousStructBegin.hpp"
 		union
@@ -124,8 +124,6 @@ namespace nu
 template<typename T>
 inline Quaternion<T>::Quaternion()
 {
-	v = Vector3<T>::zero();
-	s = T(1);
 }
 
 template<typename T>
@@ -725,7 +723,7 @@ inline Quaternion<T> Quaternion<T>::rotateFromTo(const Vector3<T>& start, const 
 	const T dot = v1.dotProduct(v2);
 	if (dot >= T(0.99999847691))
 	{
-		return Quaternion<T>::identity();
+		return Quaternion<T>::identity;
 	}
 	if (dot <= T(-0.99999847691))
 	{
@@ -743,7 +741,7 @@ inline Quaternion<T> Quaternion<T>::rotateFromTo(const Vector3<T>& start, const 
 	const T dot = v1.dotProduct(v2);
 	if (dot >= T(0.99999847691))
 	{
-		return Quaternion<T>::identity();
+		return Quaternion<T>::identity;
 	}
 	if (dot <= T(-0.99999847691))
 	{
@@ -760,11 +758,7 @@ inline Quaternion<T>& Quaternion<T>::makeIdentity()
 	s = T(1);
 }
 
-template<typename T>
-inline Quaternion<T> Quaternion<T>::identity()
-{
-	return Quaternion<T>(Vector3<T>::zero(), T(1));
-}
+template<typename T> const Quaternion<T> Quaternion<T>::identity(Vector3<T>::zero, 1);
 
 template<typename T>
 inline Quaternion<T> operator*(const T& s, const Quaternion<T>& quaternion)

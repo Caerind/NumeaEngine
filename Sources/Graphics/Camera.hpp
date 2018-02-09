@@ -53,7 +53,7 @@ class Camera
 
 		const Matrix4f& getViewMatrix() const;
 
-		void lookAt(const Vector3f& position, const Vector3f& target, const Vector3f& up = Vector3f(0.0f, 1.0f, 0.0f));
+		void lookAt(const Vector3f& position, const Vector3f& target, const Vector3f& up = Vector3f::up);
 		void setPosition(const Vector3f& position);
 		void setTarget(const Vector3f& target);
 		void setUp(const Vector3f& up);

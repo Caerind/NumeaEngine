@@ -1,11 +1,14 @@
 #ifndef NU_AABB_HPP
 #define NU_AABB_HPP
 
-#include "Vector3.hpp"
 #include "Matrix4.hpp"
 
 namespace nu 
 {
+
+class Sphere;
+class Plane;
+class Ray;
 
 class AABB
 {
@@ -27,11 +30,6 @@ class AABB
 		void setCenteredBox(const Vector3f& center, const Vector3f& halfSize);
 		void setCenteredBox(F32 cX, F32 cY, F32 cZ, F32 hsX, F32 hsY, F32 hsZ);
 
-		void merge(const Vector3f& point);
-		void merge(const AABB& box);
-
-		void transform(const Matrix4f& m);
-
 		Vector3f getCenter() const;
 		Vector3f getSize() const;
 		Vector3f getHalfSize() const;
@@ -49,13 +47,32 @@ class AABB
 		*/
 		Vector3f getCorner(U8 index) const;
 
+		bool operator==(const AABB& box) const;
+		bool operator!=(const AABB& box) const;
+
 		F32 getDistanceSquared(const Vector3f& point) const;
 		F32 getDistance(const Vector3f& point) const;
 
 		bool contains(const Vector3f& point) const;
+		bool contains(const AABB& box) const;
+		bool contains(const Sphere& sphere) const;
+		// TODO : contains OBB
+		// TODO : contains Frustum
 
-		bool operator==(const AABB& box) const;
-		bool operator!=(const AABB& box) const;
+		bool intersects(const AABB& box, AABB* intersection = nullptr) const;
+		bool intersects(const Sphere& sphere) const;
+		bool intersects(const Plane& plane) const;
+		bool intersects(const Ray& ray) const;
+		// TODO : intersects OBB
+		// TODO : intersects Frustum
+
+		const AABB& getAABB() const;
+		void fromAABB(const AABB& aabb);
+
+		void merge(const Vector3f& point);
+		void merge(const AABB& box);
+
+		void transform(const Matrix4f& m);
 
 	private:
 		Vector3f mMin;

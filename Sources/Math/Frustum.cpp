@@ -43,12 +43,12 @@ void Frustum::build(F32 fov, F32 ratio, F32 zNear, F32 zFar, const Vector3f& eye
 	corners[7] = nc - u * nearH + s * nearW; // NearRightBottom
 
 	// Construction of frustum's planes
-	mPlanes[0].redefine(corners[4], corners[7], corners[3]); // Bottom
-	mPlanes[1].redefine(corners[2], corners[1], corners[0]); // Far
-	mPlanes[2].redefine(corners[5], corners[4], corners[0]); // Left
-	mPlanes[3].redefine(corners[5], corners[6], corners[7]); // Near
-	mPlanes[4].redefine(corners[7], corners[6], corners[3]); // Right 
-	mPlanes[5].redefine(corners[6], corners[5], corners[1]); // Top
+	mPlanes[0].set(corners[4], corners[7], corners[3]); // Bottom
+	mPlanes[1].set(corners[2], corners[1], corners[0]); // Far
+	mPlanes[2].set(corners[5], corners[4], corners[0]); // Left
+	mPlanes[3].set(corners[5], corners[6], corners[7]); // Near
+	mPlanes[4].set(corners[7], corners[6], corners[3]); // Right 
+	mPlanes[5].set(corners[6], corners[5], corners[1]); // Top
 }
 
 bool Frustum::contains(const Vector3f& point) const

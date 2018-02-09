@@ -135,7 +135,29 @@ void DebugDraw::xzGrid(F32 begin, F32 end, F32 y, F32 interval, const LinearColo
 
 void DebugDraw::sphere(const Vector3f& center, F32 radius, const LinearColor& color)
 {
-	// TODO : Sphere
+	F32 dtheta = 25.0f;
+	F32 dphi = 25.0f;
+	for (F32 theta = -90.0f; theta <= 90.0f - dtheta; theta += dtheta) 
+	{
+		for (F32 phi = 0.0f; phi <= 360.0f - dphi; phi += dphi) 
+		{
+			F32 ct = nu::cos(theta);
+			F32 cdt = nu::cos(theta + dtheta);
+			F32 st = nu::sin(theta);
+			F32 sdt = nu::sin(theta + dtheta);
+			F32 cp = nu::cos(phi);
+			F32 cdp = nu::cos(phi + dphi);
+			F32 sp = nu::sin(phi);
+			F32 sdp = nu::sin(phi + dphi);
+			mVertices.emplace_back(center + radius * Vector3f(ct * cp, ct * sp, st), color);
+			mVertices.emplace_back(center + radius * Vector3f(cdt * cp, cdt * sp, sdt), color);
+			mVertices.emplace_back(center + radius * Vector3f(cdt * cdp, cdt * sdp, sdt), color);
+			if (theta > -90.0f && theta < 90.0f) 
+			{
+				mVertices.emplace_back(center + radius * Vector3f(ct * cdp, ct * sdp, st), color);
+			}
+		}
+	}
 }
 
 void DebugDraw::circle(const Vector3f& center, const Vector3f& normal, F32 radius, const LinearColor& color)

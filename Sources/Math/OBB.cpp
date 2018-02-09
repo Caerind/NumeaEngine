@@ -5,42 +5,42 @@ namespace nu
 
 OBB::OBB()
 {
-	mTransformation = Matrix4f::identity();
+	mTransformation.makeIdentity();
 }
 
 OBB::OBB(const Vector3f& min, const Vector3f& max)
 {
-	mTransformation = Matrix4f::identity();
+	mTransformation.makeIdentity();
 	set(min, max);
 }
 
 OBB::OBB(F32 minX, F32 minY, F32 minZ, F32 maxX, F32 maxY, F32 maxZ)
 {
-	mTransformation = Matrix4f::identity();
+	mTransformation.makeIdentity();
 	set(minX, minY, minZ, maxX, maxY, maxZ);
 }
 
 OBB::OBB(const AABB& box)
 {
-	mTransformation = Matrix4f::identity();
+	mTransformation.makeIdentity();
 	set(box);
 }
 
 OBB::OBB(const Vector3f& min, const Vector3f& max, const Matrix4f& matrix)
 {
-	mTransformation = Matrix4f::identity();
+	mTransformation.makeIdentity();
 	set(min, max, matrix);
 }
 
 OBB::OBB(F32 minX, F32 minY, F32 minZ, F32 maxX, F32 maxY, F32 maxZ, const Matrix4f& matrix)
 {
-	mTransformation = Matrix4f::identity();
+	mTransformation.makeIdentity();
 	set(minX, minY, minZ, maxX, maxY, maxZ, matrix);
 }
 
 OBB::OBB(const AABB& box, const Matrix4f& matrix)
 {
-	mTransformation = Matrix4f::identity();
+	mTransformation.makeIdentity();
 	set(box, matrix);
 }
 

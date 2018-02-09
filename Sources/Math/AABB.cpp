@@ -1,11 +1,13 @@
 #include "AABB.hpp"
 
+#include "Sphere.hpp"
+#include "Plane.hpp"
+#include "Ray.hpp"
+
 namespace nu
 {
 
 AABB::AABB()
-	: mMin(0.0f, 0.0f, 0.0f)
-	, mMax(0.0f, 0.0f, 0.0f)
 {
 }
 
@@ -72,65 +74,6 @@ void AABB::setCenteredBox(F32 cX, F32 cY, F32 cZ, F32 hsX, F32 hsY, F32 hsZ)
 	setCenteredBox(Vector3f(cX, cY, cZ), Vector3f(hsX, hsY, hsZ));
 }
 
-void AABB::merge(const Vector3f& point)
-{
-	mMin.minimize(point);
-	mMax.maximize(point);
-}
-
-void AABB::merge(const AABB& box)
-{
-	mMin.minimize(box.mMin);
-	mMax.maximize(box.mMax);
-}
-
-void AABB::transform(const Matrix4f& m)
-{
-	const Vector3f oldMin(mMin);
-	const Vector3f oldMax(mMax);
-	Vector3f currentCorner;
-	mMin.set(0.0f);
-	mMax.set(0.0f);
-
-	// We sequentially compute the corners in the following order :
-	// 0, 6, 5, 1, 2, 4 ,7 , 3
-	// This sequence allows us to only change one member at a time to get at all corners.
-	// For each one, we transform it using the matrix
-	// Which gives the resulting point and merge the resulting point.
-
-	// First corner 
-	// min min min
-	currentCorner = oldMin;
-	merge(m * currentCorner);
-
-	// min min max
-	currentCorner.z = oldMax.z;
-	merge(m * currentCorner);
-
-	// min max max
-	currentCorner.y = oldMax.y;
-	merge(m * currentCorner);
-
-	// min max min
-	currentCorner.z = oldMin.z;
-	merge(m * currentCorner);
-
-	// max max min
-	currentCorner.x = oldMax.x;
-	merge(m * currentCorner);
-
-	// max max max
-	currentCorner.z = oldMax.z;
-	merge(m * currentCorner);
-
-	// max min max
-	currentCorner.y = oldMin.y;
-	merge(m * currentCorner);
-
-	// max min min
-	currentCorner.z = oldMin.z;
-	merge(m * currentCorner);
-}
 
 Vector3f AABB::getCenter() const
 {
@@ -188,6 +131,16 @@ Vector3f AABB::getCorner(U8 index) const
 	}
 }
 
+bool AABB::operator==(const AABB& box) const
+{
+	return mMin == box.mMin && mMax == box.mMax;
+}
+
+bool AABB::operator!=(const AABB& box) const
+{
+	return !operator==(box);
+}
+
 F32 AABB::getDistanceSquared(const Vector3f& point) const
 {
 	if (contains(point))
@@ -227,17 +180,114 @@ F32 AABB::getDistance(const Vector3f& point) const
 
 bool AABB::contains(const Vector3f& point) const
 {
-	return nu::inRange(point.x, mMin.x, mMax.x) && nu::inRange(point.y, mMin.y, mMax.y) && nu::inRange(point.z, mMin.z, mMax.z);
+	return point >= mMin && point <= mMax;
 }
 
-bool AABB::operator==(const AABB& box) const
+bool AABB::contains(const AABB& box) const
 {
-	return mMin == box.mMin && mMax == box.mMax;
+	return box.mMin >= mMin && box.mMax <= mMax;
 }
 
-bool AABB::operator!=(const AABB& box) const
+bool AABB::contains(const Sphere& sphere) const
 {
-	return !operator==(box);
+	return contains(sphere.getAABB());
+}
+
+bool AABB::intersects(const AABB& box, AABB* intersection) const
+{
+	F32 left = std::max(mMin.x, box.mMin.x);
+	F32 right = std::min(mMax.x, box.mMax.x);
+	if (left >= right)
+		return false;
+
+	F32 top = std::max(mMin.y, box.mMin.y);
+	F32 bottom = std::min(mMax.y, box.mMax.y);
+	if (top >= bottom)
+		return false;
+
+	F32 up = std::max(mMin.z, box.mMin.z);
+	F32 down = std::min(mMax.z, box.mMax.z);
+	if (up >= down)
+		return false;
+
+	if (intersection)
+	{
+		intersection->setBox(left, top, up, right, bottom, down);
+	}
+
+	return true;
+}
+
+bool AABB::intersects(const Sphere& sphere) const
+{
+	return sphere.intersects(*this);
+}
+
+bool AABB::intersects(const Plane& plane) const
+{
+	return plane.intersects(*this);
+}
+
+bool AABB::intersects(const Ray& ray) const
+{
+	return ray.intersects(*this);
+}
+
+const AABB& AABB::getAABB() const
+{
+	return *this;
+}
+
+void AABB::fromAABB(const AABB& aabb)
+{
+	mMin.set(aabb.mMin);
+	mMax.set(aabb.mMax);
+}
+
+void AABB::merge(const Vector3f& point)
+{
+	mMin.minimize(point);
+	mMax.maximize(point);
+}
+
+void AABB::merge(const AABB& box)
+{
+	mMin.minimize(box.mMin);
+	mMax.maximize(box.mMax);
+}
+
+void AABB::transform(const Matrix4f& m)
+{
+	const Vector3f oldMin(mMin);
+	const Vector3f oldMax(mMax);
+	Vector3f currentCorner;
+	mMin.set(0.0f);
+	mMax.set(0.0f);
+	// This order only changes one value to change the corner
+	// min min min
+	currentCorner = oldMin;
+	merge(m * currentCorner);
+	// min min max
+	currentCorner.z = oldMax.z;
+	merge(m * currentCorner);
+	// min max max
+	currentCorner.y = oldMax.y;
+	merge(m * currentCorner);
+	// min max min
+	currentCorner.z = oldMin.z;
+	merge(m * currentCorner);
+	// max max min
+	currentCorner.x = oldMax.x;
+	merge(m * currentCorner);
+	// max max max
+	currentCorner.z = oldMax.z;
+	merge(m * currentCorner);
+	// max min max
+	currentCorner.y = oldMin.y;
+	merge(m * currentCorner);
+	// max min min
+	currentCorner.z = oldMin.z;
+	merge(m * currentCorner);
 }
 
 } // namespace nu

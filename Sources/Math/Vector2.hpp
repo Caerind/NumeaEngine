@@ -95,11 +95,12 @@ class Vector2
 		inline Vector2<T>& makeZero();
 		inline Vector2<T>& makePolar(T angle, T length = 1);
 
-		static inline Vector2<T> unit();
-		static inline Vector2<T> unitX();
-		static inline Vector2<T> unitY();
-		static inline Vector2<T> zero();
 		static inline Vector2<T> polar(T angle, T length = 1);
+
+		static const Vector2<T> unit;
+		static const Vector2<T> unitX;
+		static const Vector2<T> unitY;
+		static const Vector2<T> zero;
 
 		#include "DisableAnonymousStructBegin.hpp"
 		union 
@@ -123,11 +124,11 @@ template <typename T> T dot(const Vector2<T>& v1, const Vector2<T>& v2);
 
 template <typename T> Vector2<T> normalize(const Vector2<T>& vector, T* oldLength = nullptr);
 
+template <typename T> bool equalsVector(const Vector2<T>& v1, const Vector2<T>& v2, const T& epsilon = std::numeric_limits<T>::epsilon());
+
 template<typename T>
 inline Vector2<T>::Vector2()
 {
-	data[0] = T(0);
-	data[1] = T(0);
 }
 
 template<typename T>
@@ -363,8 +364,8 @@ inline Vector2<T>& Vector2<T>::operator/=(T scale)
 template<typename T>
 inline bool Vector2<T>::isZero() const
 {
-	if (!equals(data[0], 0)) return false;
-	return equals(data[1], 0);
+	if (!equals(data[0], T(0))) return false;
+	return equals(data[1], T(0));
 }
 
 template<typename T>
@@ -556,34 +557,15 @@ inline Vector2<T>& Vector2<T>::makePolar(T angle, T length)
 }
 
 template<typename T>
-inline Vector2<T> Vector2<T>::unit()
-{
-	return Vector2<T>(T(1), T(1));
-}
-
-template<typename T>
-inline Vector2<T> Vector2<T>::unitX()
-{
-	return Vector2<T>(T(1), T(0));
-}
-
-template<typename T>
-inline Vector2<T> Vector2<T>::unitY()
-{
-	return Vector2<T>(T(0), T(1));
-}
-
-template<typename T>
-inline Vector2<T> Vector2<T>::zero()
-{
-	return Vector2<T>(T(0), T(0));
-}
-
-template<typename T>
 inline Vector2<T> Vector2<T>::polar(T angle, T length)
 {
 	return Vector2<T>(nu::cos(angle) * length, nu::sin(angle) * length);
 }
+
+template <typename T> const Vector2<T> Vector2<T>::unit(1, 1);
+template <typename T> const Vector2<T> Vector2<T>::unitX(1, 0);
+template <typename T> const Vector2<T> Vector2<T>::unitY(0, 1);
+template <typename T> const Vector2<T> Vector2<T>::zero(0, 0);
 
 template<typename T>
 Vector2<T> operator+(const T & scale, const Vector2<T>& vector)
@@ -621,6 +603,13 @@ template<typename T>
 Vector2<T> normalize(const Vector2<T>& vector, T* oldLength)
 {
 	return vector.normalized(oldLength);
+}
+
+template <typename T> 
+bool equalsVector(const Vector2<T>& v1, const Vector2<T>& v2, const T& epsilon)
+{
+	if (!equals(v1.x, v2.x, epsilon)) return false;
+	return equals(v1.y, v2.y, epsilon);
 }
 
 typedef Vector2<F32> Vector2f;

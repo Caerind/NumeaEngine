@@ -1,55 +1,57 @@
 #include "Plane.hpp"
 
+#include "AABB.hpp"
+#include "Sphere.hpp"
+#include "Ray.hpp"
+
 namespace nu
 {
 
 Plane::Plane()
-	: mNormal(0.0f)
-	, mConstant(0.0f)
 {
 }
 
 Plane::Plane(const Vector3f& normal, F32 constant)
 	: mNormal(normal)
-	, mConstant(-constant)
+	, mConstant(constant)
 {
 }
 
 Plane::Plane(const Vector3f& normal, const Vector3f& point)
 {
-	redefine(normal, point);
+	set(normal, point);
 }
 
 Plane::Plane(F32 a, F32 b, F32 c, F32 d)
 {
-	redefine(a, b, c, d);
+	set(a, b, c, d);
 }
 
 Plane::Plane(const Vector3f& point1, const Vector3f& point2, const Vector3f& point3)
 {
-	redefine(point1, point2, point3);
+	set(point1, point2, point3);
 }
 
-void Plane::redefine(const Vector3f& normal, F32 constant)
+void Plane::set(const Vector3f& normal, F32 constant)
 {
-	mNormal.set(normal);
+	setNormal(normal);
 	mConstant = constant;
 }
 
-void Plane::redefine(const Vector3f& normal, const Vector3f& point)
+void Plane::set(const Vector3f& normal, const Vector3f& point)
 {
-	mNormal.set(normal);
+	setNormal(normal);
 	mConstant = -mNormal.dotProduct(point);
 }
 
-void Plane::redefine(F32 a, F32 b, F32 c, F32 d)
+void Plane::set(F32 a, F32 b, F32 c, F32 d)
 {
 	mNormal.set(a, b, c);
 	mConstant = d;
 	normalize();
 }
 
-void Plane::redefine(const Vector3f& point1, const Vector3f& point2, const Vector3f& point3)
+void Plane::set(const Vector3f& point1, const Vector3f& point2, const Vector3f& point3)
 {
 	Vector3f edge1 = point2 - point1;
 	Vector3f edge2 = point3 - point1;
@@ -64,7 +66,14 @@ const Vector3f& Plane::getNormal() const
 
 void Plane::setNormal(const Vector3f& normal)
 {
-	mNormal.set(normal);
+	if (normal.getSquaredLength() != 1.0f)
+	{
+		mNormal.set(normal.normalized());
+	}
+	else
+	{
+		mNormal.set(normal);
+	}
 }
 
 F32 Plane::getConstant() const
@@ -87,9 +96,11 @@ F32 Plane::normalize()
 	return length;
 }
 
-F32 Plane::getDistance(const Vector3f& point) const
+Plane Plane::normalized() const
 {
-	return mNormal.dotProduct(point) + mConstant;
+	Plane p(*this);
+	p.normalize();
+	return p;
 }
 
 Plane::Side Plane::getSide(const Vector3f& point) const
@@ -106,9 +117,54 @@ Plane::Side Plane::getSide(const Vector3f& point) const
 	return Plane::None;
 }
 
-bool Plane::contains(const Vector3f& point) const
+Plane::Side Plane::getSide(const AABB& box) const
 {
-	return equals(getDistance(point), 0.0f);
+	F32 distance = getDistance(box.getCenter());
+	F32 maxAbsDistance = abs(mNormal.dotProduct(box.getHalfSize())); // TODO : nu::abs
+	if (distance < -maxAbsDistance)
+	{
+		return Plane::Side::Negative;
+	}
+	if (distance > +maxAbsDistance)
+	{
+		return Plane::Side::Positive;
+	}
+	return Plane::Side::Both;
+}
+
+Plane::Side Plane::getSide(const Sphere& sphere) const
+{
+	F32 distance = getDistance(sphere.getCenter());
+	if (sphere.getRadius() > abs(distance)) // TODO : nu::abs
+	{
+		return Plane::Side::Both;
+	}
+	if (distance > 0.0f)
+	{
+		return Plane::Side::Positive;
+	}
+	if (distance < 0.0f)
+	{
+		return Plane::Side::Negative;
+	}
+	return Plane::Side::None;
+}
+
+Plane::Side Plane::getSide(const Ray& ray) const
+{
+	if (intersects(ray))
+	{
+		return Plane::Side::Both;
+	}
+	else
+	{
+		return getSide(ray.getOrigin());
+	}
+}
+
+Vector3f Plane::getClosestPoint(const Vector3f& point)
+{
+	return point - mNormal * getDistance(point);
 }
 
 bool Plane::operator==(const Plane& p) const
@@ -119,6 +175,50 @@ bool Plane::operator==(const Plane& p) const
 bool Plane::operator!=(const Plane& p) const
 {
 	return !operator==(p);
+}
+
+F32 Plane::getDistance(const Vector3f& point) const
+{
+	return mNormal.dotProduct(point) + mConstant;
+}
+
+bool Plane::contains(const Vector3f& point) const
+{
+	return equals(getDistance(point), 0.0f);
+}
+
+bool Plane::contains(const Ray& ray) const
+{
+	return equals(mNormal.dotProduct(ray.getDirection()), 0.0f) && contains(ray.getOrigin());
+}
+
+bool Plane::intersects(const AABB& box) const
+{
+	return getSide(box) == Plane::Side::Both;
+}
+
+bool Plane::intersects(const Sphere& sphere) const
+{
+	return fabs(getDistance(sphere.getCenter())) <= sphere.getRadius();
+}
+
+bool Plane::intersects(const Plane& plane) const
+{
+	Plane p1 = normalized();
+	Plane p2 = plane.normalized();
+	if (p1.mNormal == p2.mNormal)
+	{
+		return equals(p1.mConstant, p2.mConstant);
+	}
+	else
+	{
+		return true;
+	}
+}
+
+bool Plane::intersects(const Ray& ray) const
+{
+	return ray.intersects(*this);
 }
 
 } // namespace nu

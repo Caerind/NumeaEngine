@@ -1,10 +1,14 @@
 #ifndef NU_PLANE_HPP
 #define NU_PLANE_HPP
 
-#include "Vector4.hpp"
+#include "Matrix4.hpp"
 
 namespace nu
 {
+
+class AABB;
+class Sphere;
+class Ray;
 
 class Plane
 {
@@ -15,10 +19,10 @@ class Plane
 		Plane(F32 a, F32 b, F32 c, F32 d);
 		Plane(const Vector3f& point1, const Vector3f& point2, const Vector3f& point3);
 
-		void redefine(const Vector3f& normal, F32 constant);
-		void redefine(const Vector3f& normal, const Vector3f& point);
-		void redefine(F32 a, F32 b, F32 c, F32 d);
-		void redefine(const Vector3f& point1, const Vector3f& point2, const Vector3f& point3);
+		void set(const Vector3f& normal, F32 constant);
+		void set(const Vector3f& normal, const Vector3f& point);
+		void set(F32 a, F32 b, F32 c, F32 d);
+		void set(const Vector3f& point1, const Vector3f& point2, const Vector3f& point3);
 
 		const Vector3f& getNormal() const;
 		void setNormal(const Vector3f& normal);
@@ -27,8 +31,7 @@ class Plane
 		void setConstant(F32 constant);
 
 		F32 normalize();
-
-		F32 getDistance(const Vector3f& point) const;
+		Plane normalized() const;
 
 		enum Side : U8
 		{
@@ -38,11 +41,28 @@ class Plane
 			Both
 		};
 		Side getSide(const Vector3f& point) const;
+		Side getSide(const AABB& box) const;
+		Side getSide(const Sphere& sphere) const;
+		Side getSide(const Ray& ray) const;
 
-		bool contains(const Vector3f& point) const;
+		Vector3f getClosestPoint(const Vector3f& point);
 
 		bool operator==(const Plane& p) const;
 		bool operator!=(const Plane& p) const;
+
+		F32 getDistance(const Vector3f& point) const;
+
+		bool contains(const Vector3f& point) const;
+		bool contains(const Ray& ray) const;
+
+		bool intersects(const AABB& box) const;
+		bool intersects(const Sphere& sphere) const;
+		bool intersects(const Plane& plane) const;
+		bool intersects(const Ray& ray) const;
+		// TODO : intersects OBB
+		// TODO : intersects Frustum
+
+		// TODO : transform ?
 
 	private:
 		Vector3f mNormal;

@@ -7,7 +7,7 @@ Camera::Camera(ProjectionMode projMode)
 {
 	perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f);
 	ortho(0.0f, 0.0f, 0.0f, 0.0f, 0.1f, 100.0f);
-	lookAt(Vector3f::zero(), Vector3f::zero());
+	lookAt(Vector3f::zero, Vector3f::zero);
 	mProjectionMode = projMode;
 }
 

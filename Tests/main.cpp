@@ -16,6 +16,8 @@ void test()
 
 int main()
 {
+	//test();
+
 	nu::LogManager::initialize();
 
 	nu::FileLogger file;

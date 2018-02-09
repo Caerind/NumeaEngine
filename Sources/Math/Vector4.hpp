@@ -104,12 +104,12 @@ class Vector4
 		inline Vector4<T>& makeUnitW();
 		inline Vector4<T>& makeZero();
 
-		static inline Vector4<T> unit();
-		static inline Vector4<T> unitX();
-		static inline Vector4<T> unitY();
-		static inline Vector4<T> unitZ();
-		static inline Vector4<T> unitW();
-		static inline Vector4<T> zero();
+		static const Vector4<T> unit;
+		static const Vector4<T> unitX;
+		static const Vector4<T> unitY;
+		static const Vector4<T> unitZ;
+		static const Vector4<T> unitW;
+		static const Vector4<T> zero;
 
 		#include "DisableAnonymousStructBegin.hpp"
 		union 
@@ -135,13 +135,11 @@ template <typename T> T dot(const Vector4<T>& v1, const Vector4<T>& v2);
 
 template <typename T> Vector4<T> normalize(const Vector4<T>& vector, T* oldLength = nullptr);
 
+template <typename T> bool equalsVector(const Vector4<T>& v1, const Vector4<T>& v2, const T& epsilon = std::numeric_limits<T>::epsilon());
+
 template<typename T>
 inline Vector4<T>::Vector4()
 {
-	data[0] = T(0);
-	data[1] = T(0);
-	data[2] = T(0);
-	data[3] = T(0);
 }
 
 template<typename T>
@@ -443,10 +441,10 @@ inline Vector4<T>& Vector4<T>::operator/=(T scale)
 template<typename T>
 inline bool Vector4<T>::isZero() const
 {
-	if (!equals(data[0], 0)) return false;
-	if (!equals(data[1], 0)) return false;
-	if (!equals(data[2], 0)) return false;
-	return equals(data[3], 0);
+	if (!equals(data[0], T(0))) return false;
+	if (!equals(data[1], T(0))) return false;
+	if (!equals(data[2], T(0))) return false;
+	return equals(data[3], T(0));
 }
 
 template<typename T>
@@ -663,41 +661,12 @@ inline Vector4<T>& Vector4<T>::makeZero()
 	return set(T(0), T(0), T(0), T(0));
 }
 
-template<typename T>
-inline Vector4<T> Vector4<T>::unit()
-{
-	return Vector4<T>(T(1), T(1), T(1), T(1));
-}
-
-template<typename T>
-inline Vector4<T> Vector4<T>::unitX()
-{
-	return Vector4<T>(T(1), T(0), T(0), T(0));
-}
-
-template<typename T>
-inline Vector4<T> Vector4<T>::unitY()
-{
-	return Vector4<T>(T(0), T(1), T(0), T(0));
-}
-
-template<typename T>
-inline Vector4<T> Vector4<T>::unitZ()
-{
-	return Vector4<T>(T(0), T(0), T(1), T(0));
-}
-
-template<typename T>
-inline Vector4<T> Vector4<T>::unitW()
-{
-	return Vector4<T>(T(0), T(0), T(0), T(1));
-}
-
-template<typename T>
-inline Vector4<T> Vector4<T>::zero()
-{
-	return Vector4<T>(T(0), T(0), T(0), T(0));
-}
+template <typename T> const Vector4<T> Vector4<T>::unit(1, 1, 1, 1);
+template <typename T> const Vector4<T> Vector4<T>::unitX(1, 0, 0, 0);
+template <typename T> const Vector4<T> Vector4<T>::unitY(0, 1, 0, 0);
+template <typename T> const Vector4<T> Vector4<T>::unitZ(0, 0, 1, 0);
+template <typename T> const Vector4<T> Vector4<T>::unitW(0, 0, 0, 1);
+template <typename T> const Vector4<T> Vector4<T>::zero(0, 0, 0, 0);
 
 template<typename T>
 Vector4<T> operator+(const T& scale, const Vector4<T>& vector)
@@ -737,6 +706,15 @@ template<typename T>
 Vector4<T> normalize(const Vector4<T>& vector, T* oldLength)
 {
 	return vector.normalized(oldLength);
+}
+
+template <typename T>
+bool equalsVector(const Vector4<T>& v1, const Vector4<T>& v2, const T& epsilon)
+{
+	if (!equals(v1.x, v2.x, epsilon)) return false;
+	if (!equals(v1.y, v2.y, epsilon)) return false;
+	if (!equals(v1.z, v2.z, epsilon)) return false;
+	return equals(v1.w, v2.w, epsilon);
 }
 
 typedef Vector4<float>			Vector4f;

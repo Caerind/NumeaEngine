@@ -54,7 +54,12 @@ inline bool inRange(T val, T range_start, T range_end)
 }
 
 template <typename T>
-inline bool equals(const T& a, const T& b, const T& epsilon = std::numeric_limits<T>::epsilon())
+inline bool equals(const T& a, const T& b, const T& epsilon = std::numeric_limits<F32>::epsilon())
+{
+	return a == b;
+}
+
+template <> inline bool equals<F32>(const F32& a, const F32& b, const F32& epsilon)
 {
 	return std::fabs(a - b) < epsilon;
 }

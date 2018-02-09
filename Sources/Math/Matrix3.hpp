@@ -89,8 +89,8 @@ class Matrix3
 		static inline Matrix3<T> rotationZ(const T& angle);
 		static inline Matrix3<T> rotationZ(const Vector2<T>& v);
 
-		static inline Matrix3<T> zero();
-		static inline Matrix3<T> identity();
+		static const Matrix3<T> zero;
+		static const Matrix3<T> identity;
 
 		#include "DisableAnonymousStructBegin.hpp"
 		union
@@ -101,15 +101,9 @@ class Matrix3
 		#include "DisableAnonymousStructEnd.hpp"
 };
 
-template <typename T> Matrix3<T> operator+(const T& s, const Matrix3<T>& matrix);
-template <typename T> Matrix3<T> operator-(const T& s, const Matrix3<T>& matrix);
-template <typename T> Matrix3<T> operator*(const T& s, const Matrix3<T>& matrix);
-template <typename T> Matrix3<T> operator/(const T& s, const Matrix3<T>& matrix);
-
 template<typename T>
 inline Matrix3<T>::Matrix3()
 {
-	set(zero());
 }
 
 template<typename T>
@@ -574,7 +568,7 @@ inline Matrix3<T> Matrix3<T>::inversed(bool* succeeded) const
 		{
 			*succeeded = false;
 		}
-		return identity();
+		return identity;
 	}
 
 	T inv[9];
@@ -655,13 +649,13 @@ inline Matrix3<T>& Matrix3<T>::makeRotationZ(const Vector2<T>& v)
 template<typename T>
 inline Matrix3<T>& Matrix3<T>::makeZero()
 {
-	return set(zero());
+	return set(zero);
 }
 
 template<typename T>
 inline Matrix3<T>& Matrix3<T>::makeIdentity()
 {
-	return set(identity());
+	return set(identity);
 }
 
 template<typename T>
@@ -700,54 +694,12 @@ inline Matrix3<T> Matrix3<T>::rotationZ(const Vector2<T>& v)
 	return Matrix3<T>(v.x, v.y, 0, -v.y, v.x, 0, 0, 0, 1);
 }
 
-template<typename T>
-inline Matrix3<T> Matrix3<T>::zero()
-{
-	return Matrix3<T>(T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0));
-}
-
-template<typename T>
-inline Matrix3<T> Matrix3<T>::identity()
-{
-	return Matrix3<T>(T(1), T(0), T(0), T(0), T(1), T(0), T(0), T(0), T(1));
-}
+template <typename T> const Matrix3<T> Matrix3<T>::zero(0, 0, 0, 0, 0, 0, 0, 0, 0);
+template <typename T> const Matrix3<T> Matrix3<T>::identity(1, 0, 0, 0, 1, 0, 0, 0, 1);
 
 typedef Matrix3<F32> Matrix3f;
 
 typedef Matrix3f mat3; // GLSL-like
-
-template<typename T>
-Matrix3<T> operator+(const T& s, const Matrix3<T>& matrix)
-{
-	return matrix + s;
-}
-
-template<typename T>
-Matrix3<T> operator-(const T& s, const Matrix3<T>& matrix)
-{
-	return matrix.operator-() + s;
-}
-
-template<typename T>
-Matrix3<T> operator*(const T& s, const Matrix3<T>& matrix)
-{
-	return matrix * s;
-}
-
-template<typename T>
-Matrix3<T> operator/(const T& s, const Matrix3<T>& matrix)
-{
-	assert(!equals(matrix[0], T(0)));
-	assert(!equals(matrix[1], T(0)));
-	assert(!equals(matrix[2], T(0)));
-	assert(!equals(matrix[3], T(0)));
-	assert(!equals(matrix[4], T(0)));
-	assert(!equals(matrix[5], T(0)));
-	assert(!equals(matrix[6], T(0)));
-	assert(!equals(matrix[7], T(0)));
-	assert(!equals(matrix[8], T(0)));
-	return Matrix3<T>(s / matrix[0], s / matrix[1], s / matrix[2], s / matrix[3], s / matrix[4], s / matrix[5], s / matrix[6], s / matrix[7], s / matrix[8]);
-}
 
 } // namespace nu
 

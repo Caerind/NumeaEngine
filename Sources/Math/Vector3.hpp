@@ -5,6 +5,32 @@
 
 #include "Vector2.hpp"
 
+#ifndef NU_MATH_VEC3_FORWARD
+#define NU_MATH_VEC3_FORWARD 0,0,1
+#endif
+
+#ifndef NU_MATH_VEC3_BACK
+#define NU_MATH_VEC3_BACK 0,0,-1
+#endif
+
+#ifndef NU_MATH_VEC3_UP
+#define NU_MATH_VEC3_UP 0,1,0
+#endif
+
+#ifndef NU_MATH_VEC3_DOWN
+#define NU_MATH_VEC3_DOWN 0,-1,0
+#endif
+
+#ifndef NU_MATH_VEC3_RIGHT
+#define NU_MATH_VEC3_RIGHT -1,0,0
+#endif
+
+#ifndef NU_MATH_VEC3_LEFT
+#define NU_MATH_VEC3_LEFT 1,0,0
+#endif
+
+// TODO : Vector3 Aligned ?
+
 namespace nu
 {
 
@@ -101,11 +127,18 @@ class Vector3
 		inline Vector3<T>& makeUnitZ();
 		inline Vector3<T>& makeZero();
 
-		static inline Vector3<T> unit();
-		static inline Vector3<T> unitX();
-		static inline Vector3<T> unitY();
-		static inline Vector3<T> unitZ();
-		static inline Vector3<T> zero();
+		static const Vector3<T> unit;
+		static const Vector3<T> unitX;
+		static const Vector3<T> unitY;
+		static const Vector3<T> unitZ;
+		static const Vector3<T> zero;
+
+		static const Vector3<T> forward;
+		static const Vector3<T> back;
+		static const Vector3<T> up;
+		static const Vector3<T> down;
+		static const Vector3<T> right;
+		static const Vector3<T> left;
 
 		#include "DisableAnonymousStructBegin.hpp"
 		union 
@@ -132,12 +165,11 @@ template <typename T> Vector3<T> normalize(const Vector3<T>& vec, T* oldLength =
 
 template <typename T> Vector3<T> cross(const Vector3<T>& v1, const Vector3<T>& v2);
 
+template <typename T> bool equalsVector(const Vector3<T>& v1, const Vector3<T>& v2, const T& epsilon = std::numeric_limits<T>::epsilon());
+
 template<typename T>
 inline Vector3<T>::Vector3()
 {
-	data[0] = T(0);
-	data[1] = T(0);
-	data[2] = T(0);
 }
 
 template<typename T>
@@ -404,9 +436,9 @@ inline Vector3<T>& Vector3<T>::operator/=(T scale)
 template<typename T>
 inline bool Vector3<T>::isZero() const
 {
-	if (!equals(data[0], 0)) return false;
-	if (!equals(data[1], 0)) return false;
-	return equals(data[2], 0);
+	if (!equals(data[0], T(0))) return false;
+	if (!equals(data[1], T(0))) return false;
+	return equals(data[2], T(0));
 }
 
 template<typename T>
@@ -610,38 +642,21 @@ inline Vector3<T>& Vector3<T>::makeZero()
 	return set(T(0), T(0), T(0));
 }
 
-template<typename T>
-inline Vector3<T> Vector3<T>::unit()
-{
-	return Vector3<T>(T(1), T(1), T(1));
-}
+template <typename T> const Vector3<T> Vector3<T>::unit(1, 1, 1);
+template <typename T> const Vector3<T> Vector3<T>::unitX(1, 0, 0);
+template <typename T> const Vector3<T> Vector3<T>::unitY(0, 1, 0);
+template <typename T> const Vector3<T> Vector3<T>::unitZ(0, 0, 1);
+template <typename T> const Vector3<T> Vector3<T>::zero(0, 0, 0);
+
+template <typename T> const Vector3<T> Vector3<T>::forward(NU_MATH_VEC3_FORWARD);
+template <typename T> const Vector3<T> Vector3<T>::back(NU_MATH_VEC3_BACK);
+template <typename T> const Vector3<T> Vector3<T>::up(NU_MATH_VEC3_UP);
+template <typename T> const Vector3<T> Vector3<T>::down(NU_MATH_VEC3_DOWN);
+template <typename T> const Vector3<T> Vector3<T>::right(NU_MATH_VEC3_RIGHT);
+template <typename T> const Vector3<T> Vector3<T>::left(NU_MATH_VEC3_LEFT);
 
 template<typename T>
-inline Vector3<T> Vector3<T>::unitX()
-{
-	return Vector3<T>(T(1), T(0), T(0));
-}
-
-template<typename T>
-inline Vector3<T> Vector3<T>::unitY()
-{
-	return Vector3<T>(T(0), T(1), T(0));
-}
-
-template<typename T>
-inline Vector3<T> Vector3<T>::unitZ()
-{
-	return Vector3<T>(T(0), T(0), T(1));
-}
-
-template<typename T>
-inline Vector3<T> Vector3<T>::zero()
-{
-	return Vector3<T>(T(0), T(0), T(0));
-}
-
-template<typename T>
-Vector3<T> operator+(const T & scale, const Vector3<T>& vector)
+Vector3<T> operator+(const T& scale, const Vector3<T>& vector)
 {
 	return vector + scale;
 }
@@ -674,7 +689,7 @@ T dot(const Vector3<T>& v1, const Vector3<T>& v2)
 }
 
 template<typename T>
-Vector3<T> normalize(const Vector3<T>& vec, T * oldLength)
+Vector3<T> normalize(const Vector3<T>& vec, T* oldLength)
 {
 	return vec.normalized(oldLength);
 }
@@ -683,6 +698,14 @@ template<typename T>
 Vector3<T> cross(const Vector3<T>& v1, const Vector3<T>& v2)
 {
 	return v1.crossProduct(v2);
+}
+
+template <typename T>
+bool equalsVector(const Vector3<T>& v1, const Vector3<T>& v2, const T& epsilon)
+{
+	if (!equals(v1.x, v2.x, epsilon)) return false;
+	if (!equals(v1.y, v2.y, epsilon)) return false;
+	return equals(v1.z, v2.z, epsilon);
 }
 
 typedef Vector3<F32> Vector3f;

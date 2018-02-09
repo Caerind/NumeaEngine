@@ -11,6 +11,8 @@ template <typename T> class Quaternion;
 template <typename T> class Vector3;
 template <typename T> class Vector4;
 
+// TODO : Matrix43 ?
+
 template <typename T>
 class Matrix4
 {
@@ -115,7 +117,7 @@ class Matrix4
 		inline Matrix4<T> rotated(const Quaternion<T>& rotation);
 		inline Matrix4<T> rotated(const Matrix3<T>& rotation);
 		inline Matrix4<T> scaled(const Vector3<T>& scale);
-		inline Matrix4<T> scaled(const T& sx, const T& sy, const T& sz); // TODO
+		inline Matrix4<T> scaled(const T& sx, const T& sy, const T& sz);
 		inline Matrix4<T> scaled(const T& s);
 		inline Matrix4<T> translated(const Vector3<T>& translation);
 		inline Matrix4<T> translated(const T& tx, const T& ty, const T& tz);
@@ -130,7 +132,7 @@ class Matrix4
 		inline Matrix4<T>& makeTransform(const Vector3<T>& translation, const Quaternion<T>& rotation, const Vector3<T>& scale);
 
 		inline Matrix4<T>& makeViewMatrix(const Vector3<T>& translation, const Quaternion<T>& rotation);
-		inline Matrix4<T>& makeLookAt(const Vector3<T>& eye, const Vector3<T>& target, const Vector3<T>& up);
+		inline Matrix4<T>& makeLookAt(const Vector3<T>& eye, const Vector3<T>& target, const Vector3<T>& up = Vector3<T>::up);
 		inline Matrix4<T>& makeOrtho(const T& left, const T& right, const T& top, const T& bottom, const T& zNear, const T& zFar);
 		inline Matrix4<T>& makePerspective(const T& fov, const T& ratio, const T& zNear, const T& zFar);
 
@@ -148,12 +150,12 @@ class Matrix4
 		static inline Matrix4<T> transform(const Vector3<T>& translation, const Quaternion<T>& rotation, const Vector3<T>& scale);
 
 		static inline Matrix4<T> viewMatrix(const Vector3<T>& translation, const Quaternion<T>& rotation);
-		static inline Matrix4<T> lookAt(const Vector3<T>& eye, const Vector3<T>& target, const Vector3<T>& up);
+		static inline Matrix4<T> lookAt(const Vector3<T>& eye, const Vector3<T>& target, const Vector3<T>& up = Vector3<T>::up);
 		static inline Matrix4<T> ortho(const T& left, const T& right, const T& top, const T& bottom, const T& zNear, const T& zFar);
 		static inline Matrix4<T> perspective(const T& fov, const T& ratio, const T& zNear, const T& zFar);
 
-		static inline Matrix4<T> zero();
-		static inline Matrix4<T> identity();
+		static const Matrix4<T> zero;
+		static const Matrix4<T> identity;
 
 		#include "DisableAnonymousStructBegin.hpp"
 		union
@@ -184,7 +186,6 @@ namespace nu
 template<typename T>
 inline Matrix4<T>::Matrix4()
 {
-	set(identity());
 }
 
 template<typename T>
@@ -985,7 +986,7 @@ inline Matrix4<T> Matrix4<T>::inversed(bool* succeeded) const
 		{
 			*succeeded = false;
 		}
-		return identity();
+		return identity;
 	}
 
 	const T invDet = 1 / det;
@@ -1285,15 +1286,13 @@ inline Matrix4<T>& Matrix4<T>::makePerspective(const T& fov, const T& ratio, con
 template<typename T>
 inline Matrix4<T>& Matrix4<T>::makeZero()
 {
-	// TODO : Improve ? 
-	return set(Matrix4<T>::zero());
+	return set(Matrix4<T>::zero);
 }
 
 template<typename T>
 inline Matrix4<T>& Matrix4<T>::makeIdentity()
 {
-	// TODO : Improve ? 
-	return set(Matrix4<T>::identity());
+	return set(Matrix4<T>::identity);
 }
 
 template<typename T>
@@ -1400,23 +1399,8 @@ inline Matrix4<T> Matrix4<T>::perspective(const T& fov, const T& ratio, const T&
 	return Matrix4<T>(x, 0, 0, 0, 0, y, 0, 0, 0, 0, -(zFar + zNear) / zDist, -1, 0, 0, (-2 * zFar * zNear) / zDist, 0);
 }
 
-template<typename T>
-inline Matrix4<T> Matrix4<T>::zero()
-{
-	return Matrix4<T>(T(0), T(0), T(0), T(0),
-		T(0), T(0), T(0), T(0),
-		T(0), T(0), T(0), T(0),
-		T(0), T(0), T(0), T(0));
-}
-
-template<typename T>
-inline Matrix4<T> Matrix4<T>::identity()
-{
-	return Matrix4<T>(T(1), T(0), T(0), T(0),
-		T(0), T(1), T(0), T(0),
-		T(0), T(0), T(1), T(0),
-		T(0), T(0), T(0), T(1));
-}
+template <typename T> const Matrix4<T> Matrix4<T>::zero(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+template <typename T> const Matrix4<T> Matrix4<T>::identity(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
 
 } // namespace nu
 
