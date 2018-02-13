@@ -7,12 +7,12 @@ Frustum::Frustum()
 {
 }
 
-Frustum::Frustum(F32 fov, F32 ratio, F32 zNear, F32 zFar, const Vector3f& eye, const Vector3f& target, const Vector3f& up, const F32 handedness)
+Frustum::Frustum(F32 fov, F32 ratio, F32 zNear, F32 zFar, const Vector3f& eye, const Vector3f& target, const Vector3f& up)
 {
-	build(fov, ratio, zNear, zFar, eye, target, up, handedness);
+	build(fov, ratio, zNear, zFar, eye, target, up);
 }
 
-void Frustum::build(F32 fov, F32 ratio, F32 zNear, F32 zFar, const Vector3f& eye, const Vector3f& target, const Vector3f& up, const F32 handedness)
+void Frustum::build(F32 fov, F32 ratio, F32 zNear, F32 zFar, const Vector3f& eye, const Vector3f& target, const Vector3f& up)
 {
 	fov *= 0.5f;
 	F32 tangent = nu::tan(fov);
@@ -24,36 +24,30 @@ void Frustum::build(F32 fov, F32 ratio, F32 zNear, F32 zFar, const Vector3f& eye
 	Vector3f f((target - eye).normalized());
 	Vector3f s(up.crossProduct(f).normalized());
 	Vector3f u(f.crossProduct(s));
-	const F32 neg = -handedness;
-	f *= neg;
-	s *= neg;
 
 	Vector3f nc = eye + f * zNear;
 	Vector3f fc = eye + f * zFar;
 
-	// Computing the frustum
-	Vector3f corners[8];
-	corners[0] = fc - u * farH - s * farW; // FarLeftBottom
-	corners[1] = fc + u * farH - s * farW; // FarLeftTop
-	corners[2] = fc + u * farH + s * farW; // FarRightTop
-	corners[3] = fc - u * farH + s * farW; // FarRightBottom
-	corners[4] = nc - u * nearH - s * nearW; // NearLeftBottom
-	corners[5] = nc + u * nearH - s * nearW; // NearLeftTop
-	corners[6] = nc + u * nearH + s * nearW; // NearRightTop
-	corners[7] = nc - u * nearH + s * nearW; // NearRightBottom
+	mCorners[Corners::FTL] = fc + u * farH - s * farW;
+	mCorners[Corners::FTR] = fc + u * farH + s * farW;
+	mCorners[Corners::FBR] = fc - u * farH + s * farW;
+	mCorners[Corners::FBL] = fc - u * farH - s * farW;
+	mCorners[Corners::NTL] = nc + u * nearH - s * nearW;
+	mCorners[Corners::NTR] = nc + u * nearH + s * nearW;
+	mCorners[Corners::NBR] = nc - u * nearH + s * nearW;
+	mCorners[Corners::NBL] = nc - u * nearH - s * nearW; 
 
-	// Construction of frustum's planes
-	mPlanes[0].set(corners[4], corners[7], corners[3]); // Bottom
-	mPlanes[1].set(corners[2], corners[1], corners[0]); // Far
-	mPlanes[2].set(corners[5], corners[4], corners[0]); // Left
-	mPlanes[3].set(corners[5], corners[6], corners[7]); // Near
-	mPlanes[4].set(corners[7], corners[6], corners[3]); // Right 
-	mPlanes[5].set(corners[6], corners[5], corners[1]); // Top
+	mPlanes[Planes::Near].set(mCorners[Corners::NTL], mCorners[Corners::NTR], mCorners[Corners::NBR]);
+	mPlanes[Planes::Far].set(mCorners[Corners::FTR], mCorners[Corners::FTL], mCorners[Corners::FBL]);
+	mPlanes[Planes::Top].set(mCorners[Corners::NTL], mCorners[Corners::FTL], mCorners[FTR]);
+	mPlanes[Planes::Bottom].set(mCorners[Corners::FBR], mCorners[Corners::NBR], mCorners[Corners::NBL]);
+	mPlanes[Planes::Right].set(mCorners[Corners::FBR], mCorners[Corners::NBR], mCorners[Corners::NTR]);
+	mPlanes[Planes::Left].set(mCorners[Corners::NBL], mCorners[Corners::FBL], mCorners[Corners::FTL]);
 }
 
 bool Frustum::contains(const Vector3f& point) const
 {
-	for (U8 i = 0; i < 6; i++)
+	for (U32 i = 0; i < 6; i++)
 	{
 		if (mPlanes[i].getSide(point) == Plane::Side::Negative)
 		{
@@ -63,9 +57,38 @@ bool Frustum::contains(const Vector3f& point) const
 	return true;
 }
 
-const Plane& Frustum::getPlane(U8 index) const
+bool Frustum::contains(const AABB& box) const
+{
+	for (U32 i = 0; i < 6; i++)
+	{
+		if (mPlanes[i].getSide(box) == Plane::Side::Negative)
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+bool Frustum::contains(const Sphere& sphere) const
+{
+	for (U32 i = 0; i < 6; i++)
+	{
+		if (mPlanes[i].getSide(sphere) == Plane::Side::Negative)
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+const Plane& Frustum::getPlane(U32 index) const
 {
 	return mPlanes[index];
+}
+
+const Vector3f& Frustum::getCorner(U32 index) const
+{
+	return mCorners[index];
 }
 
 } // namespace nu

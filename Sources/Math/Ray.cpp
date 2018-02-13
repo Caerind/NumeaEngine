@@ -97,7 +97,30 @@ bool Ray::intersects(const AABB& box, F32* distance) const
 
 bool Ray::intersects(const Sphere& sphere, F32* distance) const
 {
-	return false; // TODO :
+	F32 i = mDirection.dotProduct(sphere.getCenter() - mOrigin);
+	if (i < 0.0f)
+	{
+		if (distance != nullptr)
+		{
+			*distance = 0.0f;
+		}
+		return false;
+	}
+	Vector3f interior = mOrigin + mDirection * i;
+	F32 lSquared = (sphere.getRadius() * sphere.getRadius()) - (interior - sphere.getCenter()).getSquaredLength();
+	if (lSquared < 0.0f)
+	{
+		if (distance != nullptr)
+		{
+			*distance = 0.0f;
+		}
+		return false;
+	}
+	if (distance != nullptr)
+	{
+		*distance = i - sqrt(lSquared);
+	}
+	return true;
 }
 
 bool Ray::intersects(const Plane& plane, F32* distance) const
