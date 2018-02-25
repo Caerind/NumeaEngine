@@ -88,7 +88,6 @@ class Quaternion
 
 		static const Quaternion<T> identity;
 
-		#include "DisableAnonymousStructBegin.hpp"
 		union
 		{
 			T data[4];
@@ -98,7 +97,6 @@ class Quaternion
 				T s;
 			};
 		};
-		#include "DisableAnonymousStructEnd.hpp"
 };
 
 template <typename T>

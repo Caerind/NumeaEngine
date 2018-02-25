@@ -6,6 +6,7 @@
 #include "LinearColor.hpp"
 #include "../Math/Matrix4.hpp"
 #include "../Math/Quaternion.hpp"
+#include "../Math/Frustum.hpp"
 
 namespace nu
 {
@@ -16,21 +17,18 @@ class DebugDraw
 		DebugDraw();
 		~DebugDraw();
 
-		void line(const Vector3f& p1, const Vector3f& p2, const LinearColor& color);
-		void box(const Vector3f& boxCenter, const Vector3f& boxHalfSize, const LinearColor& color);
-		void aabb(const Vector3f& p1, const Vector3f& p2, const LinearColor& color);
+		void line(const Vector3f& p1, const Vector3f& p2, const LinearColor& color = LinearColor::LightGray);
+		void box(const Vector3f& boxCenter, const Vector3f& boxHalfSize, const LinearColor& color = LinearColor::LightGray);
+		void aabb(const Vector3f& p1, const Vector3f& p2, const LinearColor& color = LinearColor::LightGray);
 		void cross(const Vector3f& center);
 		void transform(const Matrix4f& transform);
 		void transform(const Quaternionf& transform);
 		void point(const Vector3f& p, const LinearColor& color = LinearColor::LightGray);
-		void xzGrid(F32 begin, F32 end, F32 y, F32 interval, const LinearColor& color);
-		void sphere(const Vector3f& center, F32 radius, const LinearColor& color);
-		void circle(const Vector3f& center, const Vector3f& normal, F32 radius, const LinearColor& color);
-		void plane(const Vector3f& center, const Vector3f& normal, const Vector2f& halfSize, const LinearColor& color);
-		void cone(const Vector3f& origin, const Vector3f& dir, F32 length, F32 radius, const LinearColor& color);
-		// TODO : geometry from math
-
-		void noise(F32 begin, F32 end, F32 gain, U32 oct, F32 lac);
+		void xzGrid(F32 begin, F32 end, F32 y, F32 interval, const LinearColor& color = LinearColor::LightGray);
+		void sphere(const Vector3f& center, F32 radius, const LinearColor& color = LinearColor::LightGray);
+		void circle(const Vector3f& center, const Vector3f& normal, F32 radius, const LinearColor& color = LinearColor::LightGray);
+		void cone(const Vector3f& origin, const Vector3f& dir, F32 length, F32 radius, const LinearColor& color = LinearColor::LightGray);
+		void frustum(const Frustum& frustum, const LinearColor& color = LinearColor::LightGray);
 
 		void render(const Matrix4f& viewMatrix, const Matrix4f& projectionMatrix);
 

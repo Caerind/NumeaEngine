@@ -34,6 +34,12 @@ class Renderer
 		void begin(const Color& clearColor = Color::Black);
 		void end();
 
+		U32 getCurrentVertexArray() const;
+		U32 getCurrentVertexBuffer() const;
+		U32 getCurrentIndexBuffer() const;
+		U32 getCurrentShader() const;
+		U32 getCurrentTexture() const;
+
 		Camera& getCamera();
 
 		static bool instantiated();

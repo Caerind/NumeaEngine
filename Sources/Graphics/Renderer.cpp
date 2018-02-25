@@ -57,6 +57,41 @@ void Renderer::end()
 {
 }
 
+U32 Renderer::getCurrentVertexArray() const
+{
+	int id;
+	glCheck(glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &id));
+	return U32(id);
+}
+
+U32 Renderer::getCurrentVertexBuffer() const
+{
+	int id;
+	glCheck(glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &id));
+	return U32(id);
+}
+
+U32 Renderer::getCurrentIndexBuffer() const
+{
+	int id;
+	glCheck(glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &id));
+	return U32(id);
+}
+
+U32 Renderer::getCurrentShader() const
+{
+	int id;
+	glCheck(glGetIntegerv(GL_CURRENT_PROGRAM, &id));
+	return U32(id);
+}
+
+U32 Renderer::getCurrentTexture() const
+{
+	int id;
+	glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &id));
+	return U32(id);
+}
+
 Camera& Renderer::getCamera()
 {
 	return mCamera;

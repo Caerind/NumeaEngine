@@ -157,13 +157,11 @@ class Matrix4
 		static const Matrix4<T> zero;
 		static const Matrix4<T> identity;
 
-		#include "DisableAnonymousStructBegin.hpp"
 		union
 		{
 			T data[16];
 			T m[4][4];
 		};
-		#include "DisableAnonymousStructEnd.hpp"
 };
 
 typedef Matrix4<F32> Matrix4f;

@@ -111,7 +111,6 @@ class Vector4
 		static const Vector4<T> unitW;
 		static const Vector4<T> zero;
 
-		#include "DisableAnonymousStructBegin.hpp"
 		union 
 		{
 			T data[4];
@@ -123,7 +122,6 @@ class Vector4
 				T w;
 			};
 		};
-		#include "DisableAnonymousStructEnd.hpp"
 };
 
 template <typename T> Vector4<T> operator+(const T& scale, const Vector4<T>& vector);

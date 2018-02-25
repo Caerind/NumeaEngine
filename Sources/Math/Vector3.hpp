@@ -140,7 +140,6 @@ class Vector3
 		static const Vector3<T> right;
 		static const Vector3<T> left;
 
-		#include "DisableAnonymousStructBegin.hpp"
 		union 
 		{
 			T data[3];
@@ -151,7 +150,6 @@ class Vector3
 				T z;
 			};
 		};
-		#include "DisableAnonymousStructEnd.hpp"
 };
 
 template <typename T> Vector3<T> operator+(const T& scale, const Vector3<T>& vector);

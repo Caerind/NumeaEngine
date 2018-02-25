@@ -102,7 +102,6 @@ class Vector2
 		static const Vector2<T> unitY;
 		static const Vector2<T> zero;
 
-		#include "DisableAnonymousStructBegin.hpp"
 		union 
 		{
 			T data[2];
@@ -112,7 +111,6 @@ class Vector2
 				T y;
 			};
 		};
-		#include "DisableAnonymousStructEnd.hpp"
 };
 
 template <typename T> Vector2<T> operator+(const T& scale, const Vector2<T>& vector);

@@ -92,13 +92,11 @@ class Matrix3
 		static const Matrix3<T> zero;
 		static const Matrix3<T> identity;
 
-		#include "DisableAnonymousStructBegin.hpp"
 		union
 		{
 			T data[9];
 			T m[3][3];
 		};
-		#include "DisableAnonymousStructEnd.hpp"
 };
 
 template<typename T>

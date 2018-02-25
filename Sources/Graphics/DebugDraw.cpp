@@ -115,7 +115,7 @@ void DebugDraw::transform(const Quaternionf & transform)
 
 void DebugDraw::point(const Vector3f& p, const LinearColor& color)
 {
-	box(p, Vector3f(0.01f), color);
+	box(p, Vector3f(0.001f), color);
 }
 
 void DebugDraw::xzGrid(F32 begin, F32 end, F32 y, F32 interval, const LinearColor& color)
@@ -135,40 +135,37 @@ void DebugDraw::xzGrid(F32 begin, F32 end, F32 y, F32 interval, const LinearColo
 
 void DebugDraw::sphere(const Vector3f& center, F32 radius, const LinearColor& color)
 {
-	F32 dtheta = 25.0f;
-	F32 dphi = 25.0f;
-	for (F32 theta = -90.0f; theta <= 90.0f - dtheta; theta += dtheta) 
+	// Verticals
+	U32 circles = 10;
+	F32 dt = 360.0f / circles;
+	Quaternionf q(dt, Vector3f::up);
+	Vector3f n = Vector3f::forward;
+	for (U32 i = 0; i < circles; i++)
 	{
-		for (F32 phi = 0.0f; phi <= 360.0f - dphi; phi += dphi) 
-		{
-			F32 ct = nu::cos(theta);
-			F32 cdt = nu::cos(theta + dtheta);
-			F32 st = nu::sin(theta);
-			F32 sdt = nu::sin(theta + dtheta);
-			F32 cp = nu::cos(phi);
-			F32 cdp = nu::cos(phi + dphi);
-			F32 sp = nu::sin(phi);
-			F32 sdp = nu::sin(phi + dphi);
-			mVertices.emplace_back(center + radius * Vector3f(ct * cp, ct * sp, st), color);
-			mVertices.emplace_back(center + radius * Vector3f(cdt * cp, cdt * sp, sdt), color);
-			mVertices.emplace_back(center + radius * Vector3f(cdt * cdp, cdt * sdp, sdt), color);
-			if (theta > -90.0f && theta < 90.0f) 
-			{
-				mVertices.emplace_back(center + radius * Vector3f(ct * cdp, ct * sdp, st), color);
-			}
-		}
+		circle(center, n, radius, color);
+		n = q * n;
+	}
+
+	// Horizontals
+	circles = 5;
+	F32 dy = (radius * 2) / circles;
+	for (F32 y = -radius; y < radius; y += dy)
+	{
+		Vector3f p = center + y * Vector3f::up;
+		F32 r = nu::cos(nu::asin(y / radius));
+		circle(p, Vector3f::up, r, color);
 	}
 }
 
 void DebugDraw::circle(const Vector3f& center, const Vector3f& normal, F32 radius, const LinearColor& color)
 {
 	Vector3f n = normal.normalized();
-	Vector3f r(1, 0, 0); // random vector
+	Vector3f r(1.0f, 0.0f, 0.0f); // random vector
 	if (n == r)
 	{
-		r.set(0, 1, 0);
+		r.set(0.0f, 1.0f, 0.0f);
 	}
-	Vector3f o = r.crossProduct(n);
+	Vector3f o = r.crossProduct(n).normalized();
 
 	U32 points = 30;
 	F32 dt = 360.0f / points;
@@ -180,11 +177,6 @@ void DebugDraw::circle(const Vector3f& center, const Vector3f& normal, F32 radiu
 		o = q * o;
 		addVertex(o * radius + center, color);
 	}
-}
-
-void DebugDraw::plane(const Vector3f& center, const Vector3f& normal, const Vector2f& halfSize, const LinearColor& color)
-{
-	// TODO : Plane
 }
 
 void DebugDraw::cone(const Vector3f& origin, const Vector3f& dir, F32 length, F32 radius, const LinearColor& color)
@@ -212,46 +204,25 @@ void DebugDraw::cone(const Vector3f& origin, const Vector3f& dir, F32 length, F3
 	}
 }
 
-void DebugDraw::noise(F32 begin, F32 end, F32 gain, U32 oct, F32 lac)
+void DebugDraw::frustum(const Frustum& frustum, const LinearColor& color)
 {
-	nu::Noise noiseHeight(13678);
-	noiseHeight.setGain(gain);
-	noiseHeight.setOctaves(oct);
-	noiseHeight.setLacunarity(lac);
+	// Far
+	line(frustum.getCorner(Frustum::FBL), frustum.getCorner(Frustum::FBR), color);
+	line(frustum.getCorner(Frustum::FBL), frustum.getCorner(Frustum::FTL), color);
+	line(frustum.getCorner(Frustum::FTR), frustum.getCorner(Frustum::FBR), color);
+	line(frustum.getCorner(Frustum::FTR), frustum.getCorner(Frustum::FTL), color);
 
-	nu::LinearColor c = nu::LinearColor::White;
-	Vector3f p;
+	// Near
+	line(frustum.getCorner(Frustum::NBL), frustum.getCorner(Frustum::NBR), color);
+	line(frustum.getCorner(Frustum::NBL), frustum.getCorner(Frustum::NTL), color);
+	line(frustum.getCorner(Frustum::NTR), frustum.getCorner(Frustum::NBR), color);
+	line(frustum.getCorner(Frustum::NTR), frustum.getCorner(Frustum::NTL), color);
 
-	F32 d = 1.0f;
-
-	F32 min = 600.f;
-	F32 max = -600.f;
-
-	for (F32 d1 = begin; d1 < end; d1 += d)
-	{
-		for (F32 d2 = begin; d2 < end; d2 += d)
-		{
-			p.set(d1, 0.0f, d2);
-			p.y = noiseHeight.getNoise(p.x, p.z) * 1.0f;
-			addVertex(p, c * p.y);
-
-			p.set(d1 + d, 0.0f, d2);
-			p.y = noiseHeight.getNoise(p.x, p.z) * 1.0f;
-			addVertex(p, c * p.y);
-
-			mVertices.push_back(mVertices[mVertices.size() - 2]);
-
-			p.set(d1, 0.0f, d2 + d);
-			p.y = noiseHeight.getNoise(p.x, p.z) * 1.0f;
-			addVertex(p, c * p.y);
-		}
-	}
-
-	mVertices.emplace_back(Vector3f(end, 0.0f, begin), c);
-	mVertices.emplace_back(Vector3f(end, 0.0f, end), c);
-	mVertices.emplace_back(Vector3f(begin, 0.0f, end), c);
-	mVertices.emplace_back(Vector3f(end, 0.0f, end), c);
-
+	// Links
+	line(frustum.getCorner(Frustum::FBL), frustum.getCorner(Frustum::NBL), color);
+	line(frustum.getCorner(Frustum::FBR), frustum.getCorner(Frustum::NBR), color);
+	line(frustum.getCorner(Frustum::FTL), frustum.getCorner(Frustum::NTL), color);
+	line(frustum.getCorner(Frustum::FTR), frustum.getCorner(Frustum::NTR), color);
 }
 
 void DebugDraw::render(const Matrix4f& viewMatrix, const Matrix4f& projectionMatrix)
