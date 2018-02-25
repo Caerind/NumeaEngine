@@ -12,10 +12,7 @@ class VertexBuffer
 {
 	public:
 		VertexBuffer();
-		VertexBuffer(VertexStruct vertexStruct);
 		~VertexBuffer();
-
-		void setStruct(VertexStruct vertexStruct);
 
 		template <typename T>
 		void set(const T* vertices, U32 size);
@@ -35,7 +32,7 @@ class VertexBuffer
 		VertexStruct getStruct() const;
 
 	private:
-		VertexArray* mVertexArray;
+		VertexArray mArray;
 		VertexStruct mVertexStruct;
 		U32 mIndex;
 		U32 mVertices;
@@ -45,11 +42,13 @@ class VertexBuffer
 template<typename T>
 inline void VertexBuffer::set(const T* vertices, U32 size)
 {
+	mArray.bind();
 	glCheck(glBindBuffer(GL_ARRAY_BUFFER, mIndex));
 	glCheck(glBufferData(GL_ARRAY_BUFFER, sizeof(T) * size, vertices, GL_STATIC_DRAW));
 	mVertices = size;
 	mStride = sizeof(T);
-	setStruct(T::type);
+	mVertexStruct = T::type;
+	mArray.setStruct(T::type);
 }
 
 template<typename T>
@@ -59,7 +58,8 @@ inline void VertexBuffer::set(const std::vector<T>& vertices)
 	glCheck(glBufferData(GL_ARRAY_BUFFER, sizeof(T) * vertices.size(), &vertices[0], GL_STATIC_DRAW));
 	mVertices = vertices.size();
 	mStride = sizeof(T);
-	setStruct(T::type);
+	mVertexStruct = T::type;
+	mArray.setStruct(T::type);
 }
 
 } // namespace nu

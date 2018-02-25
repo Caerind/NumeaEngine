@@ -11,25 +11,22 @@ namespace nu
 class VertexArray
 {
 	public:
+		VertexArray();
 		VertexArray(VertexStruct vertexStruct);
 		~VertexArray();
 
+		void setStruct(VertexStruct vertexStruct);
+
 		void bind();
 
-		U32 getIndex() const;
+		bool isValid() const;
+		U32 getId() const;
 
 		VertexStruct getStruct() const;
 
-		static bool isInitialized();
-		static bool initialize();
-		static VertexArray* get(VertexStruct vertex);
-
 	private:
-		VertexStruct mStruct;
+		VertexStruct mVertexStruct;
 		U32 mIndex;
-
-		static bool sInitialized;
-		static VertexArray* sArrays[VertexStruct_Count];
 };
 
 } // namespace nu

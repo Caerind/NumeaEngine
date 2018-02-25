@@ -230,8 +230,8 @@ void DebugDraw::render(const Matrix4f& viewMatrix, const Matrix4f& projectionMat
 	mShader.bind();
 	mShader.setUniform("VP", projectionMatrix * viewMatrix);
 
-	mBuffer.set(mVertices);
-	mBuffer.bind();
+	mVBO.set(mVertices);
+	mVBO.bind();
 
 	Renderer::instance().drawArrays(Primitive::Lines, mVertices.size());
 

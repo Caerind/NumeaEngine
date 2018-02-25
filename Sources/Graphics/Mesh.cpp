@@ -11,7 +11,8 @@ namespace nu
 {
 
 Mesh::Mesh()
-	: mVertices()
+	: mVBO()
+	, mIndices()
 {
 }
 
@@ -23,7 +24,7 @@ bool Mesh::load(const nu::Loader<Mesh>& loader)
 
 void Mesh::bind()
 {
-	mVertices.bind();
+	mVBO.bind();
 	mIndices.bind();
 }
 
@@ -32,15 +33,9 @@ void Mesh::draw()
 	Renderer::instance().drawElements(Primitive::Triangles, getIndices());
 }
 
-void Mesh::set(const std::vector<Vertex_XYZ_Normal_UV>& vertices, const std::vector<U32>& indices)
-{
-	mVertices.set(vertices);
-	mIndices.set(indices);
-}
-
 VertexBuffer& Mesh::getVertexBuffer()
 {
-	return mVertices;
+	return mVBO;
 }
 
 IndexBuffer& Mesh::getIndexBuffer()
@@ -50,7 +45,7 @@ IndexBuffer& Mesh::getIndexBuffer()
 
 U32 Mesh::getVertices() const
 {
-	return mVertices.getVertices();
+	return mVBO.getVertices();
 }
 
 U32 Mesh::getIndices() const
@@ -86,6 +81,7 @@ Loader<Mesh> MeshLoader::fromFile(const std::string& filename)
 			memcpy(&pos, &m->mVertices[i], 3 * sizeof(float));
 			memcpy(&normal, &m->mNormals[i], 3 * sizeof(float));
 			memcpy(&uv, &m->mTextureCoords[0][i], 2 * sizeof(float));
+			uv.y = 1.0f - uv.y;
 			vertices.push_back(Vertex_XYZ_Normal_UV(pos, normal, uv));
 		}
 

@@ -3,18 +3,34 @@
 namespace nu
 {
 
-bool VertexArray::sInitialized = false;
-VertexArray* VertexArray::sArrays[];
-
-VertexArray::VertexArray(VertexStruct vertexStruct)
-	: mStruct(vertexStruct)
+VertexArray::VertexArray()
+	: mVertexStruct(VertexStruct_Count)
 	, mIndex(0)
 {
-
 	glCheck(glGenVertexArrays(1, &mIndex));
+}
+
+VertexArray::VertexArray(VertexStruct vertexStruct)
+	: mVertexStruct(vertexStruct)
+	, mIndex(0)
+{
+	glCheck(glGenVertexArrays(1, &mIndex));
+	setStruct(vertexStruct);
+}
+
+VertexArray::~VertexArray()
+{
+	glCheck(glDeleteVertexArrays(1, &mIndex));
+}
+
+void VertexArray::setStruct(VertexStruct vertexStruct)
+{
+	mVertexStruct = vertexStruct;
+
 	glCheck(glBindVertexArray(mIndex));
 
-	VertexDeclaration* decl = VertexDeclaration::get(mStruct);
+	VertexDeclaration* decl = VertexDeclaration::get(mVertexStruct);
+	assert(decl != nullptr);
 
 	U32 offset = 0;
 	for (U32 i = 0; i < decl->getElements(); i++)
@@ -39,15 +55,10 @@ VertexArray::VertexArray(VertexStruct vertexStruct)
 
 		glCheck(glVertexAttribPointer(i, e.nbOfElement, type, GL_FALSE, decl->getStride(), (void*)(offset)));
 
-		//printf("%d, %d, %x, %d, %x\n", i, e.nbOfElement, type, decl->getStride(), (void*)(offset));
+		printf("%d : %d, %d, %x, %d, %d\n", mVertexStruct, i, e.nbOfElement, type, decl->getStride(), offset);
 
 		offset += e.sizeOfElement;
 	}
-}
-
-VertexArray::~VertexArray()
-{
-	glCheck(glDeleteVertexArrays(1, &mIndex));
 }
 
 void VertexArray::bind()
@@ -55,46 +66,19 @@ void VertexArray::bind()
 	glCheck(glBindVertexArray(mIndex));
 }
 
-U32 VertexArray::getIndex() const
+bool VertexArray::isValid() const
+{
+	return glIsVertexArray(mIndex) == GL_TRUE && mVertexStruct != VertexStruct_Count;
+}
+
+U32 VertexArray::getId() const
 {
 	return mIndex;
 }
 
 VertexStruct VertexArray::getStruct() const
 {
-	return mStruct;
-}
-
-bool VertexArray::isInitialized()
-{
-	return sInitialized;
-}
-
-bool VertexArray::initialize()
-{
-	if (!sInitialized)
-	{
-		for (U32 i = 0; i < VertexStruct_Count; i++)
-		{
-			sArrays[i] = nullptr;
-		}
-		sInitialized = true;
-	}
-	return sInitialized;
-}
-
-VertexArray* VertexArray::get(VertexStruct vertex)
-{
-	if (!sInitialized)
-	{
-		LogWarning(nu::LogChannel::Graphics, 1, "VertexArray : Initialization within get() is not recommanded");
-		initialize();
-	}
-	if (sInitialized && sArrays[vertex] == nullptr)
-	{
-		sArrays[vertex] = new VertexArray(vertex);
-	}
-	return sArrays[vertex];
+	return mVertexStruct;
 }
 
 } // namespace nu

@@ -9,7 +9,6 @@ Renderer::Renderer()
 	: mCamera()
 {
 	nu::VertexDeclaration::initialize();
-	nu::VertexArray::initialize();
 
 	sSingleton = this;
 

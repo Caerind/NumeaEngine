@@ -186,8 +186,6 @@ int main()
 		shader->setUniform("LightPosition", viewPosition);
 		shader->setUniform("EyeDirection", viewDirection);
 
-		printf("Render : \n");
-
 		// RENDER MODEL 1
 		shader->bind();
 		shader->setUniform("MV", mv1);
@@ -195,7 +193,7 @@ int main()
 		shader->setUniform("N", n1);
 		textureCube->bind();
 		meshCube->bind();
-		printf("State 1 : %d %d %d %d %d\n", renderer.getCurrentVertexArray(), renderer.getCurrentVertexBuffer(), renderer.getCurrentIndexBuffer(), renderer.getCurrentShader(), renderer.getCurrentTexture());
+		//printf("State 1 : %d %d %d %d %d\n", renderer.getCurrentVertexArray(), renderer.getCurrentVertexBuffer(), renderer.getCurrentIndexBuffer(), renderer.getCurrentShader(), renderer.getCurrentTexture());
 		meshCube->draw();
 
 		// RENDER MODEL 2
@@ -205,14 +203,12 @@ int main()
 		shader->setUniform("N", n2);
 		textureSheep->bind();
 		meshSheep->bind();
-		printf("State 2 : %d %d %d %d %d\n", renderer.getCurrentVertexArray(), renderer.getCurrentVertexBuffer(), renderer.getCurrentIndexBuffer(), renderer.getCurrentShader(), renderer.getCurrentTexture());
+		//printf("State 2 : %d %d %d %d %d\n", renderer.getCurrentVertexArray(), renderer.getCurrentVertexBuffer(), renderer.getCurrentIndexBuffer(), renderer.getCurrentShader(), renderer.getCurrentTexture());
 		meshSheep->draw();
 
 		debug.render(renderer.getCamera().getViewMatrix(), renderer.getCamera().getProjectionMatrix());
 
 		renderer.end();
-
-		printf("\n");
 
 		if (show)
 			nu::ImGuiWrapper::render();

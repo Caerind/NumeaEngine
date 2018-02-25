@@ -18,7 +18,8 @@ class Mesh : public Resource<Mesh>
 		void bind();
 		void draw();
 
-		void set(const std::vector<Vertex_XYZ_Normal_UV>& vertices, const std::vector<U32>& indices);
+		template <typename T>
+		void set(const std::vector<T>& vertices, const std::vector<U32>& indices);
 
 		VertexBuffer& getVertexBuffer();
 		IndexBuffer& getIndexBuffer();
@@ -27,7 +28,7 @@ class Mesh : public Resource<Mesh>
 		U32 getIndices() const;
 
 	private:
-		VertexBuffer mVertices;
+		VertexBuffer mVBO;
 		IndexBuffer mIndices;
 };
 
@@ -36,6 +37,13 @@ class MeshLoader
 	public:
 		static Loader<Mesh> fromFile(const std::string& filename);
 };
+
+template<typename T>
+inline void Mesh::set(const std::vector<T>& vertices, const std::vector<U32>& indices)
+{
+	mVBO.set<T>(vertices);
+	mIndices.set(indices);
+}
 
 } // namespace nu
 

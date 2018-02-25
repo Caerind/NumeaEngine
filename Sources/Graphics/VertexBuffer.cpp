@@ -4,7 +4,7 @@ namespace nu
 {
 
 VertexBuffer::VertexBuffer()
-	: mVertexArray(nullptr)
+	: mArray()
 	, mVertexStruct(VertexStruct_Count)
 	, mIndex(0)
 	, mVertices(0)
@@ -13,34 +13,14 @@ VertexBuffer::VertexBuffer()
 	glCheck(glGenBuffers(1, &mIndex));
 }
 
-VertexBuffer::VertexBuffer(VertexStruct vertexStruct)
-	: mVertexArray(nullptr)
-	, mVertexStruct(vertexStruct)
-	, mIndex(0)
-	, mVertices(0)
-	, mStride(0)
-{
-	glCheck(glGenBuffers(1, &mIndex));
-	setStruct(vertexStruct);
-}
-
 VertexBuffer::~VertexBuffer()
 {
 	glCheck(glDeleteBuffers(1, &mIndex));
 }
 
-void VertexBuffer::setStruct(VertexStruct vertexStruct)
-{
-	mVertexArray = VertexArray::get(vertexStruct);
-	mVertexStruct = vertexStruct; 
-}
-
 void VertexBuffer::bind()
 {
-	if (mVertexArray != nullptr)
-	{
-		mVertexArray->bind();
-	}
+	mArray.bind();
 	glCheck(glBindBuffer(GL_ARRAY_BUFFER, mIndex));
 }
 
@@ -61,7 +41,7 @@ U32 VertexBuffer::getSize() const
 
 bool VertexBuffer::isValid() const
 {
-	return glIsBuffer(mIndex) == GL_TRUE && mVertexArray != nullptr;
+	return glIsBuffer(mIndex) == GL_TRUE && mVertexStruct != VertexStruct_Count;
 }
 
 U32 VertexBuffer::getId() const
