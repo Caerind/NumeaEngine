@@ -77,6 +77,7 @@ struct Vertex_XY_Color_UV
 struct Vertex_XYZ
 {
 	Vertex_XYZ() : position(Vector3f::zero) {}
+	Vertex_XYZ(F32 x, F32 y, F32 z) : position(x, y, z) {}
 	Vertex_XYZ(const Vector3f& p) : position(p) {}
 
 	Vector3f position;

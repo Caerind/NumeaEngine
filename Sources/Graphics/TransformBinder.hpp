@@ -17,6 +17,7 @@ class TransformBinder : public Node
 			ModelMatrix = 0,
 			ModelViewMatrix,
 			ModelViewProjectionMatrix,
+			ViewProjectionMatrix,
 			NormalMatrix,
 			Count
 		};

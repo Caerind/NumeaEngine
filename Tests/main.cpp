@@ -38,7 +38,7 @@ int main()
 	nu::Mesh::Ptr meshSheep = manager.get("meshSheep", nu::MeshLoader::fromFile("testSheep.obj"));
 
 	nu::Renderer renderer;
-	renderer.getCamera().perspective(60.0f, window.getSizeRatio(), 0.1f, 30.0f);
+	renderer.getCamera().perspective(60.0f, window.getSizeRatio(), 0.1f, 100.0f);
 	renderer.getCamera().lookAt(nu::Vector3f(-2.0f, 1.5f, -2.0f), nu::Vector3f(0, 0, 1), nu::Vector3f(0, 1, 0));
 
 	nu::Vector3f position = renderer.getCamera().getPosition();
@@ -85,6 +85,16 @@ int main()
 	mSprite2.setUniformBinding(nu::Model::ModelViewMatrix, "MV");
 	mSprite2.setUniformBinding(nu::Model::ModelViewProjectionMatrix, "MVP");
 	mSprite2.setUniformBinding(nu::Model::NormalMatrix, "N");
+
+	std::vector<nu::CubeMap::TextureSide> sides;
+	sides.emplace_back(nu::CubeMap::NegZ, "cubemap/negz.jpg");
+	sides.emplace_back(nu::CubeMap::PosZ, "cubemap/posz.jpg");
+	sides.emplace_back(nu::CubeMap::NegY, "cubemap/negy.jpg");
+	sides.emplace_back(nu::CubeMap::PosY, "cubemap/posy.jpg");
+	sides.emplace_back(nu::CubeMap::NegX, "cubemap/negx.jpg");
+	sides.emplace_back(nu::CubeMap::PosX, "cubemap/posx.jpg");
+	nu::CubeMap map;
+	map.loadTexture(sides);
 
 	nu::LinearColor clearColor(nu::LinearColor::LightBlue);
 	nu::LinearColor ambientColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -203,6 +213,8 @@ int main()
 		shaderXYZNormalUV->setUniform("QuadraticAttenuation", quadraticAttenuation);
 		shaderXYZNormalUV->setUniform("LightPosition", viewPosition);
 		shaderXYZNormalUV->setUniform("EyeDirection", viewDirection);
+
+		map.draw();
 
 		mCube.draw();
 		mSheep.draw();

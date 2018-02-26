@@ -13,6 +13,7 @@
 #include "../Sources/Graphics/Node.hpp"
 #include "../Sources/Graphics/Model.hpp"
 #include "../Sources/Graphics/Sprite.hpp"
+#include "../Sources/Graphics/CubeMap.hpp"
 
 #include "../Sources/System/UnitTest.hpp"
 

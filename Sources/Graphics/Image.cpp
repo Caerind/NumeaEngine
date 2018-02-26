@@ -197,9 +197,7 @@ Loader<Image> ImageLoader::fromFile(const std::string& filename)
 {
 	return Loader<Image>([=](Image& image)
 	{
-		I32 width = 0;
-		I32 height = 0;
-		I32 channels = 0;
+		I32 width, height, channels;
 		U8* ptr = stbi_load(filename.c_str(), &width, &height, &channels, STBI_rgb_alpha);
 		if (ptr)
 		{
@@ -216,6 +214,7 @@ Loader<Image> ImageLoader::fromFile(const std::string& filename)
 		}
 		else
 		{
+			printf("B\n");
 			image.create(0, 0, nullptr);
 			LogError(nu::LogChannel::Graphics, 2, "Failed to load image : %s. Reason : %s\n", filename.c_str(), stbi_failure_reason());
 			return false;
