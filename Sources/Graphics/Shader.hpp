@@ -7,6 +7,7 @@
 #include "LinearColor.hpp"
 #include "Texture.hpp"
 #include "../Math/Matrix4.hpp"
+#include "../Application/ResourcePtr.hpp"
 
 namespace nu
 {

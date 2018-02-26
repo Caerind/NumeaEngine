@@ -3,6 +3,7 @@
 
 #include "Image.hpp"
 #include "../Application/GLEWWrapper.hpp"
+#include "../Application/ResourcePtr.hpp"
 
 namespace nu
 {

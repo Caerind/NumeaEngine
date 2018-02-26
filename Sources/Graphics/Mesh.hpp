@@ -4,6 +4,7 @@
 #include "VertexBuffer.hpp"
 #include "IndexBuffer.hpp"
 #include "../Application/Resource.hpp"
+#include "../Application/ResourcePtr.hpp"
 
 namespace nu
 {

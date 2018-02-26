@@ -55,7 +55,7 @@ void VertexArray::setStruct(VertexStruct vertexStruct)
 
 		glCheck(glVertexAttribPointer(i, e.nbOfElement, type, GL_FALSE, decl->getStride(), (void*)(offset)));
 
-		printf("%d : %d, %d, %x, %d, %d\n", mVertexStruct, i, e.nbOfElement, type, decl->getStride(), offset);
+		//printf("%d : %d, %d, %x, %d, %d\n", mVertexStruct, i, e.nbOfElement, type, decl->getStride(), offset);
 
 		offset += e.sizeOfElement;
 	}

@@ -41,7 +41,6 @@ class DebugDraw
 
 	private:
 		std::vector<Vertex_XYZ_Color> mVertices;
-		VertexArray mVAO;
 		VertexBuffer mVBO;
 		Shader mShader;
 
