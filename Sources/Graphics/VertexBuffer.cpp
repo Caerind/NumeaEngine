@@ -1,5 +1,7 @@
 #include "VertexBuffer.hpp"
 
+#include "Renderer.hpp"
+
 namespace nu
 {
 
@@ -22,6 +24,11 @@ void VertexBuffer::bind()
 {
 	mArray.bind();
 	glCheck(glBindBuffer(GL_ARRAY_BUFFER, mIndex));
+}
+
+void VertexBuffer::draw()
+{
+	Renderer::instance().drawArrays(Primitive::Triangles, mVertices);
 }
 
 U32 VertexBuffer::getVertices() const

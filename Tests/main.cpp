@@ -30,17 +30,16 @@ int main()
 
 	nu::ImGuiWrapper::init(window);
 
-	nu::Renderer renderer;
-	renderer.getCamera().perspective(60.0f, window.getSizeRatio(), 0.1f, 30.0f);
-	renderer.getCamera().lookAt(nu::Vector3f(-2.0f, 1.5f, -2.0f), nu::Vector3f(0, 0, 1), nu::Vector3f(0, 1, 0));
-
 	nu::Texture::Ptr textureCube = manager.get("textureCube", nu::TextureLoader::fromFile("testCube.png"));
 	nu::Texture::Ptr textureSheep = manager.get("textureSheep", nu::TextureLoader::fromFile("testSheep.png"));
-	nu::Shader::Ptr shader = manager.get("shader", nu::ShaderLoader::fromFile("shader.vert", "shader.frag"));
+	nu::Shader::Ptr shaderXYZUV = manager.get("xyz_uv", nu::ShaderLoader::fromFile("../Sources/Shaders/xyz_uv.vert", "../Sources/Shaders/xyz_uv.frag"));
+	nu::Shader::Ptr shaderXYZNormalUV = manager.get("xyz_normal_uv", nu::ShaderLoader::fromFile("../Sources/Shaders/xyz_normal_uv.vert", "../Sources/Shaders/xyz_normal_uv.frag"));
 	nu::Mesh::Ptr meshCube = manager.get("meshCube", nu::MeshLoader::fromFile("testCube.obj"));
 	nu::Mesh::Ptr meshSheep = manager.get("meshSheep", nu::MeshLoader::fromFile("testSheep.obj"));
 
-	nu::DebugDraw debug;
+	nu::Renderer renderer;
+	renderer.getCamera().perspective(60.0f, window.getSizeRatio(), 0.1f, 30.0f);
+	renderer.getCamera().lookAt(nu::Vector3f(-2.0f, 1.5f, -2.0f), nu::Vector3f(0, 0, 1), nu::Vector3f(0, 1, 0));
 
 	nu::Vector3f position = renderer.getCamera().getPosition();
 	nu::Vector3f direction = nu::Vector3f::forward;
@@ -48,7 +47,7 @@ int main()
 	renderer.getCamera().setTarget(position + direction);
 
 	nu::Model mCube;
-	mCube.setShader(shader);
+	mCube.setShader(shaderXYZNormalUV);
 	mCube.setTexture(textureCube);
 	mCube.setMesh(meshCube);
 	mCube.setPosition(0, 1, 4);
@@ -58,7 +57,7 @@ int main()
 	mCube.setUniformBinding(nu::Model::NormalMatrix, "N");
 
 	nu::Model mSheep;
-	mSheep.setShader(shader);
+	mSheep.setShader(shaderXYZNormalUV);
 	mSheep.setTexture(textureSheep);
 	mSheep.setMesh(meshSheep);
 	mSheep.setPosition(0, 1.5, 0.5);
@@ -67,6 +66,25 @@ int main()
 	mSheep.setUniformBinding(nu::Model::NormalMatrix, "N");
 
 	mCube.attach(&mSheep);
+
+	nu::Sprite mSprite;
+	mSprite.setShader(shaderXYZUV);
+	mSprite.setTexture(textureCube);
+	mSprite.setSize(3.0f, 1.0f);
+	mSprite.setPosition(-5, 0, 4);
+	mSprite.setRotation(nu::Matrix3f::rotationY(-45.0f).toQuaternion());
+	mSprite.setUniformBinding(nu::Model::ModelViewProjectionMatrix, "MVP");
+
+	nu::Sprite mSprite2;
+	mSprite2.useNormals(true);
+	mSprite2.setShader(shaderXYZNormalUV);
+	mSprite2.setTexture(textureCube);
+	mSprite2.setSize(3.0f, 1.0f);
+	mSprite2.setPosition(-5, 1, 4);
+	mSprite2.setRotation(nu::Matrix3f::rotationY(-45.0f).toQuaternion());
+	mSprite2.setUniformBinding(nu::Model::ModelViewMatrix, "MV");
+	mSprite2.setUniformBinding(nu::Model::ModelViewProjectionMatrix, "MVP");
+	mSprite2.setUniformBinding(nu::Model::NormalMatrix, "N");
 
 	nu::LinearColor clearColor(nu::LinearColor::LightBlue);
 	nu::LinearColor ambientColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -128,21 +146,21 @@ int main()
 		renderer.getCamera().setPosition(position);
 		renderer.getCamera().setTarget(position + direction);
 
-		debug.frustum(f);
-		debug.point(nu::Vector3f(0, 0, 0));
-		debug.point(nu::Vector3f(2, 2, 2));
-		debug.point(nu::Vector3f(-2, 2, -2));
-		debug.point(nu::Vector3f(2, 2, -2));
-		debug.point(nu::Vector3f(-2, 2, 2));
-		debug.xzGrid(-10.0f, 10.0f, 0.0f, 1.0f, nu::Color::Green);
-		debug.box(nu::Vector3f(5, 2, -5), nu::Vector3f(1, 1, 1), nu::Color::Red);
-		debug.cross(nu::Vector3f(0.01f, 0.01f, 0.01f));
-		debug.transform(mCube.getGlobalTransform());
-		debug.sphere(nu::Vector3f(1, 1, 2), 1, nu::Color::Yellow);
-		debug.circle(nu::Vector3f(3, 3, 3), nu::Vector3f(1, 0, 0), 2, nu::Color::Red);
-		debug.circle(nu::Vector3f(3, 3, 3), nu::Vector3f(0, 1, 0), 2, nu::Color::Green);
-		debug.circle(nu::Vector3f(3, 3, 3), nu::Vector3f(0, 0, 1), 2, nu::Color::Blue);
-		debug.cone(nu::Vector3f(4, 4, 0), nu::Vector3f(0, -1, 0), 4, 2, nu::Color::Yellow);
+		renderer.getDebug().frustum(f);
+		renderer.getDebug().point(nu::Vector3f(0, 0, 0));
+		renderer.getDebug().point(nu::Vector3f(2, 2, 2));
+		renderer.getDebug().point(nu::Vector3f(-2, 2, -2));
+		renderer.getDebug().point(nu::Vector3f(2, 2, -2));
+		renderer.getDebug().point(nu::Vector3f(-2, 2, 2));
+		renderer.getDebug().xzGrid(-10.0f, 10.0f, 0.0f, 1.0f, nu::Color::Green);
+		renderer.getDebug().box(nu::Vector3f(5, 2, -5), nu::Vector3f(1, 1, 1), nu::Color::Red);
+		renderer.getDebug().cross(nu::Vector3f(0.01f, 0.01f, 0.01f));
+		renderer.getDebug().transform(mCube.getGlobalTransform());
+		renderer.getDebug().sphere(nu::Vector3f(1, 1, 2), 1, nu::Color::Yellow);
+		renderer.getDebug().circle(nu::Vector3f(3, 3, 3), nu::Vector3f(1, 0, 0), 2, nu::Color::Red);
+		renderer.getDebug().circle(nu::Vector3f(3, 3, 3), nu::Vector3f(0, 1, 0), 2, nu::Color::Green);
+		renderer.getDebug().circle(nu::Vector3f(3, 3, 3), nu::Vector3f(0, 0, 1), 2, nu::Color::Blue);
+		renderer.getDebug().cone(nu::Vector3f(4, 4, 0), nu::Vector3f(0, -1, 0), 4, 2, nu::Color::Yellow);
 
 		// ImGui config
 		if (show)
@@ -174,22 +192,22 @@ int main()
 		// Render
 		renderer.begin(clearColor);
 
-		shader->bind();
-		shader->setUniform("Texture", nu::Shader::CurrentTexture);
-		shader->setUniform("Ambient", ambientColor);
-		shader->setUniform("LightColor", lightColor);
-		shader->setUniform("Shininess", shininess);
-		shader->setUniform("Strength", strength);
-		shader->setUniform("ConstantAttenuation", constantAttenuation);
-		shader->setUniform("LinearAttenuation", linearAttenuation);
-		shader->setUniform("QuadraticAttenuation", quadraticAttenuation);
-		shader->setUniform("LightPosition", viewPosition);
-		shader->setUniform("EyeDirection", viewDirection);
+		shaderXYZNormalUV->bind();
+		shaderXYZNormalUV->setUniform("Texture", nu::Shader::CurrentTexture);
+		shaderXYZNormalUV->setUniform("Ambient", ambientColor);
+		shaderXYZNormalUV->setUniform("LightColor", lightColor);
+		shaderXYZNormalUV->setUniform("Shininess", shininess);
+		shaderXYZNormalUV->setUniform("Strength", strength);
+		shaderXYZNormalUV->setUniform("ConstantAttenuation", constantAttenuation);
+		shaderXYZNormalUV->setUniform("LinearAttenuation", linearAttenuation);
+		shaderXYZNormalUV->setUniform("QuadraticAttenuation", quadraticAttenuation);
+		shaderXYZNormalUV->setUniform("LightPosition", viewPosition);
+		shaderXYZNormalUV->setUniform("EyeDirection", viewDirection);
 
 		mCube.draw();
 		mSheep.draw();
-
-		debug.render(renderer.getCamera().getViewMatrix(), renderer.getCamera().getProjectionMatrix());
+		mSprite.draw();
+		mSprite2.draw();
 
 		renderer.end();
 

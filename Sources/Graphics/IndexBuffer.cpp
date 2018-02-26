@@ -1,5 +1,7 @@
 #include "IndexBuffer.hpp"
 
+#include "Renderer.hpp"
+
 namespace nu
 {
 
@@ -32,6 +34,11 @@ void IndexBuffer::set(const std::vector<U32>& indices)
 void IndexBuffer::bind()
 {
 	glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndex));
+}
+
+void IndexBuffer::draw()
+{
+	Renderer::instance().drawElements(Primitive::Triangles, mIndices);
 }
 
 U32 IndexBuffer::getIndices() const

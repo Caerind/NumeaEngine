@@ -32,9 +32,6 @@ class DebugDraw
 
 		void render(const Matrix4f& viewMatrix, const Matrix4f& projectionMatrix);
 
-		static bool instantiated();
-		static DebugDraw& instance();
-
 	private:
 		void addVertex(F32 x, F32 y, F32 z, const LinearColor& c);
 		void addVertex(const Vector3f& p, const LinearColor& c);
@@ -43,8 +40,6 @@ class DebugDraw
 		std::vector<Vertex_XYZ_Color> mVertices;
 		VertexBuffer mVBO;
 		Shader mShader;
-
-		static DebugDraw* sSingleton;
 };
 
 } // namespace nu

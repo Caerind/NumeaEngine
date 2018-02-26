@@ -7,16 +7,9 @@
 namespace nu
 {
 
-DebugDraw* DebugDraw::sSingleton = nullptr;
-
 DebugDraw::DebugDraw()
 	: mShader()
 {
-	if (sSingleton == nullptr)
-	{
-		sSingleton = this;
-	}
-
 	std::string vertexShader = "#version 330 core\n"
 		"layout(location = 0) in vec3 vPos;\n"
 		"layout(location = 1) in vec4 vCol;\n"
@@ -108,7 +101,7 @@ void DebugDraw::transform(const Matrix4f& transform)
 	*/
 }
 
-void DebugDraw::transform(const Quaternionf & transform)
+void DebugDraw::transform(const Quaternionf& transform)
 {
 	this->transform(transform.toMatrix4());
 }
@@ -160,7 +153,7 @@ void DebugDraw::sphere(const Vector3f& center, F32 radius, const LinearColor& co
 void DebugDraw::circle(const Vector3f& center, const Vector3f& normal, F32 radius, const LinearColor& color)
 {
 	Vector3f n = normal.normalized();
-	Vector3f r(1.0f, 0.0f, 0.0f); // random vector
+	Vector3f r(1.0f, 0.0f, 0.0f);
 	if (n == r)
 	{
 		r.set(0.0f, 1.0f, 0.0f);
@@ -182,12 +175,12 @@ void DebugDraw::circle(const Vector3f& center, const Vector3f& normal, F32 radiu
 void DebugDraw::cone(const Vector3f& origin, const Vector3f& dir, F32 length, F32 radius, const LinearColor& color)
 {
 	Vector3f n = dir.normalized();
-	Vector3f r(1, 0, 0); // random vector
+	Vector3f r(1.0f, 0.0f, 0.0f);
 	if (n == r)
 	{
-		r.set(0, 1, 0);
+		r.set(0.0f, 1.0f, 0.0f);
 	}
-	Vector3f o = r.crossProduct(n);
+	Vector3f o = r.crossProduct(n).normalized();
 
 	Vector3f center = origin + dir * length;
 
@@ -236,17 +229,6 @@ void DebugDraw::render(const Matrix4f& viewMatrix, const Matrix4f& projectionMat
 	Renderer::instance().drawArrays(Primitive::Lines, mVertices.size());
 
 	mVertices.clear();
-}
-
-bool DebugDraw::instantiated()
-{
-	return sSingleton != nullptr;
-}
-
-DebugDraw& DebugDraw::instance()
-{
-	assert(sSingleton != nullptr);
-	return *sSingleton;
 }
 
 void DebugDraw::addVertex(F32 x, F32 y, F32 z, const LinearColor& c)

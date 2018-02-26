@@ -21,6 +21,7 @@ class VertexBuffer
 		void set(const std::vector<T>& vertices);
 
 		void bind();
+		void draw();
 
 		U32 getVertices() const;
 		U32 getStride() const;

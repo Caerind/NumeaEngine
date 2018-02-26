@@ -7,6 +7,8 @@
 #include "VertexDeclaration.hpp"
 #include "VertexArray.hpp"
 #include "Camera.hpp"
+#include "DebugDraw.hpp"
+#include "ShaderBank.hpp"
 
 namespace nu
 {
@@ -41,6 +43,8 @@ class Renderer
 		U32 getCurrentTexture() const;
 
 		Camera& getCamera();
+		DebugDraw& getDebug();
+		ShaderBank& getShaders();
 
 		static bool instantiated();
 		static Renderer& instance();
@@ -50,7 +54,8 @@ class Renderer
 
 	private:
 		Camera mCamera;
-
+		DebugDraw mDebug;
+		ShaderBank mShaders;
 
 		static Renderer* sSingleton;
 };

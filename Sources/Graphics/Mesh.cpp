@@ -30,7 +30,7 @@ void Mesh::bind()
 
 void Mesh::draw()
 {
-	Renderer::instance().drawElements(Primitive::Triangles, getIndices());
+	mIndices.draw();
 }
 
 VertexBuffer& Mesh::getVertexBuffer()

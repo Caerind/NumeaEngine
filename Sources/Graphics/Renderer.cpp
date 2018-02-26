@@ -9,6 +9,7 @@ Renderer::Renderer()
 	: mCamera()
 {
 	nu::VertexDeclaration::initialize();
+	printf("An error message is displayed because there is a VertexBuffer in DebugDraw which comes before the initialization\n");
 
 	sSingleton = this;
 
@@ -54,6 +55,7 @@ void Renderer::begin(const Color& clearColor)
 
 void Renderer::end()
 {
+	mDebug.render(mCamera.getViewMatrix(), mCamera.getProjectionMatrix());
 }
 
 U32 Renderer::getCurrentVertexArray() const
@@ -94,6 +96,16 @@ U32 Renderer::getCurrentTexture() const
 Camera& Renderer::getCamera()
 {
 	return mCamera;
+}
+
+DebugDraw& Renderer::getDebug()
+{
+	return mDebug;
+}
+
+ShaderBank& Renderer::getShaders()
+{
+	return mShaders;
 }
 
 bool Renderer::instantiated()

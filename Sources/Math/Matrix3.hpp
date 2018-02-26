@@ -7,6 +7,9 @@ namespace nu
 {
 
 template <typename T>
+class Quaternion;
+
+template <typename T>
 class Matrix3
 {
 	public:
@@ -71,6 +74,8 @@ class Matrix3
 
 		inline Matrix3<T>& transpose();
 		inline Matrix3<T> transposed() const;
+
+		inline Quaternion<T> toQuaternion() const;
 
 		inline Matrix3<T>& makeRotationX(const T& angle);
 		inline Matrix3<T>& makeRotationX(const Vector2<T>& v);
@@ -606,6 +611,12 @@ template<typename T>
 inline Matrix3<T> Matrix3<T>::transposed() const
 {
 	return Matrix3<T>(data[0], data[3], data[6], data[1], data[4], data[7], data[2], data[5], data[8]);
+}
+
+template<typename T>
+inline Quaternion<T> Matrix3<T>::toQuaternion() const
+{
+	return Quaternion<T>(*this);
 }
 
 template<typename T>

@@ -16,6 +16,7 @@ class IndexBuffer
 		void set(const std::vector<U32>& indices);
 
 		void bind();
+		void draw();
 
 		U32 getIndices() const;
 
