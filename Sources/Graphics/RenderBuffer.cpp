@@ -16,7 +16,7 @@ RenderBuffer::~RenderBuffer()
 	destroy();
 }
 
-bool RenderBuffer::create(U32 width, U32 height)
+bool RenderBuffer::create(U32 width, U32 height, PixelFormat format)
 {
 	destroy();
 
@@ -26,31 +26,25 @@ bool RenderBuffer::create(U32 width, U32 height)
 		return false;
 	}
 
+	if (!isPixelFormatValid(format))
+	{
+		LogError(nu::LogChannel::Graphics, 6, "RenderBuffer : Undefined pixel format");
+		return false;
+	}
+
 	mBuffer = 0;
-	glGenRenderbuffers(1, &mBuffer);
+	glCheck(glCreateRenderbuffers(1, &mBuffer));
 	if (!isValid())
 	{
 		LogError(nu::LogChannel::Graphics, 6, "RenderBuffer : Failed to create RenderBuffer");
 		return false;
 	}
-
-	// Get the previous renderbuffer
-	I32 previous;
-	glGetIntegerv(GL_RENDERBUFFER_BINDING, &previous);
-
-	// Define the format of the new renderbuffer
-	glBindRenderbuffer(GL_RENDERBUFFER, mBuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA, width, height);
-
-	// Reset the previous renderbuffer
-	if (glIsRenderbuffer(previous) == GL_TRUE)
-	{
-		glBindRenderbuffer(GL_RENDERBUFFER, previous);
-	}
+	glCheck(glNamedRenderbufferStorage(mBuffer, convertPixelFormat(format), width, height));
 
 	mSize.set(width, height);
+	mFormat = format;
 	
-	return false;
+	return true;
 }
 
 void RenderBuffer::destroy()
@@ -65,6 +59,11 @@ void RenderBuffer::destroy()
 const Vector2u& RenderBuffer::getSize() const
 {
 	return mSize;
+}
+
+PixelFormat RenderBuffer::getFormat() const
+{
+	return mFormat;
 }
 
 bool RenderBuffer::isValid() const
