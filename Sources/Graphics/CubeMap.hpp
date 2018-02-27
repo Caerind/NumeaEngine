@@ -10,7 +10,7 @@ namespace nu
 class CubeMap
 {
 	public:
-		CubeMap(F32 size = 10.0f);
+		CubeMap();
 
 		enum Side
 		{

@@ -6,18 +6,16 @@
 namespace nu
 {
 
-CubeMap::CubeMap(F32 size)
+CubeMap::CubeMap()
 {
-	mSize = 0.0f;
-
 	std::string vertexShader = "#version 330 core\n"
 		"layout(location = 0) in vec3 vPos;\n"
-		"uniform mat4 VP;\n"
+		"uniform mat4 MVP;\n"
 		"out vec3 TexCoords;\n"
 		"void main()\n"
 		"{\n"
 		"TexCoords = vPos;\n"
-		"gl_Position = VP * vec4(vPos, 1.0);\n"
+		"gl_Position = MVP * vec4(vPos, 1.0);\n"
 		"}";
 
 	std::string fragmentShader = "#version 330 core\n"
@@ -31,7 +29,8 @@ CubeMap::CubeMap(F32 size)
 
 	mShader.load(ShaderLoader::fromSource(vertexShader, fragmentShader));
 
-	setSize(size);
+	mSize = 0.0f;
+	setSize(10.0f);
 }
 
 void CubeMap::setSize(F32 size)
@@ -138,7 +137,7 @@ void CubeMap::draw()
 	glCheck(glDepthMask(GL_FALSE));
 
 	mShader.bind();
-	mShader.setUniform("VP", Renderer::instance().getCamera().getViewProjectionMatrix());
+	mShader.setUniform("MVP", Renderer::instance().getCamera().getViewProjectionMatrix() * Matrix4f::translation(Renderer::instance().getCamera().getPosition()));
 
 	glCheck(glActiveTexture(GL_TEXTURE0));
 	glCheck(glBindTexture(GL_TEXTURE_CUBE_MAP, mTexture));

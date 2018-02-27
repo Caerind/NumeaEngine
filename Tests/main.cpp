@@ -36,6 +36,7 @@ int main()
 	nu::Shader::Ptr shaderXYZNormalUV = manager.get("xyz_normal_uv", nu::ShaderLoader::fromFile("../Sources/Shaders/xyz_normal_uv.vert", "../Sources/Shaders/xyz_normal_uv.frag"));
 	nu::Mesh::Ptr meshCube = manager.get("meshCube", nu::MeshLoader::fromFile("testCube.obj"));
 	nu::Mesh::Ptr meshSheep = manager.get("meshSheep", nu::MeshLoader::fromFile("testSheep.obj"));
+	nu::Image::Ptr imageNoise = manager.get("noise", nu::ImageLoader::fromFile("testnoise.png"));
 
 	nu::Renderer renderer;
 	renderer.getCamera().perspective(60.0f, window.getSizeRatio(), 0.1f, 100.0f);
@@ -87,16 +88,21 @@ int main()
 	mSprite2.setUniformBinding(nu::Model::NormalMatrix, "N");
 
 	std::vector<nu::CubeMap::TextureSide> sides;
-	sides.emplace_back(nu::CubeMap::NegZ, "cubemap/negz.jpg");
-	sides.emplace_back(nu::CubeMap::PosZ, "cubemap/posz.jpg");
-	sides.emplace_back(nu::CubeMap::NegY, "cubemap/negy.jpg");
-	sides.emplace_back(nu::CubeMap::PosY, "cubemap/posy.jpg");
-	sides.emplace_back(nu::CubeMap::NegX, "cubemap/negx.jpg");
-	sides.emplace_back(nu::CubeMap::PosX, "cubemap/posx.jpg");
+	sides.emplace_back(nu::CubeMap::NegZ, "cubemap/negz.bmp");
+	sides.emplace_back(nu::CubeMap::PosZ, "cubemap/posz.bmp");
+	sides.emplace_back(nu::CubeMap::NegY, "cubemap/negy.bmp");
+	sides.emplace_back(nu::CubeMap::PosY, "cubemap/posy.bmp");
+	sides.emplace_back(nu::CubeMap::NegX, "cubemap/negx.bmp");
+	sides.emplace_back(nu::CubeMap::PosX, "cubemap/posx.bmp");
 	nu::CubeMap map;
 	map.loadTexture(sides);
 
-	nu::LinearColor clearColor(nu::LinearColor::LightBlue);
+	nu::Terrain mTerrain;
+	mTerrain.setTexture(nullptr);
+	mTerrain.build(*imageNoise, 100.0f, 100, 1.2f);
+	mTerrain.setPosition(-50.0f, -8, -50.0f);
+
+	nu::LinearColor clearColor(nu::Color(140,160,210));
 	nu::LinearColor ambientColor(0.2f, 0.3f, 0.3f, 1.0f);
 	nu::LinearColor lightColor(1.0f, 0.0f, 0.0f, 1.0f);
 	F32 shininess = 5.0f;
@@ -104,6 +110,7 @@ int main()
 	F32 constantAttenuation = 0.5f;
 	F32 linearAttenuation = 0.5f;
 	F32 quadraticAttenuation = 0.5f;
+	F32 terrainY = -8.0f;
 
 	bool show = false;
 	nu::Frustum f = renderer.getCamera().buildFrustum();
@@ -186,6 +193,8 @@ int main()
 			ImGui::SliderFloat("Catt", &constantAttenuation, -5.0f, 10.0f);
 			ImGui::SliderFloat("Latt", &linearAttenuation, -5.0f, 10.0f);
 			ImGui::SliderFloat("Qatt", &quadraticAttenuation, -5.0f, 10.0f);
+			ImGui::SliderFloat("TerY", &terrainY, -10.0f, 0.0f);
+			ImGui::Text("Eye position : (%.1f, %.1f, %.1f)", renderer.getCamera().getPosition().x, renderer.getCamera().getPosition().y, renderer.getCamera().getPosition().z);
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			ImGui::End();
 			ImGuiWrapper_End();
@@ -198,6 +207,8 @@ int main()
 		// View
 		nu::Vector3f viewPosition = renderer.getCamera().getViewMatrix() * position;
 		nu::Vector3f viewDirection = nu::Vector3f() - viewPosition;
+
+		mTerrain.setPosition(-50.0f, terrainY, -50.0f);
 
 		// Render
 		renderer.begin(clearColor);
@@ -220,6 +231,7 @@ int main()
 		mSheep.draw();
 		mSprite.draw();
 		mSprite2.draw();
+		mTerrain.draw();
 
 		renderer.end();
 
