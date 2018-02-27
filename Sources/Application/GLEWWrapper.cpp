@@ -10,6 +10,7 @@ const char* glErrorString(GLenum gl_err)
 		case GL_NO_ERROR: return "GL_NO_ERROR"; break;
 		case GL_INVALID_OPERATION: return "GL_INVALID_OPERATION"; break;
 		case GL_INVALID_VALUE: return "GL_INVALID_VALUE"; break;
+		case GL_INVALID_ENUM: return "GL_INVALID_ENUM"; break;
 	}
 	return "";
 }

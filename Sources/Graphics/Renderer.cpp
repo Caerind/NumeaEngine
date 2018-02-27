@@ -58,10 +58,14 @@ void Renderer::end()
 	mDebug.render(mCamera.getViewMatrix(), mCamera.getProjectionMatrix());
 }
 
-// TODO : RT
-/*
 bool Renderer::setTarget(const RenderTarget* target)
 {
+	mTarget = target;
+	return true;
+
+	// TODO : RenderTarget activation
+
+	/*
 	if (mTarget == target)
 	{
 		return true;
@@ -89,13 +93,13 @@ bool Renderer::setTarget(const RenderTarget* target)
 	// TODO : Update Scissor & Viewport if needed
 
 	return true;
+	*/
 }
 
 const RenderTarget* Renderer::getTarget()
 {
 	return mTarget;
 }
-*/
 
 U32 Renderer::getCurrentVertexArray() const
 {

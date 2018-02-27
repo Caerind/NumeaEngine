@@ -44,10 +44,12 @@ enum class PixelFormat
 	RGBA32, // 4 * U32
 	RGBA32F, // 4 * F32
 
-	Depth16, // 1 * U16
-	Depth32, // 1 * U32
-	Depth32F, // 1 * F32
+	Depth,
+	Depth16,
+	Depth32,
+	Depth32F,
 
+	Stencil,
 	Stencil1,
 	Stencil4,
 	Stencil8,
@@ -89,9 +91,11 @@ inline GLenum convertPixelFormat(PixelFormat pxFormat)
 		case PixelFormat::RGBA16: return GL_RGBA16UI; break;
 		case PixelFormat::RGBA32: return GL_RGBA32UI; break;
 		case PixelFormat::RGBA32F: return GL_RGBA32F; break;
+		case PixelFormat::Depth: return GL_DEPTH_COMPONENT; break;
 		case PixelFormat::Depth16: return GL_DEPTH_COMPONENT16; break;
 		case PixelFormat::Depth32: return GL_DEPTH_COMPONENT32; break;
 		case PixelFormat::Depth32F: return GL_DEPTH_COMPONENT32F; break;
+		case PixelFormat::Stencil: return GL_STENCIL_INDEX; break;
 		case PixelFormat::Stencil1: return GL_STENCIL_INDEX1; break;
 		case PixelFormat::Stencil4: return GL_STENCIL_INDEX4; break;
 		case PixelFormat::Stencil8: return GL_STENCIL_INDEX8; break;
