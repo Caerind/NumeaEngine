@@ -20,17 +20,15 @@ class VertexBuffer
 		template <typename T>
 		void set(const std::vector<T>& vertices);
 
-		void bind();
-		void draw();
-
 		U32 getVertices() const;
 		U32 getStride() const;
 		U32 getSize() const;
+		VertexStruct getStruct() const;
 
+		void bind() const;
+		void draw() const;
 		bool isValid() const;
 		U32 getOpenGLId() const;
-
-		VertexStruct getStruct() const;
 
 	private:
 		VertexArray mArray;

@@ -17,6 +17,7 @@ class Texture : public Resource<Texture>
 		bool load(const Loader<Texture>& loader);
 
 		bool create(U32 width, U32 height);
+		void destroy();
 
 		void update(const Image& image);
 		void update(const Image& image, U32 x, U32 y);

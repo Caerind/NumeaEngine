@@ -15,11 +15,10 @@ class IndexBuffer
 		void set(U32* indices, U32 size);
 		void set(const std::vector<U32>& indices);
 
-		void bind();
-		void draw();
-
 		U32 getIndices() const;
 
+		void bind() const;
+		void draw() const;
 		bool isValid() const;
 		U32 getOpenGLId() const;
 

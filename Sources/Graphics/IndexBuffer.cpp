@@ -31,19 +31,19 @@ void IndexBuffer::set(const std::vector<U32>& indices)
 	mIndices = indices.size();
 }
 
-void IndexBuffer::bind()
+U32 IndexBuffer::getIndices() const
+{
+	return mIndices;
+}
+
+void IndexBuffer::bind() const
 {
 	glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndex));
 }
 
-void IndexBuffer::draw()
+void IndexBuffer::draw() const
 {
 	Renderer::instance().drawElements(Primitive::Triangles, mIndices);
-}
-
-U32 IndexBuffer::getIndices() const
-{
-	return mIndices;
 }
 
 bool IndexBuffer::isValid() const

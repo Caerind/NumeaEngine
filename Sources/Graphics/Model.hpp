@@ -15,17 +15,17 @@ class Model : public TransformBinder
 	public:
 		Model();
 
-		void setTexture(Texture::Ptr texture);
-		void setMesh(Mesh::Ptr mesh);
+		void setTexture(const Texture* texture);
+		void setMesh(const Mesh* mesh);
 
-		Texture::Ptr getTexture();
-		Mesh::Ptr getMesh();
+		const Texture* getTexture() const;
+		const Mesh* getMesh() const;
 
 		void draw();
 
 	private:
-		Texture::Ptr mTexture;
-		Mesh::Ptr mMesh;
+		const Texture* mTexture;
+		const Mesh* mMesh;
 };
 
 } // namespace nu

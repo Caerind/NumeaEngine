@@ -10,12 +10,11 @@ Texture::Texture()
 	, mIsSmooth(false)
 	, mHasMipmap(false)
 {
-	glCheck(glGenTextures(1, &mIndex));
 }
 
 Texture::~Texture()
 {
-	glCheck(glDeleteTextures(1, &mIndex));
+	destroy();
 }
 
 bool Texture::load(const Loader<Texture>& loader)
@@ -26,30 +25,45 @@ bool Texture::load(const Loader<Texture>& loader)
 
 bool Texture::create(U32 width, U32 height)
 {
+	destroy();
+
 	if ((width == 0) || (height == 0))
 	{
 		LogError(LogChannel::Graphics, 3, "Failed to create texture, invalid size (%dx%d)\n", width, height);
 		return false;
 	}
+
 	Vector2u actualSize(getValidSize(width), getValidSize(height));
 	U32 maxSize = getMaximumSize();
 	if ((actualSize.x > maxSize) || (actualSize.y > maxSize))
 	{
-		LogError(LogChannel::Graphics, 3, "Failed to create texture, its internal size is too high (%dx%d), maximum is (%dx%d)\n", actualSize.x, actualSize.y, maxSize, maxSize);
+		LogError(LogChannel::Graphics, 3, "Failed to create texture, its internal size is too high (%dx%d), maximum is (%dx%d)", actualSize.x, actualSize.y, maxSize, maxSize);
 		return false;
 	}
-	mSize.x = width;
-	mSize.y = height;
-	mActualSize = actualSize;
 
+	glCheck(glGenTextures(1, &mIndex));
 	glCheck(glBindTexture(GL_TEXTURE_2D, mIndex));
-	glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mActualSize.x, mActualSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL));
+	glCheck(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, actualSize.x, actualSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL));
 	glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
 	glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
 	glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mIsSmooth ? GL_LINEAR : GL_NEAREST));
 	glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mIsSmooth ? GL_LINEAR : GL_NEAREST));
+
+	mSize.x = width;
+	mSize.y = height;
+	mActualSize = actualSize;
 	mHasMipmap = false;
+
 	return true;
+}
+
+void Texture::destroy()
+{
+	if (isValid())
+	{
+		glCheck(glDeleteTextures(1, &mIndex));
+		mIndex = 0;
+	}
 }
 
 void Texture::update(const Image& image)
@@ -69,7 +83,7 @@ void Texture::update(const U8* pixels)
 
 void Texture::update(const U8* pixels, U32 width, U32 height, U32 x, U32 y)
 {
-	if (pixels && mIndex)
+	if (pixels && isValid())
 	{
 		glCheck(glBindTexture(GL_TEXTURE_2D, mIndex));
 		glCheck(glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels));
@@ -85,8 +99,10 @@ void Texture::update(const Texture& texture)
 
 void Texture::update(const Texture& texture, U32 x, U32 y)
 {
-	if (!glIsTexture(mIndex) || !glIsTexture(texture.mIndex))
+	if (!isValid() || !texture.isValid())
+	{
 		return;
+	}
 
 	if (GL_EXT_framebuffer_object && GL_EXT_framebuffer_blit)
 	{
@@ -147,8 +163,11 @@ void Texture::update(const Texture& texture, U32 x, U32 y)
 
 Image Texture::copyToImage() const
 {
-	if (!glIsTexture(mIndex))
+	if (!isValid())
+	{
 		return Image();
+	}
+
 	std::vector<U8> pixels(mSize.x * mSize.y * 4);
 	if ((mSize == mActualSize))
 	{
@@ -171,6 +190,7 @@ Image Texture::copyToImage() const
 			dst += dstPitch;
 		}
 	}
+
 	Image image;
 	image.create(mSize.x, mSize.y, &pixels[0]);
 	return image;
@@ -181,7 +201,7 @@ void Texture::setSmooth(bool smooth)
 	if (smooth != mIsSmooth)
 	{
 		mIsSmooth = smooth;
-		if (glIsTexture(mIndex))
+		if (isValid())
 		{
 			glCheck(glBindTexture(GL_TEXTURE_2D, mIndex));
 			glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mIsSmooth ? GL_LINEAR : GL_NEAREST));
@@ -204,8 +224,10 @@ bool Texture::isSmooth() const
 
 bool Texture::generateMipmap()
 {
-	if (!glIsTexture(mIndex))
+	if (!isValid())
+	{
 		return false;
+	}
 	glCheck(glBindTexture(GL_TEXTURE_2D, mIndex));
 	glCheck(glGenerateMipmap(GL_TEXTURE_2D));
 	glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mIsSmooth ? GL_LINEAR_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_LINEAR));
@@ -216,7 +238,9 @@ bool Texture::generateMipmap()
 void Texture::invalidateMipmap()
 {
 	if (!mHasMipmap)
+	{
 		return;
+	}
 	glCheck(glBindTexture(GL_TEXTURE_2D, mIndex));
 	glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mIsSmooth ? GL_LINEAR : GL_NEAREST));
 	mHasMipmap = false;
@@ -258,7 +282,7 @@ U32 Texture::getOpenGLId() const
 
 U32 Texture::getMaximumSize()
 {
-	I32 size = 0;
+	I32 size;
 	glCheck(glGetIntegerv(GL_MAX_TEXTURE_SIZE, &size));
 	return U32(size);
 }
@@ -274,7 +298,9 @@ U32 Texture::getValidSize(U32 size) const
 		// If hardware doesn't support NPOT textures, we calculate the nearest power of two
 		U32 powerOfTwo = 1;
 		while (powerOfTwo < size)
+		{
 			powerOfTwo *= 2;
+		}
 		return powerOfTwo;
 	}
 }

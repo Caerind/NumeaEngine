@@ -22,13 +22,13 @@ bool Mesh::load(const nu::Loader<Mesh>& loader)
 	return mLoaded;
 }
 
-void Mesh::bind()
+void Mesh::bind() const
 {
 	mVBO.bind();
 	mIndices.bind();
 }
 
-void Mesh::draw()
+void Mesh::draw() const
 {
 	mIndices.draw();
 }

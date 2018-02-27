@@ -12,13 +12,13 @@ TransformBinder::TransformBinder()
 	clearUniformBindings();
 }
 
-void TransformBinder::setShader(Shader::Ptr shader)
+void TransformBinder::setShader(Shader* shader)
 {
 	mShader = shader;
 	clearUniformBindings();
 }
 
-Shader::Ptr TransformBinder::getShader()
+Shader* TransformBinder::getShader()
 {
 	return mShader;
 }

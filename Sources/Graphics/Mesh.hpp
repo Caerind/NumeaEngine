@@ -16,8 +16,8 @@ class Mesh : public Resource<Mesh>
 
 		bool load(const nu::Loader<Mesh>& loader);
 
-		void bind();
-		void draw();
+		void bind() const;
+		void draw() const;
 
 		template <typename T>
 		void set(const std::vector<T>& vertices, const std::vector<U32>& indices);

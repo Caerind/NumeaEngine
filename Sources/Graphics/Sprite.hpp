@@ -15,8 +15,8 @@ class Sprite : public TransformBinder
 	public:
 		Sprite();
 
-		void setTexture(Texture::Ptr texture);
-		Texture::Ptr getTexture();
+		void setTexture(const Texture* texture);
+		const Texture* getTexture() const;
 
 		void setSize(F32 x, F32 y);
 		void setSize(const Vector2f& size);
@@ -35,7 +35,7 @@ class Sprite : public TransformBinder
 		Vector2f mSize;
 		bool mUseNormals;
 		bool mNeedUpdate;
-		Texture::Ptr mTexture;
+		const Texture* mTexture;
 };
 
 } // namespace nu

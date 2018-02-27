@@ -16,13 +16,11 @@ class VertexArray
 		~VertexArray();
 
 		void setStruct(VertexStruct vertexStruct);
-
-		void bind();
-
-		bool isValid() const;
-		U32 getId() const;
-
 		VertexStruct getStruct() const;
+
+		void bind() const;
+		bool isValid() const;
+		U32 getOpenGLId() const;
 
 	private:
 		VertexStruct mVertexStruct;

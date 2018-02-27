@@ -15,12 +15,12 @@ Sprite::Sprite()
 {
 }
 
-void Sprite::setTexture(Texture::Ptr texture)
+void Sprite::setTexture(const Texture* texture)
 {
 	mTexture = texture;
 }
 
-Texture::Ptr Sprite::getTexture()
+const Texture* Sprite::getTexture() const
 {
 	return mTexture;
 }

@@ -32,6 +32,7 @@ class ResourcePtr
 
 		T& operator*();
 		T* operator->();
+		T* get();
 
 	private:
 		U32 mId;
@@ -96,6 +97,12 @@ inline T& ResourcePtr<T>::operator*()
 
 template<class T>
 inline T* ResourcePtr<T>::operator->()
+{
+	return mPtr;
+}
+
+template<class T>
+inline T* ResourcePtr<T>::get()
 {
 	return mPtr;
 }

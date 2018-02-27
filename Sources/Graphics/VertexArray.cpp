@@ -61,7 +61,12 @@ void VertexArray::setStruct(VertexStruct vertexStruct)
 	}
 }
 
-void VertexArray::bind()
+VertexStruct VertexArray::getStruct() const
+{
+	return mVertexStruct;
+}
+
+void VertexArray::bind() const
 {
 	glCheck(glBindVertexArray(mIndex));
 }
@@ -71,14 +76,9 @@ bool VertexArray::isValid() const
 	return glIsVertexArray(mIndex) == GL_TRUE && mVertexStruct != VertexStruct_Count;
 }
 
-U32 VertexArray::getId() const
+U32 VertexArray::getOpenGLId() const
 {
 	return mIndex;
-}
-
-VertexStruct VertexArray::getStruct() const
-{
-	return mVertexStruct;
 }
 
 } // namespace nu

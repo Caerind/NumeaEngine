@@ -13,22 +13,22 @@ Model::Model()
 	clearUniformBindings();
 }
 
-void Model::setTexture(Texture::Ptr texture)
+void Model::setTexture(const Texture* texture)
 {
 	mTexture = texture;
 }
 
-void Model::setMesh(Mesh::Ptr mesh)
+void Model::setMesh(const Mesh* mesh)
 {
 	mMesh = mesh;
 }
 
-Texture::Ptr Model::getTexture()
+const Texture* Model::getTexture() const
 {
 	return mTexture;
 }
 
-Mesh::Ptr Model::getMesh()
+const Mesh* Model::getMesh() const
 {
 	return mMesh;
 }

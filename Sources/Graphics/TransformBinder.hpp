@@ -22,8 +22,8 @@ class TransformBinder : public Node
 			Count
 		};
 
-		void setShader(Shader::Ptr shader);
-		Shader::Ptr getShader();
+		void setShader(Shader* shader);
+		Shader* getShader();
 
 		void setUniformBinding(TransformBindingUniform binding, const std::string& uniform);
 		void clearUniformBindings();
@@ -35,7 +35,7 @@ class TransformBinder : public Node
 		std::string mBindings[TransformBindingUniform::Count];
 		
 	protected:
-		Shader::Ptr mShader;
+		Shader* mShader;
 };
 
 } // namespace nu
