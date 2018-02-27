@@ -10,6 +10,8 @@
 #include "DebugDraw.hpp"
 #include "ShaderBank.hpp"
 
+//#include "RenderTarget.hpp" TODO : RT
+
 namespace nu
 {
 
@@ -36,6 +38,12 @@ class Renderer
 		void begin(const Color& clearColor = Color::Black);
 		void end();
 
+		// TODO : RT
+		/*
+		bool setTarget(const RenderTarget* target);
+		const RenderTarget* getTarget();
+		*/
+
 		U32 getCurrentVertexArray() const;
 		U32 getCurrentVertexBuffer() const;
 		U32 getCurrentIndexBuffer() const;
@@ -56,6 +64,9 @@ class Renderer
 		Camera mCamera;
 		DebugDraw mDebug;
 		ShaderBank mShaders;
+
+		// TODO : RT
+		//const RenderTarget* mTarget;
 
 		static Renderer* sSingleton;
 };

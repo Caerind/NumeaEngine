@@ -52,7 +52,7 @@ class Shader : public Resource<Shader>
 
 		I32 getAttribLocation(const std::string& name) const;
 
-		U32 getIndex() const;
+		U32 getOpenGLId() const;
 
 		void reset();
 

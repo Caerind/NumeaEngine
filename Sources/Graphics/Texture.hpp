@@ -41,7 +41,7 @@ class Texture : public Resource<Texture>
 		void bind() const;
 		bool isValid() const;
 
-		U32 getIndex() const;
+		U32 getOpenGLId() const;
 
 		static U32 getMaximumSize();
 

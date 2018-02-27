@@ -51,7 +51,7 @@ bool IndexBuffer::isValid() const
 	return glIsBuffer(mIndex) == GL_TRUE;
 }
 
-U32 IndexBuffer::getId() const
+U32 IndexBuffer::getOpenGLId() const
 {
 	return mIndex;
 }

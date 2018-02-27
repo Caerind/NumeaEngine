@@ -28,7 +28,7 @@ class VertexBuffer
 		U32 getSize() const;
 
 		bool isValid() const;
-		U32 getId() const;
+		U32 getOpenGLId() const;
 
 		VertexStruct getStruct() const;
 

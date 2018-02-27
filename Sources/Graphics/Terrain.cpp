@@ -67,20 +67,21 @@ U32 Terrain::getIndices() const
 	return mMesh.getIndices();
 }
 
-bool Terrain::build(const nu::Image& image, F32 size, U32 verticesPerLine, F32 heightScale)
+bool Terrain::build(const nu::Image& image, F32 size, U32 verticesPerLine, F32 heightScale, bool buildNormals)
 {
 	if (!image.isLoaded())
 	{
 		return false;
 	}
 
-	printf("Size : %d %d\n", image.getSize().x, image.getSize().y);
-
 	const F32 imgScaleX = (F32)(image.getSize().x) / (verticesPerLine - 1);
 	const F32 imgScaleZ = (F32)(image.getSize().y) / (verticesPerLine - 1);
 
 	std::vector<Vertex_XYZ_Normal> vertices;
 	std::vector<U32> indices;
+
+	vertices.reserve(verticesPerLine * verticesPerLine);
+	indices.reserve(verticesPerLine * verticesPerLine * 6);
 
 	const F32 delta = size / (verticesPerLine - 1);
 
@@ -110,6 +111,19 @@ bool Terrain::build(const nu::Image& image, F32 size, U32 verticesPerLine, F32 h
 				indices.emplace_back(c);
 				indices.emplace_back(b + 1);
 				indices.emplace_back(b);
+			}
+		}
+	}
+
+	if (buildNormals)
+	{
+		for (U32 z = 1; z < verticesPerLine - 1; z++)
+		{
+			for (U32 x = 1; x < verticesPerLine - 1; x++)
+			{
+				F32 dhx = vertices[z * verticesPerLine + x - 1].position.y - vertices[z * verticesPerLine + x + 1].position.y;
+				F32 dhz = vertices[(z - 1) * verticesPerLine + x].position.y - vertices[(z + 1) * verticesPerLine + x].position.y;
+				vertices[z * verticesPerLine + x].normal.set(dhx, 2.0f, dhz).normalize();
 			}
 		}
 	}

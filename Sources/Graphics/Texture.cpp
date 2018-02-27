@@ -251,7 +251,7 @@ bool Texture::isValid() const
 	return glIsTexture(mIndex) == GL_TRUE;
 }
 
-U32 Texture::getIndex() const
+U32 Texture::getOpenGLId() const
 {
 	return mIndex;
 }

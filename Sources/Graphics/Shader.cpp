@@ -173,7 +173,7 @@ I32 Shader::getAttribLocation(const std::string& name) const
 	return glCheck(glGetAttribLocation(mProgram, name.c_str()));
 }
 
-U32 Shader::getIndex() const
+U32 Shader::getOpenGLId() const
 {
 	return mProgram;
 }
@@ -275,7 +275,7 @@ Loader<Shader> ShaderLoader::fromFile(const std::string& vs, const std::string& 
 			return false;
 		}
 
-		U32 program = shader.getIndex();
+		U32 program = shader.getOpenGLId();
 		shader.reset();
 
 		U32 vertex = Shader::compileShader(vsBuffer.str(), Shader::VertexShader);
@@ -313,7 +313,7 @@ Loader<Shader> ShaderLoader::fromSource(const std::string& vs, const std::string
 {
 	return Loader<Shader>([=](Shader& shader)
 	{
-		U32 program = shader.getIndex();
+		U32 program = shader.getOpenGLId();
 		shader.reset();
 
 		U32 vertex = Shader::compileShader(vs, Shader::VertexShader);

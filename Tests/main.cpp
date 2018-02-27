@@ -99,8 +99,8 @@ int main()
 
 	nu::Terrain mTerrain;
 	mTerrain.setTexture(nullptr);
-	mTerrain.build(*imageNoise, 100.0f, 100, 1.2f);
-	mTerrain.setPosition(-50.0f, -8, -50.0f);
+	mTerrain.build(*imageNoise, 100.0f, 100, 1.2f, true);
+	mTerrain.setPosition(-50.0f, -0.6f, -50.0f);
 
 	nu::LinearColor clearColor(nu::Color(140,160,210));
 	nu::LinearColor ambientColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -110,7 +110,7 @@ int main()
 	F32 constantAttenuation = 0.5f;
 	F32 linearAttenuation = 0.5f;
 	F32 quadraticAttenuation = 0.5f;
-	F32 terrainY = -8.0f;
+	F32 terrainY = -0.6f;
 
 	bool show = false;
 	nu::Frustum f = renderer.getCamera().buildFrustum();
@@ -193,7 +193,7 @@ int main()
 			ImGui::SliderFloat("Catt", &constantAttenuation, -5.0f, 10.0f);
 			ImGui::SliderFloat("Latt", &linearAttenuation, -5.0f, 10.0f);
 			ImGui::SliderFloat("Qatt", &quadraticAttenuation, -5.0f, 10.0f);
-			ImGui::SliderFloat("TerY", &terrainY, -10.0f, 0.0f);
+			ImGui::SliderFloat("TerY", &terrainY, -2.0f, 1.0f);
 			ImGui::Text("Eye position : (%.1f, %.1f, %.1f)", renderer.getCamera().getPosition().x, renderer.getCamera().getPosition().y, renderer.getCamera().getPosition().z);
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			ImGui::End();

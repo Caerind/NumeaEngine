@@ -38,7 +38,7 @@ void VertexArray::setStruct(VertexStruct vertexStruct)
 		glCheck(glEnableVertexAttribArray(i));
 
 		const VertexElement& e(decl->getElement(i));
-		GLenum type;
+		GLenum type = GL_FLOAT;
 		switch (e.typeOfElement)
 		{
 			case VertexElement::Byte: type = GL_BYTE; break;

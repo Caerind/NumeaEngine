@@ -23,7 +23,7 @@ class Terrain : public Node
 		U32 getVertices() const;
 		U32 getIndices() const;
 
-		bool build(const nu::Image& image, F32 size, U32 verticesPerLine, F32 heightScale);
+		bool build(const nu::Image& image, F32 size, U32 verticesPerLine, F32 heightScale, bool buildNormals);
 
 		void draw();
 

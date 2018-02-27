@@ -58,6 +58,45 @@ void Renderer::end()
 	mDebug.render(mCamera.getViewMatrix(), mCamera.getProjectionMatrix());
 }
 
+// TODO : RT
+/*
+bool Renderer::setTarget(const RenderTarget* target)
+{
+	if (mTarget == target)
+	{
+		return true;
+	}
+
+	if (mTarget)
+	{
+		if (!mTarget->hasContext())
+		{
+			mTarget->deactivate();
+		}
+		mTarget = nullptr;
+	}
+
+	if (target)
+	{
+		if (!target->activate())
+		{
+			LogError(nu::LogChannel::Graphics, 6, "Renderer : Failed to activate target\n");
+			return false;
+		}
+		mTarget = target;
+	}
+
+	// TODO : Update Scissor & Viewport if needed
+
+	return true;
+}
+
+const RenderTarget* Renderer::getTarget()
+{
+	return mTarget;
+}
+*/
+
 U32 Renderer::getCurrentVertexArray() const
 {
 	int id;

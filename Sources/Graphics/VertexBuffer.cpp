@@ -51,7 +51,7 @@ bool VertexBuffer::isValid() const
 	return glIsBuffer(mIndex) == GL_TRUE && mVertexStruct != VertexStruct_Count;
 }
 
-U32 VertexBuffer::getId() const
+U32 VertexBuffer::getOpenGLId() const
 {
 	return mIndex;
 }

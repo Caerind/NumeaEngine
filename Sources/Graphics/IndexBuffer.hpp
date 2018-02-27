@@ -21,7 +21,7 @@ class IndexBuffer
 		U32 getIndices() const;
 
 		bool isValid() const;
-		U32 getId() const;
+		U32 getOpenGLId() const;
 
 	private:
 		U32 mIndex;
