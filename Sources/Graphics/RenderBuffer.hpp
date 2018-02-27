@@ -21,6 +21,7 @@ class RenderBuffer
 		const Vector2u& getSize() const;
 		PixelFormat getFormat() const;
 
+		void bind();
 		bool isValid() const;
 		U32 getOpenGLId() const;
 
