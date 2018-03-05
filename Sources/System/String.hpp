@@ -6,6 +6,8 @@
 #include <map>
 #include <sstream>
 #include <string>
+#include <locale>
+#include <codecvt>
 
 namespace nu
 {
@@ -27,6 +29,9 @@ bool limitSize(const std::string& string, std::string& result, U32 size);
 void trimWhitespace(std::string& string);
 
 inline bool empty(const std::string& string) { return string.size() == 0; } // Faster than the std::string::empty
+
+std::string toNarrowString(const std::wstring& wideString);
+std::wstring toWideString(const std::string& narrowString);
 
 inline std::string toBoolString(bool value) { return (value) ? "true" : "false"; }
 

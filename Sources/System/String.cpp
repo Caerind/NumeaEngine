@@ -5,6 +5,8 @@
 namespace nu
 {
 
+std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> gWideConverter;
+
 std::map<U32, std::string> StringId::gStrings;
 
 void toLower(std::string& string)
@@ -90,6 +92,16 @@ bool limitSize(const std::string& string, std::string& result, U32 size)
 void trimWhitespace(std::string& string)
 {
 	string = string.substr(0, string.find_last_not_of(" \t") + 1).substr(string.find_first_not_of(" \t"));
+}
+
+std::string toNarrowString(const std::wstring& wideString)
+{
+	return gWideConverter.to_bytes(wideString);
+}
+
+std::wstring toWideString(const std::string& narrowString)
+{
+	return gWideConverter.from_bytes(narrowString);
 }
 
 bool StringId::getString(std::string& string) const
