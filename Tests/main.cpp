@@ -39,7 +39,7 @@ int main()
 	nu::Image::Ptr imageNoise = manager.get("noise", nu::ImageLoader::fromFile("testnoise.png"));
 
 	nu::Renderer renderer;
-	renderer.getCamera().perspective(60.0f, window.getSizeRatio(), 0.1f, 100.0f);
+	renderer.getCamera().perspective(60.0f, window.getSizeRatio(), 0.1f, 10000.0f);
 	renderer.getCamera().lookAt(nu::Vector3f(-2.0f, 1.5f, -2.0f), nu::Vector3f(0, 0, 1), nu::Vector3f(0, 1, 0));
 
 	nu::Vector3f position = renderer.getCamera().getPosition();
@@ -47,10 +47,13 @@ int main()
 	nu::Vector3f right = direction.crossProduct(nu::Vector3f::up);
 	renderer.getCamera().setTarget(position + direction);
 
+	//nu::RenderTexture rt;
+	//rt.create(800, 600);
+
 	nu::Model mCube;
-	mCube.setShader(shaderXYZNormalUV);
-	mCube.setTexture(textureCube);
-	mCube.setMesh(meshCube);
+	mCube.setShader(shaderXYZNormalUV.get());
+	mCube.setTexture(textureCube.get());
+	mCube.setMesh(meshCube.get());
 	mCube.setPosition(0, 1, 4);
 	mCube.setScale(0.7f);
 	mCube.setUniformBinding(nu::Model::ModelViewMatrix, "MV");
@@ -58,9 +61,9 @@ int main()
 	mCube.setUniformBinding(nu::Model::NormalMatrix, "N");
 
 	nu::Model mSheep;
-	mSheep.setShader(shaderXYZNormalUV);
-	mSheep.setTexture(textureSheep);
-	mSheep.setMesh(meshSheep);
+	mSheep.setShader(shaderXYZNormalUV.get());
+	mSheep.setTexture(textureSheep.get());
+	mSheep.setMesh(meshSheep.get());
 	mSheep.setPosition(0, 1.5, 0.5);
 	mSheep.setUniformBinding(nu::Model::ModelViewMatrix, "MV");
 	mSheep.setUniformBinding(nu::Model::ModelViewProjectionMatrix, "MVP");
@@ -69,8 +72,9 @@ int main()
 	mCube.attach(&mSheep);
 
 	nu::Sprite mSprite;
-	mSprite.setShader(shaderXYZUV);
-	mSprite.setTexture(textureCube);
+	mSprite.setShader(shaderXYZUV.get());
+	//mSprite.setTexture(rt.getTexture());
+	mSprite.setTexture(textureCube.get());
 	mSprite.setSize(3.0f, 1.0f);
 	mSprite.setPosition(-5, 0, 4);
 	mSprite.setRotation(nu::Matrix3f::rotationY(-45.0f).toQuaternion());
@@ -78,8 +82,8 @@ int main()
 
 	nu::Sprite mSprite2;
 	mSprite2.useNormals(true);
-	mSprite2.setShader(shaderXYZNormalUV);
-	mSprite2.setTexture(textureCube);
+	mSprite2.setShader(shaderXYZNormalUV.get());
+	mSprite2.setTexture(textureCube.get());
 	mSprite2.setSize(3.0f, 1.0f);
 	mSprite2.setPosition(-5, 1, 4);
 	mSprite2.setRotation(nu::Matrix3f::rotationY(-45.0f).toQuaternion());
@@ -102,6 +106,8 @@ int main()
 	mTerrain.build(*imageNoise, 100.0f, 100, 1.2f, true);
 	mTerrain.setPosition(-50.0f, -0.6f, -50.0f);
 
+	nu::Frustum f = renderer.getCamera().buildFrustum();
+
 	nu::LinearColor clearColor(nu::Color(140,160,210));
 	nu::LinearColor ambientColor(0.2f, 0.3f, 0.3f, 1.0f);
 	nu::LinearColor lightColor(1.0f, 0.0f, 0.0f, 1.0f);
@@ -110,10 +116,8 @@ int main()
 	F32 constantAttenuation = 0.5f;
 	F32 linearAttenuation = 0.5f;
 	F32 quadraticAttenuation = 0.5f;
-	F32 terrainY = -0.6f;
 
 	bool show = false;
-	nu::Frustum f = renderer.getCamera().buildFrustum();
 
 	nu::Clock clock;
 	while (window.isOpen())
@@ -193,7 +197,6 @@ int main()
 			ImGui::SliderFloat("Catt", &constantAttenuation, -5.0f, 10.0f);
 			ImGui::SliderFloat("Latt", &linearAttenuation, -5.0f, 10.0f);
 			ImGui::SliderFloat("Qatt", &quadraticAttenuation, -5.0f, 10.0f);
-			ImGui::SliderFloat("TerY", &terrainY, -2.0f, 1.0f);
 			ImGui::Text("Eye position : (%.1f, %.1f, %.1f)", renderer.getCamera().getPosition().x, renderer.getCamera().getPosition().y, renderer.getCamera().getPosition().z);
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			ImGui::End();
@@ -207,8 +210,6 @@ int main()
 		// View
 		nu::Vector3f viewPosition = renderer.getCamera().getViewMatrix() * position;
 		nu::Vector3f viewDirection = nu::Vector3f() - viewPosition;
-
-		mTerrain.setPosition(-50.0f, terrainY, -50.0f);
 
 		// Render
 		renderer.begin(clearColor);
@@ -225,6 +226,8 @@ int main()
 		shaderXYZNormalUV->setUniform("LightPosition", viewPosition);
 		shaderXYZNormalUV->setUniform("EyeDirection", viewDirection);
 
+		//rt.activate();
+
 		map.draw();
 
 		mCube.draw();
@@ -232,6 +235,9 @@ int main()
 		mSprite.draw();
 		mSprite2.draw();
 		mTerrain.draw();
+
+		//rt.deactivate();
+		//rt.toWindow(window.getSize().x, window.getSize().y, GL_COLOR_ATTACHMENT0);
 
 		renderer.end();
 

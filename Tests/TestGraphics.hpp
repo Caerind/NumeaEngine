@@ -15,6 +15,9 @@
 #include "../Sources/Graphics/Sprite.hpp"
 #include "../Sources/Graphics/CubeMap.hpp"
 #include "../Sources/Graphics/Terrain.hpp"
+#include "../Sources/Graphics/RenderBuffer.hpp"
+#include "../Sources/Graphics/RenderTarget.hpp"
+#include "../Sources/Graphics/RenderTexture.hpp"
 
 #include "../Sources/System/UnitTest.hpp"
 
