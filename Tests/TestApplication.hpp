@@ -4,7 +4,6 @@
 #include "../Sources/Application/GLEWWrapper.hpp"
 #include "../Sources/Application/GLFWWrapper.hpp"
 #include "../Sources/Application/ImGuiWrapper.hpp"
-#include "../Sources/Application/Window.hpp"
 #include "../Sources/Application/ResourceManager.hpp"
 #include "../Sources/Application/ResourceHolder.hpp"
 #include "../Sources/Application/StateManager.hpp"
@@ -25,6 +24,7 @@ TEST("GLFWWrapper")
 
 }
 
+/*
 TEST("Window")
 {
 	nu::Window window;
@@ -34,7 +34,9 @@ TEST("Window")
 	CHECK(window.getSize().y == 600);
 	window.close();
 }
+*/
 
+/*
 TEST("ImGuiWrapper")
 {
 	nu::Window window;
@@ -62,6 +64,7 @@ TEST("ImGuiWrapper")
 		window.close();
 	}
 }
+*/
 
 TEST("ResourceManager")
 {
@@ -90,10 +93,12 @@ TEST("StateManager")
 
 }
 
+/*
 TEST("Application")
 {
 	nu::Application app;
 }
+*/
 
 }
 END_TEST;

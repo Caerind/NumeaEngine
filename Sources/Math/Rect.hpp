@@ -26,6 +26,13 @@ class Rect
 		void setMaximum(const Vector2<T>& maximum);
 		void setMaximum(T x, T y);
 
+		T left() const;
+		T top() const;
+		T right() const;
+		T bottom() const;
+		T width() const;
+		T height() const;
+
 		void merge(T x, T y);
 		void merge(const Vector2<T>& point);
 		void merge(const Rect<T>& rect);
@@ -137,6 +144,42 @@ template <typename T>
 void Rect<T>::setMaximum(T x, T y)
 {
 	setMaximum(Vector2<T>(x, y));
+}
+
+template<typename T>
+inline T Rect<T>::left() const
+{
+	return mMin.x;
+}
+
+template<typename T>
+inline T Rect<T>::top() const
+{
+	return mMin.y;
+}
+
+template<typename T>
+inline T Rect<T>::right() const
+{
+	return mMin.x + mSize.x;
+}
+
+template<typename T>
+inline T Rect<T>::bottom() const
+{
+	return mMin.y + mSize.y;
+}
+
+template<typename T>
+inline T Rect<T>::width() const
+{
+	return mSize.x;
+}
+
+template<typename T>
+inline T Rect<T>::height() const
+{
+	return mSize.y;
 }
 
 template <typename T>

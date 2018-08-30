@@ -2,7 +2,7 @@
 
 #include <functional>
 
-#include "Window.hpp"
+#include "../Window/Window.hpp"
 
 namespace nu
 {
@@ -47,12 +47,13 @@ void init()
 
 const char* getClipboardText(void* user_data)
 {
-	return ((Window*)user_data)->getClipboardText().c_str();
+	return nullptr;
+	//return ((Window*)user_data)->getClipboardText().c_str();
 }
 
 void setClipboardText(void* user_data, const char* text)
 {
-	((Window*)user_data)->setClipboardText(text);
+	//((Window*)user_data)->setClipboardText(text);
 }
 
 /*

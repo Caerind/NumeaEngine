@@ -5,7 +5,7 @@ namespace nu
 
 Application::Application()
 	: mStates(*this)
-	, mWindow(800, 600, "NumeaEngine")
+	, mWindow(VideoMode(800, 600), "NumeaEngine")
 	, mRenderer(nullptr)
 	, mFps(0)
 	, mRunning(true)
@@ -139,7 +139,7 @@ void Application::render()
 	#endif
 
 	mRenderer->end();
-	mWindow.display();
+	//mWindow.display();
 }
 
 } // namespace nu

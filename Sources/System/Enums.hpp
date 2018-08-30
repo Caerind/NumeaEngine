@@ -1,5 +1,5 @@
-#ifndef NU_ENUMS_HPP
-#define NU_ENUMS_HPP
+#ifndef NU_ENUMS_SYSTEM_HPP
+#define NU_ENUMS_SYSTEM_HPP
 
 #include "Macros.hpp"
 
@@ -128,4 +128,4 @@ inline constexpr nu::Build getBuild()
 	#endif
 }
 
-#endif // NU_ENUMS_HPP
+#endif // NU_ENUMS_SYSTEM_HPP
